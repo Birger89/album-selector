@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Album Selector</string>
+    <string name="spotify_login_button">Log in with Spotify</string>
+    <string name="empty_string">-</string>
 </resources>
