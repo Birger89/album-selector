@@ -18,6 +18,8 @@ import javax.net.ssl.HttpsURLConnection
 
 class MainActivity : AppCompatActivity() {
 
+    private var accessToken = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,19 +46,19 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (SpotifyConstants.AUTH_TOKEN_REQUEST_CODE == requestCode) {
             val response = AuthenticationClient.getResponse(resultCode, data)
-            val accessToken: String? = response.accessToken
-            fetchSpotifyUsername(accessToken)
+            accessToken = response.accessToken
+            fetchSpotifyUsername()
         }
     }
 
-    private fun fetchSpotifyUsername(token: String?) {
+    private fun fetchSpotifyUsername() {
         val getUserProfileURL = "https://api.spotify.com/v1/me"
 
         GlobalScope.launch(Dispatchers.Default) {
             val url = URL(getUserProfileURL)
             val httpsURLConnection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
             httpsURLConnection.requestMethod = "GET"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer $token")
+            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
             httpsURLConnection.doInput = true
             httpsURLConnection.doOutput = false
             val response = httpsURLConnection.inputStream.bufferedReader()
