@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
 import java.net.URLEncoder
+import java.nio.charset.Charset
 import javax.net.ssl.HttpsURLConnection
 
 class MainActivity : AppCompatActivity() {
@@ -57,20 +58,31 @@ class MainActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.search_result_1).apply {
                         visibility = View.VISIBLE
                         text = artists.getJSONObject(0).getString("name")
+                        tag = artists.getJSONObject(0).getString("uri")
                     }
                     findViewById<TextView>(R.id.search_result_2).apply {
                         visibility = View.VISIBLE
                         text = artists.getJSONObject(1).getString("name")
+                        tag = artists.getJSONObject(1).getString("uri")
                     }
+                    play_button_1.visibility = View.VISIBLE
+                    play_button_2.visibility = View.VISIBLE
                 }
             }
+        }
+
+        play_button_1.setOnClickListener {
+            playSong(search_result_1.tag.toString(), true)
+        }
+        play_button_2.setOnClickListener {
+            playSong(search_result_2.tag.toString(), false)
         }
     }
 
     private fun getAuthenticationRequest(type: AuthenticationResponse.Type): AuthenticationRequest {
         return AuthenticationRequest.Builder(SpotifyConstants.CLIENT_ID, type, SpotifyConstants.REDIRECT_URI)
             .setShowDialog(false)
-            .setScopes(arrayOf("user-read-email", "user-read-private"))
+            .setScopes(arrayOf("user-read-email", "user-read-private", "user-modify-playback-state"))
             .build()
     }
 
@@ -110,6 +122,38 @@ class MainActivity : AppCompatActivity() {
                     visibility = View.VISIBLE
                 }
             }
+        }
+    }
+
+    private fun playSong(songURI: String, shuffle: Boolean) {
+        val shuffleUrl = URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle")
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val httpsURLConnection = withContext(Dispatchers.IO) {shuffleUrl.openConnection() as HttpsURLConnection}
+            httpsURLConnection.requestMethod = "PUT"
+            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
+            httpsURLConnection.responseCode
+            httpsURLConnection.disconnect()
+        }
+
+        val body = JSONObject().put("context_uri", songURI).toString()
+
+        val playUrl = URL("https://api.spotify.com/v1/me/player/play")
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val httpsURLConnection = withContext(Dispatchers.IO) {playUrl.openConnection() as HttpsURLConnection}
+            httpsURLConnection.requestMethod = "PUT"
+            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
+            httpsURLConnection.setRequestProperty("Content-Type", "application/json")
+            httpsURLConnection.doOutput = true
+            val os = httpsURLConnection.outputStream
+            val output = body.toByteArray(Charset.forName("utf-8"))
+            withContext(Dispatchers.IO) {
+                os.write(output, 0, output.size)
+                os.close()
+            }
+            httpsURLConnection.responseCode
+            httpsURLConnection.disconnect()
         }
     }
 }
