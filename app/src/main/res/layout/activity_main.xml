@@ -12,9 +12,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/empty_string"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/devices"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spotify_login_btn" />
+        app:layout_constraintTop_toBottomOf="@+id/spotify_login_btn"
+        tools:text="Blautkake"
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/spotify_login_btn"
@@ -41,14 +44,14 @@
         android:layout_marginTop="32dp"
         android:ems="10"
         android:hint="@string/search_field"
+        android:importantForAutofill="no"
         android:inputType="textPersonName"
         android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/search_button"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/name_text_view"
-        tools:visibility="visible"
-        android:importantForAutofill="no" />
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/search_button"
@@ -119,6 +122,21 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/play_button_1"
+        tools:visibility="visible" />
+
+    <Spinner
+        android:id="@+id/devices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="32dp"
+        android:spinnerMode="dropdown"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/search_field"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spotify_login_btn"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

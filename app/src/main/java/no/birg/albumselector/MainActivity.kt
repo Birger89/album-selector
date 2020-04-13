@@ -3,10 +3,9 @@ package no.birg.albumselector
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.*
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
@@ -24,6 +23,7 @@ import javax.net.ssl.HttpsURLConnection
 class MainActivity : AppCompatActivity() {
 
     private var accessToken = ""
+    private var spotifyDevices: MutableMap<String, String> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     private fun getAuthenticationRequest(type: AuthenticationResponse.Type): AuthenticationRequest {
         return AuthenticationRequest.Builder(SpotifyConstants.CLIENT_ID, type, SpotifyConstants.REDIRECT_URI)
             .setShowDialog(false)
-            .setScopes(arrayOf("user-read-email", "user-read-private", "user-modify-playback-state"))
+            .setScopes(arrayOf("user-read-email", "user-read-private", "user-read-playback-state", "user-modify-playback-state"))
             .build()
     }
 
@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity() {
             val response = AuthenticationClient.getResponse(resultCode, data)
             accessToken = response.accessToken
             fetchSpotifyUsername()
+            fetchSpotifyDevices()
         }
     }
 
@@ -114,6 +115,7 @@ class MainActivity : AppCompatActivity() {
                 val spotifyDisplayName = jsonObject.getString("display_name")
                 findViewById<TextView>(R.id.name_text_view).apply {
                     text = spotifyDisplayName
+                    visibility = View.VISIBLE
                 }
                 findViewById<EditText>(R.id.search_field).apply {
                     visibility = View.VISIBLE
@@ -125,8 +127,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun fetchSpotifyDevices() {
+        val getDevicesUrl = "https://api.spotify.com/v1/me/player/devices"
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val url = URL(getDevicesUrl)
+            val httpsURLConnection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
+            httpsURLConnection.requestMethod = "GET"
+            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
+            val response = httpsURLConnection.inputStream.bufferedReader()
+                .use { it.readText() }
+            withContext(Dispatchers.Main) {
+                val deviceArray = JSONObject(response).getJSONArray("devices")
+
+                Log.i("Array", deviceArray.toString())
+                for (i in 0 until deviceArray.length()) {
+                    val key = deviceArray.getJSONObject(i).getString("name")
+                    val value = deviceArray.getJSONObject(i).getString("id")
+                    if(!spotifyDevices.containsKey(key)) {
+                        spotifyDevices[key] = value
+                    } else {
+                        spotifyDevices[key + "1"] = value
+                    }
+                }
+                val ad = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, spotifyDevices.keys.toList())
+                ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                devices.adapter = ad
+                devices.visibility = View.VISIBLE
+                Log.i("Things", spotifyDevices.toString())
+            }
+        }
+    }
+
     private fun playSong(songURI: String, shuffle: Boolean) {
-        val shuffleUrl = URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle")
+        val deviceID = spotifyDevices[devices.selectedItem.toString()]
+        val shuffleUrl = URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
 
         GlobalScope.launch(Dispatchers.Default) {
             val httpsURLConnection = withContext(Dispatchers.IO) {shuffleUrl.openConnection() as HttpsURLConnection}
