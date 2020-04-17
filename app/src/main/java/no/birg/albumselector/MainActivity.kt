@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.room.Room
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
@@ -15,6 +16,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.lang.StringBuilder
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -24,10 +26,16 @@ class MainActivity : AppCompatActivity() {
 
     private var accessToken = ""
     private var spotifyDevices: MutableMap<String, String> = mutableMapOf()
+    private lateinit var albumDao: AlbumDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        albumDao = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "album-database"
+        ).build().albumDao()
 
         spotify_login_btn.setOnClickListener {
             val request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN)
@@ -58,12 +66,14 @@ class MainActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.search_result_1).apply {
                         visibility = View.VISIBLE
                         text = artists.getJSONObject(0).getString("name")
-                        tag = artists.getJSONObject(0).getString("uri")
+                        setTag(R.id.TAG_ID, artists.getJSONObject(0).getString("id"))
+                        setTag(R.id.TAG_URI, artists.getJSONObject(0).getString("uri"))
                     }
                     findViewById<TextView>(R.id.search_result_2).apply {
                         visibility = View.VISIBLE
                         text = artists.getJSONObject(1).getString("name")
-                        tag = artists.getJSONObject(1).getString("uri")
+                        setTag(R.id.TAG_ID, artists.getJSONObject(1).getString("id"))
+                        setTag(R.id.TAG_URI, artists.getJSONObject(1).getString("uri"))
                     }
                     play_button_1.visibility = View.VISIBLE
                     play_button_2.visibility = View.VISIBLE
@@ -72,10 +82,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         play_button_1.setOnClickListener {
-            playSong(search_result_1.tag.toString(), true)
+            playSong(search_result_1.getTag(R.id.TAG_URI).toString(), true)
         }
         play_button_2.setOnClickListener {
-            playSong(search_result_2.tag.toString(), false)
+            playSong(search_result_2.getTag(R.id.TAG_URI).toString(), false)
+        }
+
+        add_button_1.setOnClickListener {
+            Log.i("Name", search_result_1.text.toString())
+            addAlbum(search_result_1.getTag(R.id.TAG_ID).toString(), search_result_1.text.toString(), search_result_1.getTag(R.id.TAG_URI).toString())
+            displayAlbums()
         }
     }
 
@@ -94,6 +110,7 @@ class MainActivity : AppCompatActivity() {
             accessToken = response.accessToken
             fetchSpotifyUsername()
             fetchSpotifyDevices()
+            displayAlbums()
         }
     }
 
@@ -155,6 +172,30 @@ class MainActivity : AppCompatActivity() {
                 devices.adapter = ad
                 devices.visibility = View.VISIBLE
                 Log.i("Things", spotifyDevices.toString())
+            }
+        }
+    }
+
+    private fun getAlbums(): List<Album> {
+        return albumDao.getAll()
+    }
+
+    private fun addAlbum(albumID: String, albumTitle: String, spotifyURI: String) {
+        GlobalScope.launch(Dispatchers.Default) {
+            val album = Album(albumID, albumTitle, spotifyURI)
+            albumDao.insert(album)
+        }
+    }
+
+    private fun displayAlbums() {
+        GlobalScope.launch(Dispatchers.Default) {
+            val albums = getAlbums()
+            val builder = StringBuilder()
+            for (a in albums) {
+                builder.append(a.albumTitle + "\n")
+            }
+            withContext(Dispatchers.Main) {
+                library.setText(builder.toString())
             }
         }
     }
