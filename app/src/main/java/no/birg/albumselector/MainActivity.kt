@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             val request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN)
             AuthenticationClient.openLoginActivity(
                 this,
-                SpotifyConstants.AUTH_TOKEN_REQUEST_CODE,
+                Constants.AUTH_TOKEN_REQUEST_CODE,
                 request
             )
         }
@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getAuthenticationRequest(type: AuthenticationResponse.Type): AuthenticationRequest {
-        return AuthenticationRequest.Builder(SpotifyConstants.CLIENT_ID, type, SpotifyConstants.REDIRECT_URI)
+        return AuthenticationRequest.Builder(Constants.CLIENT_ID, type, Constants.REDIRECT_URI)
             .setShowDialog(false)
             .setScopes(arrayOf("user-read-email", "user-read-private", "user-read-playback-state", "user-modify-playback-state"))
             .build()
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (SpotifyConstants.AUTH_TOKEN_REQUEST_CODE == requestCode) {
+        if (Constants.AUTH_TOKEN_REQUEST_CODE == requestCode) {
             val response = AuthenticationClient.getResponse(resultCode, data)
             accessToken = response.accessToken
             fetchSpotifyUsername()
