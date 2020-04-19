@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.StringBuilder
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -29,12 +28,9 @@ class LibraryActivity : AppCompatActivity() {
     private fun displayAlbums() {
         GlobalScope.launch(Dispatchers.Default) {
             val albums = getAlbums()
-            val builder = StringBuilder()
-            for (a in albums) {
-                builder.append(a.albumTitle + "\n")
-            }
             withContext(Dispatchers.Main) {
-                library.setText(builder.toString())
+                val adapter = AlbumAdapter(this@LibraryActivity, albums)
+                library_albums.adapter = adapter
             }
         }
     }
