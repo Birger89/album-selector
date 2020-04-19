@@ -15,7 +15,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.lang.StringBuilder
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -87,8 +86,12 @@ class MainActivity : AppCompatActivity() {
         add_button_1.setOnClickListener {
             Log.i("Name", search_result_1.text.toString())
             addAlbum(search_result_1.getTag(R.id.TAG_ID).toString(), search_result_1.text.toString(), search_result_1.getTag(R.id.TAG_URI).toString())
-            displayAlbums()
         }
+    }
+
+    fun goToLibrary(@Suppress("UNUSED_PARAMETER") view: View) {
+        val intent = Intent(this, LibraryActivity::class.java)
+        startActivity(intent)
     }
 
     private fun getAuthenticationRequest(type: AuthenticationResponse.Type): AuthenticationRequest {
@@ -106,7 +109,6 @@ class MainActivity : AppCompatActivity() {
             accessToken = response.accessToken
             fetchSpotifyUsername()
             fetchSpotifyDevices()
-            displayAlbums()
         }
     }
 
@@ -172,27 +174,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getAlbums(): List<Album> {
-        return albumDao.getAll()
-    }
-
     private fun addAlbum(albumID: String, albumTitle: String, spotifyURI: String) {
         GlobalScope.launch(Dispatchers.Default) {
             val album = Album(albumID, albumTitle, spotifyURI)
             albumDao.insert(album)
-        }
-    }
-
-    private fun displayAlbums() {
-        GlobalScope.launch(Dispatchers.Default) {
-            val albums = getAlbums()
-            val builder = StringBuilder()
-            for (a in albums) {
-                builder.append(a.albumTitle + "\n")
-            }
-            withContext(Dispatchers.Main) {
-                library.setText(builder.toString())
-            }
         }
     }
 

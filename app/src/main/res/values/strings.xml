@@ -6,7 +6,7 @@
     <string name="search_field">Waddayawanna search for?</string>
     <string name="play_button">Play</string>
     <string name="add_button">Add</string>
-    <string name="library_hint">Library</string>
-    <item type="id" name="TAG_ID"/>
-    <item type="id" name="TAG_URI"/>
+    <string name="library">Library</string>
+    <item name="TAG_ID" type="id" />
+    <item name="TAG_URI" type="id" />
 </resources>
