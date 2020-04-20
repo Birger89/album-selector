@@ -22,8 +22,10 @@ class MainActivity : AppCompatActivity() {
         albumDao = AppDatabase.getInstance(this).albumDao()
         spotifyConnection = SpotifyConnection()
 
-        spotify_login_btn.setOnClickListener {
+        if (SpotifyToken.getToken() == "") {
             spotifyConnection.fetchAccessToken(this)
+        } else {
+            displayThings()
         }
 
         search_button.setOnClickListener {
