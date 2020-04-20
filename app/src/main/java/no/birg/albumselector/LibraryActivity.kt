@@ -43,8 +43,19 @@ class LibraryActivity : AppCompatActivity() {
         spotifyConnection.playAlbum(albumURI, deviceID)
     }
 
-    private fun getAlbums(): List<Album> {
-        return albumDao.getAll()
+    private fun getAlbums(): ArrayList<Album> {
+        return albumDao.getAll() as ArrayList<Album>
+    }
+
+    fun deleteAlbum(album: Album) {
+        val adapter = library_albums.adapter as AlbumAdapter
+        GlobalScope.launch(Dispatchers.Default) {
+            albumDao.delete(album)
+            withContext(Dispatchers.Main) {
+                adapter.removeItem(album)
+                adapter.notifyDataSetChanged()
+            }
+        }
     }
 
     private fun displayAlbums() {

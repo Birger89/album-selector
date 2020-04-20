@@ -8,7 +8,7 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import kotlinx.android.synthetic.main.library_item.view.*
 
-class AlbumAdapter(context: Context, private val albums: List<Album>) : BaseAdapter() {
+class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -25,6 +25,10 @@ class AlbumAdapter(context: Context, private val albums: List<Album>) : BaseAdap
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
+    }
+
+    fun removeItem(album: Album) {
+        albums.remove(album)
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -50,6 +54,9 @@ class AlbumAdapter(context: Context, private val albums: List<Album>) : BaseAdap
 
         albumView.play_button.setOnClickListener {
             mContext.playAlbum(album.spotifyUri.toString())
+        }
+        albumView.remove_button.setOnClickListener {
+            mContext.deleteAlbum(album)
         }
 
         return albumView
