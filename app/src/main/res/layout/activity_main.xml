@@ -15,25 +15,9 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/devices"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spotify_login_btn"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Blautkake"
         tools:visibility="visible" />
-
-    <Button
-        android:id="@+id/spotify_login_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="32dp"
-        android:background="@color/spotifyGreen"
-        android:drawablePadding="8dp"
-        android:padding="8dp"
-        android:text="@string/spotify_login_button"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/search_field"
@@ -128,7 +112,6 @@
         android:id="@+id/devices"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="32dp"
@@ -136,7 +119,6 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/search_field"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spotify_login_btn"
         tools:visibility="visible" />
 
     <Button
@@ -146,8 +128,10 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:text="@string/add_button"
+        android:visibility="invisible"
         app:layout_constraintBaseline_toBaselineOf="@+id/play_button_1"
-        app:layout_constraintEnd_toStartOf="@+id/play_button_1" />
+        app:layout_constraintEnd_toStartOf="@+id/play_button_1"
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/button"
