@@ -51,7 +51,7 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     private fun getAlbums(): ArrayList<Album> {
-        return albumDao.getAll() as ArrayList<Album>
+        return albumDao.getAll().reversed() as ArrayList<Album>
     }
 
     fun deleteAlbum(album: Album) {
