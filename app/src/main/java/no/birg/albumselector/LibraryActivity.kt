@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 class LibraryActivity : AppCompatActivity() {
 
@@ -41,6 +42,12 @@ class LibraryActivity : AppCompatActivity() {
         val selectedDevice = devices.selectedItem.toString()
         val deviceID = spotifyConnection.getDevices()[selectedDevice].toString()
         spotifyConnection.playAlbum(albumURI, deviceID)
+    }
+
+    fun playRandom(@Suppress("UNUSED_PARAMETER") view: View) {
+        val adapter = library_albums.adapter as AlbumAdapter
+        val album = adapter.getItem(Random.nextInt(adapter.count)) as Album
+        playAlbum(album.spotifyUri.toString())
     }
 
     private fun getAlbums(): ArrayList<Album> {
