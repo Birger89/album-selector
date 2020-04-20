@@ -13,6 +13,8 @@ class AlbumAdapter(context: Context, private val albums: List<Album>) : BaseAdap
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
+    private val mContext: LibraryActivity = context as LibraryActivity
+
     override fun getCount(): Int {
         return albums.size
     }
@@ -45,6 +47,10 @@ class AlbumAdapter(context: Context, private val albums: List<Album>) : BaseAdap
         val album = getItem(position) as Album
 
         titleTextView.text = album.albumTitle
+
+        albumView.play_button.setOnClickListener {
+            mContext.playAlbum(album.spotifyUri.toString())
+        }
 
         return albumView
     }

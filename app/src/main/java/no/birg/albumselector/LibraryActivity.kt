@@ -37,6 +37,12 @@ class LibraryActivity : AppCompatActivity() {
         displayDevices()
     }
 
+    fun playAlbum(albumURI: String) {
+        val selectedDevice = devices.selectedItem.toString()
+        val deviceID = spotifyConnection.getDevices()[selectedDevice].toString()
+        spotifyConnection.playAlbum(albumURI, deviceID)
+    }
+
     private fun getAlbums(): List<Album> {
         return albumDao.getAll()
     }
