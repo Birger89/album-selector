@@ -2,7 +2,10 @@ package no.birg.albumselector
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_library.*
+import kotlinx.android.synthetic.main.activity_library.devices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -11,14 +14,17 @@ import kotlinx.coroutines.withContext
 class LibraryActivity : AppCompatActivity() {
 
     private lateinit var albumDao: AlbumDao
+    private lateinit var spotifyConnection: SpotifyConnection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_library)
 
         albumDao = AppDatabase.getInstance(this).albumDao()
+        spotifyConnection = SpotifyConnection()
 
         displayAlbums()
+        displayDevices()
     }
 
     private fun getAlbums(): List<Album> {
@@ -31,6 +37,18 @@ class LibraryActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 val adapter = AlbumAdapter(this@LibraryActivity, albums)
                 library_albums.adapter = adapter
+            }
+        }
+    }
+
+    private fun displayDevices() {
+        GlobalScope.launch(Dispatchers.Default) {
+            val deviceList = spotifyConnection.fetchDevices()
+            withContext(Dispatchers.Main) {
+                val ad = ArrayAdapter(this@LibraryActivity, android.R.layout.simple_spinner_item, deviceList)
+                ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                devices.adapter = ad
+                devices.visibility = View.VISIBLE
             }
         }
     }
