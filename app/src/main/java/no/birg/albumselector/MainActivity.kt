@@ -39,13 +39,15 @@ class MainActivity : AppCompatActivity() {
         play_button_1.setOnClickListener {
             val deviceID = spotifyConnection.getDevices()[devices.selectedItem.toString()]
             if (deviceID != null) {
-                spotifyConnection.playAlbum(search_result_1.getTag(R.id.TAG_URI).toString(), deviceID, true)
+                spotifyConnection.setShuffle(true, deviceID)
+                spotifyConnection.playAlbum(search_result_1.getTag(R.id.TAG_URI).toString(), deviceID)
             }
         }
         play_button_2.setOnClickListener {
             val deviceID = spotifyConnection.getDevices()[devices.selectedItem.toString()]
             if (deviceID != null) {
-                spotifyConnection.playAlbum(search_result_2.getTag(R.id.TAG_URI).toString(), deviceID, false)
+                spotifyConnection.setShuffle(false, deviceID)
+                spotifyConnection.playAlbum(search_result_2.getTag(R.id.TAG_URI).toString(), deviceID)
             }
         }
 

@@ -101,25 +101,17 @@ class SpotifyConnection : Activity() {
         jsonObject.getJSONObject("albums").getJSONArray("items")
     }
 
-    fun playAlbum(albumURI: String, deviceID: String, shuffle: Boolean) {
-        val shuffleUrl = URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
-
-        GlobalScope.launch(Dispatchers.Default) {
-            val httpsURLConnection = withContext(Dispatchers.IO) { shuffleUrl.openConnection() as HttpsURLConnection }
-            httpsURLConnection.requestMethod = "PUT"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
-            httpsURLConnection.responseCode
-            httpsURLConnection.disconnect()
-        }
-
+    fun playAlbum(albumURI: String, deviceID: String) {
+        val playUrl = URL("https://api.spotify.com/v1/me/player/play?device_id=$deviceID")
         val body = JSONObject().put("context_uri", albumURI).toString()
 
-        val playUrl = URL("https://api.spotify.com/v1/me/player/play")
-
         GlobalScope.launch(Dispatchers.Default) {
-            val httpsURLConnection = withContext(Dispatchers.IO) { playUrl.openConnection() as HttpsURLConnection }
+            val httpsURLConnection =
+                withContext(Dispatchers.IO) { playUrl.openConnection() as HttpsURLConnection }
             httpsURLConnection.requestMethod = "PUT"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+            httpsURLConnection.setRequestProperty(
+                "Authorization", "Bearer ${SpotifyToken.getToken()}"
+            )
             httpsURLConnection.setRequestProperty("Content-Type", "application/json")
             httpsURLConnection.doOutput = true
             val os = httpsURLConnection.outputStream
@@ -128,6 +120,22 @@ class SpotifyConnection : Activity() {
                 os.write(output, 0, output.size)
                 os.close()
             }
+            httpsURLConnection.responseCode
+            httpsURLConnection.disconnect()
+        }
+    }
+
+    fun setShuffle(shuffle: Boolean, deviceID: String) {
+        val shuffleUrl =
+            URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val httpsURLConnection =
+                withContext(Dispatchers.IO) { shuffleUrl.openConnection() as HttpsURLConnection }
+            httpsURLConnection.requestMethod = "PUT"
+            httpsURLConnection.setRequestProperty(
+                "Authorization", "Bearer ${SpotifyToken.getToken()}"
+            )
             httpsURLConnection.responseCode
             httpsURLConnection.disconnect()
         }
