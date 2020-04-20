@@ -6,81 +6,47 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import com.spotify.sdk.android.authentication.AuthenticationClient
-import com.spotify.sdk.android.authentication.AuthenticationRequest
-import com.spotify.sdk.android.authentication.AuthenticationResponse
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.Charset
-import javax.net.ssl.HttpsURLConnection
+import kotlinx.coroutines.*
+import org.json.JSONArray
 
 class MainActivity : AppCompatActivity() {
 
-    private var accessToken = ""
-    private var spotifyDevices: MutableMap<String, String> = mutableMapOf()
     private lateinit var albumDao: AlbumDao
+    private lateinit var spotifyConnection: SpotifyConnection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         albumDao = AppDatabase.getInstance(this).albumDao()
+        spotifyConnection = SpotifyConnection()
 
         spotify_login_btn.setOnClickListener {
-            val request = getAuthenticationRequest(AuthenticationResponse.Type.TOKEN)
-            AuthenticationClient.openLoginActivity(
-                this,
-                Constants.AUTH_TOKEN_REQUEST_CODE,
-                request
-            )
+            spotifyConnection.fetchAccessToken(this)
         }
 
         search_button.setOnClickListener {
-            val query = findViewById<EditText>(R.id.search_field).text.toString()
-            var queryParam = URLEncoder.encode("q", "UTF-8") + "=" + URLEncoder.encode(query, "UTF-8")
-            queryParam += "&" + URLEncoder.encode("type", "UTF-8") + "=" + URLEncoder.encode("album", "UTF-8")
-            queryParam += "&" + URLEncoder.encode("limit", "UTF-8") + "=" + URLEncoder.encode("2", "UTF-8")
-            val url = URL("https://api.spotify.com/v1/search?" + queryParam)
-
             GlobalScope.launch(Dispatchers.Default) {
-                val httpsURLConnection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
-                httpsURLConnection.requestMethod = "GET"
-                httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
-                val response = httpsURLConnection.inputStream.bufferedReader()
-                    .use { it.readText() }
-                withContext(Dispatchers.Main) {
-                    val jsonObject = JSONObject(response)
-                    val artists = jsonObject.getJSONObject("albums").getJSONArray("items")
+                val result = spotifyConnection.search(search_field.text.toString())
 
-                    findViewById<TextView>(R.id.search_result_1).apply {
-                        visibility = View.VISIBLE
-                        text = artists.getJSONObject(0).getString("name")
-                        setTag(R.id.TAG_ID, artists.getJSONObject(0).getString("id"))
-                        setTag(R.id.TAG_URI, artists.getJSONObject(0).getString("uri"))
-                    }
-                    findViewById<TextView>(R.id.search_result_2).apply {
-                        visibility = View.VISIBLE
-                        text = artists.getJSONObject(1).getString("name")
-                        setTag(R.id.TAG_ID, artists.getJSONObject(1).getString("id"))
-                        setTag(R.id.TAG_URI, artists.getJSONObject(1).getString("uri"))
-                    }
-                    play_button_1.visibility = View.VISIBLE
-                    play_button_2.visibility = View.VISIBLE
+                withContext(Dispatchers.Main) {
+                    displaySearchResult(result)
                 }
             }
         }
 
         play_button_1.setOnClickListener {
-            playSong(search_result_1.getTag(R.id.TAG_URI).toString(), true)
+            val deviceID = spotifyConnection.getDevices()[devices.selectedItem.toString()]
+            if (deviceID != null) {
+                spotifyConnection.playAlbum(search_result_1.getTag(R.id.TAG_URI).toString(), deviceID, true)
+            }
         }
         play_button_2.setOnClickListener {
-            playSong(search_result_2.getTag(R.id.TAG_URI).toString(), false)
+            val deviceID = spotifyConnection.getDevices()[devices.selectedItem.toString()]
+            if (deviceID != null) {
+                spotifyConnection.playAlbum(search_result_2.getTag(R.id.TAG_URI).toString(), deviceID, false)
+            }
         }
 
         add_button_1.setOnClickListener {
@@ -94,123 +60,53 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun getAuthenticationRequest(type: AuthenticationResponse.Type): AuthenticationRequest {
-        return AuthenticationRequest.Builder(Constants.CLIENT_ID, type, Constants.REDIRECT_URI)
-            .setShowDialog(false)
-            .setScopes(arrayOf("user-read-email", "user-read-private", "user-read-playback-state", "user-modify-playback-state"))
-            .build()
-    }
-
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (Constants.AUTH_TOKEN_REQUEST_CODE == requestCode) {
-            val response = AuthenticationClient.getResponse(resultCode, data)
-            accessToken = response.accessToken
-            fetchSpotifyUsername()
-            fetchSpotifyDevices()
-        }
-    }
-
-    private fun fetchSpotifyUsername() {
-        val getUserProfileURL = "https://api.spotify.com/v1/me"
-
         GlobalScope.launch(Dispatchers.Default) {
-            val url = URL(getUserProfileURL)
-            val httpsURLConnection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
-            httpsURLConnection.requestMethod = "GET"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
-            httpsURLConnection.doInput = true
-            httpsURLConnection.doOutput = false
-            val response = httpsURLConnection.inputStream.bufferedReader()
-                .use { it.readText() }
+            val username = spotifyConnection.fetchUsername()
+            val devices = spotifyConnection.fetchDevices()
             withContext(Dispatchers.Main) {
-                val jsonObject = JSONObject(response)
-
-                val spotifyDisplayName = jsonObject.getString("display_name")
-                findViewById<TextView>(R.id.name_text_view).apply {
-                    text = spotifyDisplayName
-                    visibility = View.VISIBLE
-                }
-                findViewById<EditText>(R.id.search_field).apply {
-                    visibility = View.VISIBLE
-                }
-                findViewById<Button>(R.id.search_button).apply {
-                    visibility = View.VISIBLE
-                }
+                displayThings(username, devices)
             }
         }
     }
 
-    private fun fetchSpotifyDevices() {
-        val getDevicesUrl = "https://api.spotify.com/v1/me/player/devices"
+    private fun displayThings(username: String, deviceList: List<String>) {
+        name_text_view.text = username
+        name_text_view.visibility = View.VISIBLE
 
-        GlobalScope.launch(Dispatchers.Default) {
-            val url = URL(getDevicesUrl)
-            val httpsURLConnection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
-            httpsURLConnection.requestMethod = "GET"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
-            val response = httpsURLConnection.inputStream.bufferedReader()
-                .use { it.readText() }
-            withContext(Dispatchers.Main) {
-                val deviceArray = JSONObject(response).getJSONArray("devices")
+        search_field.visibility = View.VISIBLE
+        search_button.visibility = View.VISIBLE
 
-                Log.i("Array", deviceArray.toString())
-                for (i in 0 until deviceArray.length()) {
-                    val key = deviceArray.getJSONObject(i).getString("name")
-                    val value = deviceArray.getJSONObject(i).getString("id")
-                    if(!spotifyDevices.containsKey(key)) {
-                        spotifyDevices[key] = value
-                    } else {
-                        spotifyDevices[key + "1"] = value
-                    }
-                }
-                val ad = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, spotifyDevices.keys.toList())
-                ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                devices.adapter = ad
-                devices.visibility = View.VISIBLE
-                Log.i("Things", spotifyDevices.toString())
-            }
+        val ad = ArrayAdapter(this, android.R.layout.simple_spinner_item, deviceList)
+        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        devices.adapter = ad
+        devices.visibility = View.VISIBLE
+    }
+
+    private fun displaySearchResult(results: JSONArray) {
+        findViewById<TextView>(R.id.search_result_1).apply {
+            visibility = View.VISIBLE
+            text = results.getJSONObject(0).getString("name")
+            setTag(R.id.TAG_ID, results.getJSONObject(0).getString("id"))
+            setTag(R.id.TAG_URI, results.getJSONObject(0).getString("uri"))
         }
+        findViewById<TextView>(R.id.search_result_2).apply {
+            visibility = View.VISIBLE
+            text = results.getJSONObject(1).getString("name")
+            setTag(R.id.TAG_ID, results.getJSONObject(1).getString("id"))
+            setTag(R.id.TAG_URI, results.getJSONObject(1).getString("uri"))
+        }
+        play_button_1.visibility = View.VISIBLE
+        play_button_2.visibility = View.VISIBLE
+
+        add_button_1.visibility = View.VISIBLE
     }
 
     private fun addAlbum(albumID: String, albumTitle: String, spotifyURI: String) {
         GlobalScope.launch(Dispatchers.Default) {
             val album = Album(albumID, albumTitle, spotifyURI)
             albumDao.insert(album)
-        }
-    }
-
-    private fun playSong(songURI: String, shuffle: Boolean) {
-        val deviceID = spotifyDevices[devices.selectedItem.toString()]
-        val shuffleUrl = URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
-
-        GlobalScope.launch(Dispatchers.Default) {
-            val httpsURLConnection = withContext(Dispatchers.IO) {shuffleUrl.openConnection() as HttpsURLConnection}
-            httpsURLConnection.requestMethod = "PUT"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
-            httpsURLConnection.responseCode
-            httpsURLConnection.disconnect()
-        }
-
-        val body = JSONObject().put("context_uri", songURI).toString()
-
-        val playUrl = URL("https://api.spotify.com/v1/me/player/play")
-
-        GlobalScope.launch(Dispatchers.Default) {
-            val httpsURLConnection = withContext(Dispatchers.IO) {playUrl.openConnection() as HttpsURLConnection}
-            httpsURLConnection.requestMethod = "PUT"
-            httpsURLConnection.setRequestProperty("Authorization", "Bearer $accessToken")
-            httpsURLConnection.setRequestProperty("Content-Type", "application/json")
-            httpsURLConnection.doOutput = true
-            val os = httpsURLConnection.outputStream
-            val output = body.toByteArray(Charset.forName("utf-8"))
-            withContext(Dispatchers.IO) {
-                os.write(output, 0, output.size)
-                os.close()
-            }
-            httpsURLConnection.responseCode
-            httpsURLConnection.disconnect()
         }
     }
 }
