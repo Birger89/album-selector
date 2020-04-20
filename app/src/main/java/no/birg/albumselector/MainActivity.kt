@@ -64,26 +64,27 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        GlobalScope.launch(Dispatchers.Default) {
-            val username = spotifyConnection.fetchUsername()
-            val devices = spotifyConnection.fetchDevices()
-            withContext(Dispatchers.Main) {
-                displayThings(username, devices)
-            }
-        }
+        displayThings()
     }
 
-    private fun displayThings(username: String, deviceList: List<String>) {
-        name_text_view.text = username
-        name_text_view.visibility = View.VISIBLE
+    private fun displayThings() {
+        GlobalScope.launch(Dispatchers.Default) {
+            val username = spotifyConnection.fetchUsername()
+            val deviceList = spotifyConnection.fetchDevices()
 
-        search_field.visibility = View.VISIBLE
-        search_button.visibility = View.VISIBLE
+            withContext(Dispatchers.Main) {
+                name_text_view.text = username
+                name_text_view.visibility = View.VISIBLE
 
-        val ad = ArrayAdapter(this, android.R.layout.simple_spinner_item, deviceList)
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        devices.adapter = ad
-        devices.visibility = View.VISIBLE
+                search_field.visibility = View.VISIBLE
+                search_button.visibility = View.VISIBLE
+
+                val ad = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, deviceList)
+                ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                devices.adapter = ad
+                devices.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun displaySearchResult(results: JSONArray) {
