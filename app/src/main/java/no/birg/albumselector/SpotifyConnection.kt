@@ -15,7 +15,7 @@ import java.nio.charset.Charset
 import javax.net.ssl.HttpsURLConnection
 
 class SpotifyConnection : Activity() {
-    private var spotifyDevices: MutableMap<String, String> = mutableMapOf()
+    private val spotifyDevices: MutableMap<String, String> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
