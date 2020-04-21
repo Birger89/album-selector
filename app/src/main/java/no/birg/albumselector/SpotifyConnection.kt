@@ -3,6 +3,7 @@ package no.birg.albumselector
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import com.spotify.sdk.android.authentication.AuthenticationClient
 import com.spotify.sdk.android.authentication.AuthenticationRequest
 import com.spotify.sdk.android.authentication.AuthenticationResponse
@@ -130,10 +131,21 @@ class SpotifyConnection : Activity() {
             withContext(Dispatchers.IO) { playerURL.openConnection() as HttpsURLConnection }
         httpsURLConnection.requestMethod = "GET"
         httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
-        val response = httpsURLConnection.inputStream.bufferedReader().use { it.readText() }
-        val jsonObject = JSONObject(response)
 
-        jsonObject.getBoolean("shuffle_state")
+        val responseCode = httpsURLConnection.responseCode
+        if (responseCode == 200) {
+            val response = httpsURLConnection.inputStream.bufferedReader().use { it.readText() }
+            val shuffleState = JSONObject(response).getBoolean("shuffle_state")
+            httpsURLConnection.disconnect()
+
+            Log.i("SpotifyConnection", "Shuffle state received: $shuffleState")
+            shuffleState
+        } else {
+            httpsURLConnection.disconnect()
+
+            Log.i("SpotifyConnection", "No shuffle state received")
+            false
+        }
     }
 
     fun setShuffle(shuffle: Boolean, deviceID: String) {
