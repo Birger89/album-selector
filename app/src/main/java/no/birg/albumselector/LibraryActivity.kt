@@ -46,6 +46,7 @@ class LibraryActivity : AppCompatActivity() {
     fun playAlbum(albumURI: String) {
         val selectedDevice = devices.selectedItem.toString()
         val deviceID = spotifyConnection.getDevices()[selectedDevice].toString()
+        spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
         spotifyConnection.playAlbum(albumURI, deviceID)
     }
 

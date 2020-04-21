@@ -8,6 +8,7 @@
     <string name="play_random">Rando</string>
     <string name="add_button">Add</string>
     <string name="remove_button">Remove</string>
+    <string name="shuffle">Shuffle</string>
     <string name="library">Library</string>
     <item name="TAG_ID" type="id" />
     <item name="TAG_URI" type="id" />
