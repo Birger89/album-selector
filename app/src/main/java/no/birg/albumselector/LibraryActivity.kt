@@ -3,6 +3,7 @@ package no.birg.albumselector
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_library.*
 import kotlinx.coroutines.Dispatchers
@@ -45,9 +46,13 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     fun playAlbum(albumURI: String) {
-        val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
-        spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
-        spotifyConnection.playAlbum(albumURI, deviceID)
+        if (devices.selectedItem != null) {
+            val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
+            spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
+            spotifyConnection.playAlbum(albumURI, deviceID)
+        } else {
+            Log.w("LibraryActivity", "No device selected")
+        }
     }
 
     fun playRandom(@Suppress("UNUSED_PARAMETER") view: View) {
