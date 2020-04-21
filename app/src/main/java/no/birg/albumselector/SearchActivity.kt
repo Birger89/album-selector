@@ -6,18 +6,18 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.*
 import org.json.JSONArray
 
-class MainActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity() {
 
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_search)
 
         albumDao = AppDatabase.getInstance(this).albumDao()
         spotifyConnection = SpotifyConnection()
@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 search_field.visibility = View.VISIBLE
                 search_button.visibility = View.VISIBLE
 
-                val ad = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, deviceList)
+                val ad = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_item, deviceList)
                 ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 devices.adapter = ad
                 devices.visibility = View.VISIBLE
