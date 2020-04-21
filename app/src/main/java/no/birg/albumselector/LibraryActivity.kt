@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_library.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -44,8 +43,7 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     fun playAlbum(albumURI: String) {
-        val selectedDevice = devices.selectedItem.toString()
-        val deviceID = spotifyConnection.getDevices()[selectedDevice].toString()
+        val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
         spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
         spotifyConnection.playAlbum(albumURI, deviceID)
     }
@@ -85,9 +83,7 @@ class LibraryActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Default) {
             val deviceList = spotifyConnection.fetchDevices()
             withContext(Dispatchers.Main) {
-                val ad = ArrayAdapter(this@LibraryActivity, android.R.layout.simple_spinner_item, deviceList)
-                ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                devices.adapter = ad
+                devices.adapter = DeviceAdapter(this@LibraryActivity, deviceList)
                 devices.visibility = View.VISIBLE
             }
         }

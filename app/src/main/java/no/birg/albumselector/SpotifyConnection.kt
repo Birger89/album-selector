@@ -15,7 +15,7 @@ import java.nio.charset.Charset
 import javax.net.ssl.HttpsURLConnection
 
 class SpotifyConnection : Activity() {
-    private val spotifyDevices: MutableMap<String, String> = mutableMapOf()
+    private val spotifyDevices = arrayListOf<Pair<String, String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +57,7 @@ class SpotifyConnection : Activity() {
         jsonObject.getString("display_name")
     }
 
-    fun getDevices(): MutableMap<String, String> {
-        return spotifyDevices
-    }
-
-    fun fetchDevices() : List<String> = runBlocking {
+    fun fetchDevices() : ArrayList<Pair<String, String>> = runBlocking {
         val getDevicesUrl = "https://api.spotify.com/v1/me/player/devices"
 
         val url = URL(getDevicesUrl)
@@ -73,15 +69,12 @@ class SpotifyConnection : Activity() {
         val deviceArray = JSONObject(response).getJSONArray("devices")
 
         for (i in 0 until deviceArray.length()) {
-            val key = deviceArray.getJSONObject(i).getString("name")
-            val value = deviceArray.getJSONObject(i).getString("id")
-            if(!spotifyDevices.containsKey(key)) {
-                spotifyDevices[key] = value
-            } else {
-                spotifyDevices[key + "1"] = value
-            }
+            val key = deviceArray.getJSONObject(i).getString("id")
+            val value = deviceArray.getJSONObject(i).getString("name")
+            val device = Pair(key, value)
+            spotifyDevices.add(device)
         }
-        spotifyDevices.keys.toList()
+        spotifyDevices
     }
 
     fun search(query: String) : JSONArray = runBlocking {

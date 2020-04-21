@@ -39,18 +39,14 @@ class SearchActivity : AppCompatActivity() {
         }
 
         play_button_1.setOnClickListener {
-            val deviceID = spotifyConnection.getDevices()[devices.selectedItem.toString()]
-            if (deviceID != null) {
-                spotifyConnection.setShuffle(true, deviceID)
-                spotifyConnection.playAlbum(search_result_1.getTag(R.id.TAG_URI).toString(), deviceID)
-            }
+            val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
+            spotifyConnection.setShuffle(true, deviceID)
+            spotifyConnection.playAlbum(search_result_1.getTag(R.id.TAG_URI).toString(), deviceID)
         }
         play_button_2.setOnClickListener {
-            val deviceID = spotifyConnection.getDevices()[devices.selectedItem.toString()]
-            if (deviceID != null) {
-                spotifyConnection.setShuffle(false, deviceID)
-                spotifyConnection.playAlbum(search_result_2.getTag(R.id.TAG_URI).toString(), deviceID)
-            }
+            val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
+            spotifyConnection.setShuffle(false, deviceID)
+            spotifyConnection.playAlbum(search_result_2.getTag(R.id.TAG_URI).toString(), deviceID)
         }
 
         add_button_1.setOnClickListener {
@@ -81,9 +77,7 @@ class SearchActivity : AppCompatActivity() {
                 search_field.visibility = View.VISIBLE
                 search_button.visibility = View.VISIBLE
 
-                val ad = ArrayAdapter(this@SearchActivity, android.R.layout.simple_spinner_item, deviceList)
-                ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                devices.adapter = ad
+                devices.adapter = DeviceAdapter(this@SearchActivity, deviceList)
                 devices.visibility = View.VISIBLE
             }
         }
