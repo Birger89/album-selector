@@ -69,10 +69,15 @@ class SpotifyConnection : Activity() {
         val deviceArray = JSONObject(response).getJSONArray("devices")
 
         for (i in 0 until deviceArray.length()) {
-            val key = deviceArray.getJSONObject(i).getString("id")
-            val value = deviceArray.getJSONObject(i).getString("name")
+            val deviceObj = deviceArray.getJSONObject(i)
+            val key = deviceObj.getString("id")
+            val value = deviceObj.getString("name")
             val device = Pair(key, value)
-            spotifyDevices.add(device)
+            if (deviceObj.getBoolean("is_active")) {
+                spotifyDevices.add(0, device)
+            } else {
+                spotifyDevices.add(device)
+            }
         }
         spotifyDevices
     }
