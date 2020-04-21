@@ -46,12 +46,12 @@ class SpotifyConnection : Activity() {
         val getUserProfileURL = "https://api.spotify.com/v1/me"
 
         val url = URL(getUserProfileURL)
-        val httpsURLConnection = withContext(Dispatchers.IO) { url.openConnection() as HttpsURLConnection }
-        httpsURLConnection.requestMethod = "GET"
-        httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
-        httpsURLConnection.doInput = true
-        httpsURLConnection.doOutput = false
-        val response = httpsURLConnection.inputStream.bufferedReader()
+        val connection = withContext(Dispatchers.IO) { url.openConnection() as HttpsURLConnection }
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+        connection.doInput = true
+        connection.doOutput = false
+        val response = connection.inputStream.bufferedReader()
             .use { it.readText() }
         val jsonObject = JSONObject(response)
 
@@ -62,10 +62,10 @@ class SpotifyConnection : Activity() {
         val getDevicesUrl = "https://api.spotify.com/v1/me/player/devices"
 
         val url = URL(getDevicesUrl)
-        val httpsURLConnection = withContext(Dispatchers.IO) { url.openConnection() as HttpsURLConnection }
-        httpsURLConnection.requestMethod = "GET"
-        httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
-        val response = httpsURLConnection.inputStream.bufferedReader()
+        val connection = withContext(Dispatchers.IO) { url.openConnection() as HttpsURLConnection }
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+        val response = connection.inputStream.bufferedReader()
             .use { it.readText() }
         val deviceArray = JSONObject(response).getJSONArray("devices")
 
@@ -89,13 +89,13 @@ class SpotifyConnection : Activity() {
         queryParam += "&" + URLEncoder.encode("limit", "UTF-8") + "=" + URLEncoder.encode("2", "UTF-8")
         val url = URL("https://api.spotify.com/v1/search?$queryParam")
 
-        val httpsURLConnection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
-        httpsURLConnection.requestMethod = "GET"
-        httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
-        val response = httpsURLConnection.inputStream.bufferedReader()
+        val connection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+        val response = connection.inputStream.bufferedReader()
             .use { it.readText() }
         val jsonObject = JSONObject(response)
-        httpsURLConnection.disconnect()
+        connection.disconnect()
 
         jsonObject.getJSONObject("albums").getJSONArray("items")
     }
@@ -105,43 +105,43 @@ class SpotifyConnection : Activity() {
         val body = JSONObject().put("context_uri", albumURI).toString()
 
         GlobalScope.launch(Dispatchers.Default) {
-            val httpsURLConnection =
+            val connection =
                 withContext(Dispatchers.IO) { playUrl.openConnection() as HttpsURLConnection }
-            httpsURLConnection.requestMethod = "PUT"
-            httpsURLConnection.setRequestProperty(
+            connection.requestMethod = "PUT"
+            connection.setRequestProperty(
                 "Authorization", "Bearer ${SpotifyToken.getToken()}"
             )
-            httpsURLConnection.setRequestProperty("Content-Type", "application/json")
-            httpsURLConnection.doOutput = true
-            val os = httpsURLConnection.outputStream
+            connection.setRequestProperty("Content-Type", "application/json")
+            connection.doOutput = true
+            val os = connection.outputStream
             val output = body.toByteArray(Charset.forName("utf-8"))
             withContext(Dispatchers.IO) {
                 os.write(output, 0, output.size)
                 os.close()
             }
-            httpsURLConnection.responseCode
-            httpsURLConnection.disconnect()
+            connection.responseCode
+            connection.disconnect()
         }
     }
 
     fun fetchShuffleState() : Boolean = runBlocking {
         val playerURL = URL("https://api.spotify.com/v1/me/player")
 
-        val httpsURLConnection =
+        val connection =
             withContext(Dispatchers.IO) { playerURL.openConnection() as HttpsURLConnection }
-        httpsURLConnection.requestMethod = "GET"
-        httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
 
-        val responseCode = httpsURLConnection.responseCode
+        val responseCode = connection.responseCode
         if (responseCode == 200) {
-            val response = httpsURLConnection.inputStream.bufferedReader().use { it.readText() }
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
             val shuffleState = JSONObject(response).getBoolean("shuffle_state")
-            httpsURLConnection.disconnect()
+            connection.disconnect()
 
             Log.i("SpotifyConnection", "Shuffle state received: $shuffleState")
             shuffleState
         } else {
-            httpsURLConnection.disconnect()
+            connection.disconnect()
 
             Log.i("SpotifyConnection", "No shuffle state received")
             false
@@ -153,14 +153,14 @@ class SpotifyConnection : Activity() {
             URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
 
         GlobalScope.launch(Dispatchers.Default) {
-            val httpsURLConnection =
+            val connection =
                 withContext(Dispatchers.IO) { shuffleUrl.openConnection() as HttpsURLConnection }
-            httpsURLConnection.requestMethod = "PUT"
-            httpsURLConnection.setRequestProperty(
+            connection.requestMethod = "PUT"
+            connection.setRequestProperty(
                 "Authorization", "Bearer ${SpotifyToken.getToken()}"
             )
-            httpsURLConnection.responseCode
-            httpsURLConnection.disconnect()
+            connection.responseCode
+            connection.disconnect()
         }
     }
 }
