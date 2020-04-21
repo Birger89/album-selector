@@ -38,6 +38,11 @@ class LibraryActivity : AppCompatActivity() {
         displayDevices()
     }
 
+    fun goToSearch(@Suppress("UNUSED_PARAMETER") view: View) {
+        val intent = Intent(this, SearchActivity::class.java)
+        startActivity(intent)
+    }
+
     fun playAlbum(albumURI: String) {
         val selectedDevice = devices.selectedItem.toString()
         val deviceID = spotifyConnection.getDevices()[selectedDevice].toString()
