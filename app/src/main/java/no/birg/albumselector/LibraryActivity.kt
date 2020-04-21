@@ -28,6 +28,7 @@ class LibraryActivity : AppCompatActivity() {
         } else {
             displayAlbums()
             displayDevices()
+            setShuffleState()
         }
     }
 
@@ -35,6 +36,7 @@ class LibraryActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         displayAlbums()
         displayDevices()
+        setShuffleState()
     }
 
     fun goToSearch(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -85,6 +87,15 @@ class LibraryActivity : AppCompatActivity() {
             withContext(Dispatchers.Main) {
                 devices.adapter = DeviceAdapter(this@LibraryActivity, deviceList)
                 devices.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun setShuffleState() {
+        GlobalScope.launch(Dispatchers.Default) {
+            val shuffleState = spotifyConnection.fetchShuffleState()
+            withContext(Dispatchers.Main) {
+                shuffle_switch.isChecked = shuffleState
             }
         }
     }

@@ -123,6 +123,19 @@ class SpotifyConnection : Activity() {
         }
     }
 
+    fun fetchShuffleState() : Boolean = runBlocking {
+        val playerURL = URL("https://api.spotify.com/v1/me/player")
+
+        val httpsURLConnection =
+            withContext(Dispatchers.IO) { playerURL.openConnection() as HttpsURLConnection }
+        httpsURLConnection.requestMethod = "GET"
+        httpsURLConnection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+        val response = httpsURLConnection.inputStream.bufferedReader().use { it.readText() }
+        val jsonObject = JSONObject(response)
+
+        jsonObject.getBoolean("shuffle_state")
+    }
+
     fun setShuffle(shuffle: Boolean, deviceID: String) {
         val shuffleUrl =
             URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
