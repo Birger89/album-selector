@@ -86,7 +86,6 @@ class LibraryActivity : AppCompatActivity() {
             val deviceList = spotifyConnection.fetchDevices()
             withContext(Dispatchers.Main) {
                 devices.adapter = DeviceAdapter(this@LibraryActivity, deviceList)
-                devices.visibility = View.VISIBLE
             }
         }
     }

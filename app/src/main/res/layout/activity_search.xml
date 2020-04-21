@@ -12,12 +12,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/empty_string"
-        android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/devices"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Blautkake"
-        tools:visibility="visible" />
+        tools:text="Blautkake" />
 
     <EditText
         android:id="@+id/search_field"
@@ -30,12 +28,10 @@
         android:hint="@string/search_field"
         android:importantForAutofill="no"
         android:inputType="textPersonName"
-        android:visibility="invisible"
         app:layout_constraintEnd_toStartOf="@+id/search_button"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name_text_view"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toBottomOf="@+id/name_text_view" />
 
     <Button
         android:id="@+id/search_button"
@@ -47,12 +43,10 @@
         android:layout_marginRight="16dp"
         android:background="@color/spotifyGreen"
         android:text="@string/search_button"
-        android:visibility="invisible"
         app:layout_constraintBaseline_toBaselineOf="@+id/search_field"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/search_field"
-        tools:visibility="visible" />
+        app:layout_constraintStart_toEndOf="@+id/search_field" />
 
     <TextView
         android:id="@+id/search_result_1"
@@ -116,10 +110,8 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="32dp"
         android:spinnerMode="dropdown"
-        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/search_field"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/add_button_1"

@@ -72,13 +72,7 @@ class SearchActivity : AppCompatActivity() {
 
             withContext(Dispatchers.Main) {
                 name_text_view.text = username
-                name_text_view.visibility = View.VISIBLE
-
-                search_field.visibility = View.VISIBLE
-                search_button.visibility = View.VISIBLE
-
                 devices.adapter = DeviceAdapter(this@SearchActivity, deviceList)
-                devices.visibility = View.VISIBLE
             }
         }
     }
