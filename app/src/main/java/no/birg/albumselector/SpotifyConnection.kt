@@ -125,6 +125,50 @@ class SpotifyConnection : Activity() {
         }
     }
 
+    fun fetchAlbumTracks(albumID: String) : ArrayList<String> = runBlocking {
+        val albumURL = URL("https://api.spotify.com/v1/albums/$albumID/tracks?limit=50")
+
+        val connection =
+            withContext(Dispatchers.IO) { albumURL.openConnection() as HttpsURLConnection }
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+
+        val responseCode = connection.responseCode
+        if (responseCode == 200) {
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
+            val tracksJSON = JSONObject(response).getJSONArray("items")
+
+            val tracks = ArrayList<String>()
+            for (i in 0 until tracksJSON.length()) {
+                tracks.add(tracksJSON.getJSONObject(i).getString("id"))
+            }
+            tracks
+        } else {
+            connection.disconnect()
+
+            Log.e("SpotifyConnection", "No tracks were received")
+            ArrayList()
+        }
+
+    }
+
+    fun queueSong(songID: String, deviceID: String) {
+        val songURI = "spotify:track:$songID"
+        val queueURL =
+            URL("https://api.spotify.com/v1/me/player/queue?uri=$songURI&device_id=$deviceID")
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val connection =
+                withContext(Dispatchers.IO) { queueURL.openConnection() as HttpsURLConnection }
+            connection.requestMethod = "POST"
+            connection.setRequestProperty(
+                "Authorization", "Bearer ${SpotifyToken.getToken()}"
+            )
+            connection.responseCode
+            connection.disconnect()
+        }
+    }
+
     fun fetchShuffleState() : Boolean = runBlocking {
         val playerURL = URL("https://api.spotify.com/v1/me/player")
 

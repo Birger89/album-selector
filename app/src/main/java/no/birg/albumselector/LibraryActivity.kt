@@ -46,10 +46,29 @@ class LibraryActivity : AppCompatActivity() {
     }
 
     fun playAlbum(albumID: String) {
+        if (queue_switch.isChecked) {
+            queueAlbum(albumID)
+        } else {
+            if (devices.selectedItem != null) {
+                val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
+                spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
+                spotifyConnection.playAlbum(albumID, deviceID)
+            } else {
+                Log.w("LibraryActivity", "No device selected")
+            }
+        }
+    }
+
+    private fun queueAlbum(albumID: String) {
         if (devices.selectedItem != null) {
             val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
-            spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
-            spotifyConnection.playAlbum(albumID, deviceID)
+
+            GlobalScope.launch(Dispatchers.Default) {
+                val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
+                for (trackID in trackIDs) {
+                    spotifyConnection.queueSong(trackID, deviceID)
+                }
+            }
         } else {
             Log.w("LibraryActivity", "No device selected")
         }
