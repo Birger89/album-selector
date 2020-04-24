@@ -77,7 +77,7 @@ class LibraryActivity : AppCompatActivity() {
     fun playRandom(@Suppress("UNUSED_PARAMETER") view: View) {
         val adapter = library_albums.adapter as AlbumAdapter
         val album = adapter.getItem(Random.nextInt(adapter.count)) as Album
-        playAlbum(album.spotifyUri.toString())
+        playAlbum(album.aid)
     }
 
     private fun getAlbums(): ArrayList<Album> {
