@@ -55,7 +55,7 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : Bas
         holder.titleTextView.text = album.albumTitle
 
         holder.playButton.setOnClickListener {
-            mContext.playAlbum(album.spotifyUri.toString())
+            mContext.playAlbum(album.aid)
         }
         holder.removeButtor.setOnClickListener {
             mContext.deleteAlbum(album)

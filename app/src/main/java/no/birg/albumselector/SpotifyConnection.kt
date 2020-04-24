@@ -100,7 +100,8 @@ class SpotifyConnection : Activity() {
         jsonObject.getJSONObject("albums").getJSONArray("items")
     }
 
-    fun playAlbum(albumURI: String, deviceID: String) {
+    fun playAlbum(albumID: String, deviceID: String) {
+        val albumURI = "spotify:album:$albumID"
         val playUrl = URL("https://api.spotify.com/v1/me/player/play?device_id=$deviceID")
         val body = JSONObject().put("context_uri", albumURI).toString()
 

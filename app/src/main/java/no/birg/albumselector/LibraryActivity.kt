@@ -45,11 +45,11 @@ class LibraryActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun playAlbum(albumURI: String) {
+    fun playAlbum(albumID: String) {
         if (devices.selectedItem != null) {
             val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
             spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
-            spotifyConnection.playAlbum(albumURI, deviceID)
+            spotifyConnection.playAlbum(albumID, deviceID)
         } else {
             Log.w("LibraryActivity", "No device selected")
         }
