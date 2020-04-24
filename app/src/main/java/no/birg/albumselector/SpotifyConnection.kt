@@ -86,7 +86,7 @@ class SpotifyConnection : Activity() {
     fun search(query: String) : JSONArray = runBlocking {
         var queryParam = URLEncoder.encode("q", "UTF-8") + "=" + URLEncoder.encode(query, "UTF-8")
         queryParam += "&" + URLEncoder.encode("type", "UTF-8") + "=" + URLEncoder.encode("album", "UTF-8")
-        queryParam += "&" + URLEncoder.encode("limit", "UTF-8") + "=" + URLEncoder.encode("2", "UTF-8")
+        queryParam += "&" + URLEncoder.encode("limit", "UTF-8") + "=" + URLEncoder.encode("50", "UTF-8")
         val url = URL("https://api.spotify.com/v1/search?$queryParam")
 
         val connection = withContext(Dispatchers.IO) {url.openConnection() as HttpsURLConnection}

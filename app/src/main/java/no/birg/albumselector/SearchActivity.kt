@@ -5,10 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.*
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.*
-import org.json.JSONArray
 
 class SearchActivity : AppCompatActivity() {
 
@@ -27,37 +25,27 @@ class SearchActivity : AppCompatActivity() {
         } else {
             displayThings()
         }
-
-        search_button.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Default) {
-                val result = spotifyConnection.search(search_field.text.toString())
-
-                withContext(Dispatchers.Main) {
-                    displaySearchResult(result)
-                }
-            }
-        }
-
-        play_button_1.setOnClickListener {
-            val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
-            spotifyConnection.setShuffle(true, deviceID)
-            spotifyConnection.playAlbum(search_result_1.getTag(R.id.TAG_URI).toString(), deviceID)
-        }
-        play_button_2.setOnClickListener {
-            val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
-            spotifyConnection.setShuffle(false, deviceID)
-            spotifyConnection.playAlbum(search_result_2.getTag(R.id.TAG_URI).toString(), deviceID)
-        }
-
-        add_button_1.setOnClickListener {
-            Log.i("Name", search_result_1.text.toString())
-            addAlbum(search_result_1.getTag(R.id.TAG_ID).toString(), search_result_1.text.toString(), search_result_1.getTag(R.id.TAG_URI).toString())
-        }
     }
 
     fun goToLibrary(@Suppress("UNUSED_PARAMETER") view: View) {
         val intent = Intent(this, LibraryActivity::class.java)
         startActivity(intent)
+    }
+
+    fun search(@Suppress("UNUSED_PARAMETER") view: View) {
+        GlobalScope.launch(Dispatchers.Default) {
+            val query = search_field.text.toString()
+
+            if (query != "") {
+                val results = spotifyConnection.search(search_field.text.toString())
+                withContext(Dispatchers.Main) {
+                    val adapter = ResultAdapter(this@SearchActivity, results)
+                    search_results.adapter = adapter
+                }
+            } else {
+                Log.i("SearchActivity", "No search query found")
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -77,26 +65,7 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun displaySearchResult(results: JSONArray) {
-        findViewById<TextView>(R.id.search_result_1).apply {
-            visibility = View.VISIBLE
-            text = results.getJSONObject(0).getString("name")
-            setTag(R.id.TAG_ID, results.getJSONObject(0).getString("id"))
-            setTag(R.id.TAG_URI, results.getJSONObject(0).getString("uri"))
-        }
-        findViewById<TextView>(R.id.search_result_2).apply {
-            visibility = View.VISIBLE
-            text = results.getJSONObject(1).getString("name")
-            setTag(R.id.TAG_ID, results.getJSONObject(1).getString("id"))
-            setTag(R.id.TAG_URI, results.getJSONObject(1).getString("uri"))
-        }
-        play_button_1.visibility = View.VISIBLE
-        play_button_2.visibility = View.VISIBLE
-
-        add_button_1.visibility = View.VISIBLE
-    }
-
-    private fun addAlbum(albumID: String, albumTitle: String, spotifyURI: String) {
+    fun addAlbum(albumID: String, albumTitle: String, spotifyURI: String) {
         GlobalScope.launch(Dispatchers.Default) {
             val album = Album(albumID, albumTitle, spotifyURI)
             albumDao.insert(album)
