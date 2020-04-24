@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.library_item.view.*
 
@@ -40,6 +41,8 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : Bas
 
             holder = ViewHolder()
             holder.titleTextView = albumView.album_title as TextView
+            holder.playButton = albumView.play_button as Button
+            holder.removeButtor = albumView.remove_button as Button
 
             albumView.tag = holder
         } else {
@@ -47,15 +50,14 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : Bas
             holder = convertView.tag as ViewHolder
         }
 
-        val titleTextView = holder.titleTextView
         val album = getItem(position) as Album
 
-        titleTextView.text = album.albumTitle
+        holder.titleTextView.text = album.albumTitle
 
-        albumView.play_button.setOnClickListener {
+        holder.playButton.setOnClickListener {
             mContext.playAlbum(album.spotifyUri.toString())
         }
-        albumView.remove_button.setOnClickListener {
+        holder.removeButtor.setOnClickListener {
             mContext.deleteAlbum(album)
         }
 
@@ -64,5 +66,7 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : Bas
 
     private class ViewHolder {
         lateinit var titleTextView: TextView
+        lateinit var playButton: Button
+        lateinit var removeButtor: Button
     }
 }
