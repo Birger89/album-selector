@@ -23,7 +23,7 @@ class SearchActivity : AppCompatActivity() {
         if (SpotifyToken.getToken() == "") {
             spotifyConnection.fetchAccessToken(this)
         } else {
-            displayThings()
+            displayUsername()
         }
     }
 
@@ -50,17 +50,15 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        displayThings()
+        displayUsername()
     }
 
-    private fun displayThings() {
+    private fun displayUsername() {
         GlobalScope.launch(Dispatchers.Default) {
             val username = spotifyConnection.fetchUsername()
-            val deviceList = spotifyConnection.fetchDevices()
 
             withContext(Dispatchers.Main) {
                 name_text_view.text = username
-                devices.adapter = DeviceAdapter(this@SearchActivity, deviceList)
             }
         }
     }
