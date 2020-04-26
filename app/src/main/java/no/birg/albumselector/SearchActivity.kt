@@ -28,7 +28,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     fun goToLibrary(@Suppress("UNUSED_PARAMETER") view: View) {
-        val intent = Intent(this, LibraryActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
 

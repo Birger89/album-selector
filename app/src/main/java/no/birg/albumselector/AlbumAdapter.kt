@@ -9,12 +9,12 @@ import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.library_item.view.*
 
-class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : BaseAdapter() {
+class AlbumAdapter(context: Context, private val albums: ArrayList<Album>, fragment: LibraryFragment) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    private val mContext: LibraryActivity = context as LibraryActivity
+    private val mFragment: LibraryFragment = fragment
 
     override fun getCount(): Int {
         return albums.size
@@ -55,10 +55,10 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>) : Bas
         holder.titleTextView.text = album.albumTitle
 
         holder.playButton.setOnClickListener {
-            mContext.playAlbum(album.aid)
+            mFragment.playAlbum(album.aid)
         }
         holder.removeButtor.setOnClickListener {
-            mContext.deleteAlbum(album)
+            mFragment.deleteAlbum(album)
         }
 
         return albumView

@@ -1,47 +1,49 @@
 package no.birg.albumselector
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
-import kotlinx.android.synthetic.main.activity_library.*
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_library.*
+import kotlinx.android.synthetic.main.fragment_library.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
-class LibraryActivity : AppCompatActivity() {
+class LibraryFragment : Fragment() {
 
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_library)
 
-        albumDao = AppDatabase.getInstance(this).albumDao()
+        albumDao = (activity as MainActivity).getAlbumDao()
         spotifyConnection = SpotifyConnection()
-
-        if (SpotifyToken.getToken() == "") {
-            spotifyConnection.fetchAccessToken(this)
-        } else {
-            displayAlbums()
-            displayDevices()
-            setShuffleState()
-        }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         displayAlbums()
         displayDevices()
         setShuffleState()
+
+        val view = inflater.inflate(R.layout.fragment_library, container, false)
+        view.search_button.setOnClickListener{ goToSearch() }
+        view.play_random_button.setOnClickListener{ playRandom() }
+
+        return view
     }
 
-    fun goToSearch(@Suppress("UNUSED_PARAMETER") view: View) {
-        val intent = Intent(this, SearchActivity::class.java)
+    private fun goToSearch() {
+        val intent = Intent(activity, SearchActivity::class.java)
         startActivity(intent)
     }
 
@@ -74,7 +76,7 @@ class LibraryActivity : AppCompatActivity() {
         }
     }
 
-    fun playRandom(@Suppress("UNUSED_PARAMETER") view: View) {
+    private fun playRandom() {
         val adapter = library_albums.adapter as AlbumAdapter
         val album = adapter.getItem(Random.nextInt(adapter.count)) as Album
         playAlbum(album.aid)
@@ -99,7 +101,7 @@ class LibraryActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Default) {
             val albums = getAlbums()
             withContext(Dispatchers.Main) {
-                val adapter = AlbumAdapter(this@LibraryActivity, albums)
+                val adapter = context?.let { AlbumAdapter(it, albums, this@LibraryFragment) }
                 library_albums.adapter = adapter
             }
         }
@@ -109,7 +111,7 @@ class LibraryActivity : AppCompatActivity() {
         GlobalScope.launch(Dispatchers.Default) {
             val deviceList = spotifyConnection.fetchDevices()
             withContext(Dispatchers.Main) {
-                devices.adapter = DeviceAdapter(this@LibraryActivity, deviceList)
+                devices.adapter = context?.let { DeviceAdapter(it, deviceList) }
             }
         }
     }
