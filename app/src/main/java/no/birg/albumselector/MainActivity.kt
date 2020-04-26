@@ -13,11 +13,7 @@ class MainActivity : AppCompatActivity() {
 
         albumDao = AppDatabase.getInstance(this).albumDao()
 
-        if (SpotifyToken.getToken() == "") {
-            SpotifyConnection().fetchAccessToken(this)
-        } else {
-            setContentView(R.layout.activity_main)
-        }
+        SpotifyConnection().fetchAccessToken(this)
     }
 
     fun getAlbumDao() : AlbumDao {
@@ -28,5 +24,9 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         setContentView(R.layout.activity_main)
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.add(R.id.main_frame, LibraryFragment())
+        transaction.commit()
     }
 }

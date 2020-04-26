@@ -1,6 +1,5 @@
 package no.birg.albumselector
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -43,8 +42,15 @@ class LibraryFragment : Fragment() {
     }
 
     private fun goToSearch() {
-        val intent = Intent(activity, SearchActivity::class.java)
-        startActivity(intent)
+        val transaction = fragmentManager?.beginTransaction()
+
+        if (transaction != null) {
+            transaction.replace(R.id.main_frame, SearchFragment())
+            transaction.addToBackStack(null)
+            transaction.commit()
+        } else {
+            Log.e("LibraryFragment", "fragmentManager is null")
+        }
     }
 
     fun playAlbum(albumID: String) {

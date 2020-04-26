@@ -11,12 +11,12 @@ import kotlinx.android.synthetic.main.result_item.view.*
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ResultAdapter(context: Context, private val results: JSONArray) : BaseAdapter() {
+class ResultAdapter(context: Context, private val results: JSONArray, fragment: SearchFragment) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    private val mContext: SearchActivity = context as SearchActivity
+    private val mFragment: SearchFragment = fragment
 
     override fun getCount(): Int {
         return results.length()
@@ -55,7 +55,7 @@ class ResultAdapter(context: Context, private val results: JSONArray) : BaseAdap
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            mContext.addAlbum(id, title, uri)
+            mFragment.addAlbum(id, title, uri)
         }
 
         return resultView
