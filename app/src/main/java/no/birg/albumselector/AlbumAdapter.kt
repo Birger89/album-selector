@@ -60,6 +60,9 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>, fragm
         holder.removeButtor.setOnClickListener {
             mFragment.deleteAlbum(album)
         }
+        albumView.setOnClickListener {
+            mFragment.displayAlbumDetails(album)
+        }
 
         return albumView
     }

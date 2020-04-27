@@ -103,6 +103,18 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    fun displayAlbumDetails(album: Album) {
+        val transaction = fragmentManager?.beginTransaction()
+
+        if (transaction != null) {
+            transaction.replace(R.id.main_frame, AlbumFragment(album))
+            transaction.addToBackStack(null)
+            transaction.commit()
+        } else {
+            Log.e("LibraryFragment", "fragmentManager is null")
+        }
+    }
+
     private fun displayAlbums() {
         GlobalScope.launch(Dispatchers.Default) {
             val albums = getAlbums()
