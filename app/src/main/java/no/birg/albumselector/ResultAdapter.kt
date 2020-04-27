@@ -57,6 +57,10 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
         holder.addButton.setOnClickListener {
             mFragment.addAlbum(id, title, uri)
         }
+        resultView.setOnClickListener {
+            val album = Album(id, title, uri)
+            mFragment.displayAlbumDetails(album)
+        }
 
         return resultView
     }

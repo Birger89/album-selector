@@ -55,6 +55,18 @@ class SearchFragment : Fragment() {
         }
     }
 
+    fun displayAlbumDetails(album: Album) {
+        val transaction = fragmentManager?.beginTransaction()
+
+        if (transaction != null) {
+            transaction.replace(R.id.main_frame, AlbumFragment(album))
+            transaction.addToBackStack(null)
+            transaction.commit()
+        } else {
+            Log.e("SearchFragment", "fragmentManager is null")
+        }
+    }
+
     private fun displayUsername() {
         GlobalScope.launch(Dispatchers.Default) {
             val username = spotifyConnection.fetchUsername()
