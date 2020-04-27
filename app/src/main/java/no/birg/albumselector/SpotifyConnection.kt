@@ -54,6 +54,7 @@ class SpotifyConnection : Activity() {
             .use { it.readText() }
         val jsonObject = JSONObject(response)
 
+        connection.disconnect()
         jsonObject.getString("display_name")
     }
 
@@ -80,6 +81,8 @@ class SpotifyConnection : Activity() {
                 spotifyDevices.add(device)
             }
         }
+
+        connection.disconnect()
         spotifyDevices
     }
 
@@ -142,6 +145,8 @@ class SpotifyConnection : Activity() {
             for (i in 0 until tracksJSON.length()) {
                 tracks.add(tracksJSON.getJSONObject(i).getString("id"))
             }
+
+            connection.disconnect()
             tracks
         } else {
             connection.disconnect()
