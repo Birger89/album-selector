@@ -16,7 +16,6 @@ import java.nio.charset.Charset
 import javax.net.ssl.HttpsURLConnection
 
 class SpotifyConnection : Activity() {
-    private val spotifyDevices = arrayListOf<Pair<String, String>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +67,7 @@ class SpotifyConnection : Activity() {
         val response = connection.inputStream.bufferedReader()
             .use { it.readText() }
         val deviceArray = JSONObject(response).getJSONArray("devices")
+        val spotifyDevices = ArrayList<Pair<String, String>>()
 
         for (i in 0 until deviceArray.length()) {
             val deviceObj = deviceArray.getJSONObject(i)
