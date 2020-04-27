@@ -128,6 +128,26 @@ class SpotifyConnection : Activity() {
         }
     }
 
+    fun fetchAlbumDetails(albumID: String) : JSONObject = runBlocking {
+        val albumURL = URL("https://api.spotify.com/v1/albums/$albumID")
+
+        val connection =
+            withContext(Dispatchers.IO) { albumURL.openConnection() as HttpsURLConnection }
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+
+        val responseCode = connection.responseCode
+        if (responseCode == 200) {
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
+
+            connection.disconnect()
+            JSONObject(response)
+        } else {
+            connection.disconnect()
+            JSONObject()
+        }
+    }
+
     fun fetchAlbumTracks(albumID: String) : ArrayList<String> = runBlocking {
         val albumURL = URL("https://api.spotify.com/v1/albums/$albumID/tracks?limit=50")
 
