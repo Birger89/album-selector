@@ -10,10 +10,12 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.*
 
-class SearchFragment : Fragment() {
+class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
+
+    private val libraryFragment = fragment
 
     private lateinit var searchView: View
 
@@ -66,7 +68,7 @@ class SearchFragment : Fragment() {
         val transaction = fragmentManager?.beginTransaction()
 
         if (transaction != null) {
-            transaction.replace(R.id.main_frame, AlbumFragment(album))
+            transaction.replace(R.id.main_frame, AlbumFragment(album, libraryFragment))
             transaction.addToBackStack(null)
             transaction.commit()
         } else {

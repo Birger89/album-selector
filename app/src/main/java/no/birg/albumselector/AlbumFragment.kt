@@ -9,9 +9,10 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.view.*
 import kotlinx.coroutines.*
 
-class AlbumFragment(album: Album) : Fragment() {
+class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 
     private val mAlbum = album
+    private val libraryFragment = fragment
     private lateinit var spotifyConnection: SpotifyConnection
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +43,7 @@ class AlbumFragment(album: Album) : Fragment() {
                         .load(imageUrl)
                         .into(view.album_cover)
                 }
+                view.play_button.setOnClickListener { libraryFragment.playAlbum(mAlbum.aid) }
             }
         }
         return view

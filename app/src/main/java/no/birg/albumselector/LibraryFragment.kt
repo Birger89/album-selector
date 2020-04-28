@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,9 @@ class LibraryFragment : Fragment() {
     private lateinit var spotifyConnection: SpotifyConnection
 
     private lateinit var state: Parcelable
+    private var queueState = false
+    private var shuffleState = false
+    private var selectedDevice: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +44,16 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
         view.search_button.setOnClickListener{ goToSearch() }
         view.play_random_button.setOnClickListener{ playRandom() }
+        view.queue_switch.setOnCheckedChangeListener { _, isChecked -> queueState = isChecked }
+        view.shuffle_switch.setOnCheckedChangeListener { _, isChecked -> shuffleState = isChecked }
+        view.devices.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                if (parent != null) {
+                    selectedDevice = (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) { }
+        }
 
         return view
     }
@@ -53,7 +67,7 @@ class LibraryFragment : Fragment() {
         val transaction = fragmentManager?.beginTransaction()
 
         if (transaction != null) {
-            transaction.replace(R.id.main_frame, SearchFragment())
+            transaction.replace(R.id.main_frame, SearchFragment(this))
             transaction.addToBackStack(null)
             transaction.commit()
         } else {
@@ -62,13 +76,12 @@ class LibraryFragment : Fragment() {
     }
 
     fun playAlbum(albumID: String) {
-        if (queue_switch.isChecked) {
+        if (queueState) {
             queueAlbum(albumID)
         } else {
-            if (devices.selectedItem != null) {
-                val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
-                spotifyConnection.setShuffle(shuffle_switch.isChecked, deviceID)
-                spotifyConnection.playAlbum(albumID, deviceID)
+            if (selectedDevice != "") {
+                spotifyConnection.setShuffle(shuffleState, selectedDevice)
+                spotifyConnection.playAlbum(albumID, selectedDevice)
             } else {
                 Log.w("LibraryActivity", "No device selected")
             }
@@ -76,13 +89,11 @@ class LibraryFragment : Fragment() {
     }
 
     private fun queueAlbum(albumID: String) {
-        if (devices.selectedItem != null) {
-            val deviceID = (devices.selectedItem as Pair<*, *>).first.toString()
-
+        if (selectedDevice != "") {
             GlobalScope.launch(Dispatchers.Default) {
                 val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
                 for (trackID in trackIDs) {
-                    spotifyConnection.queueSong(trackID, deviceID)
+                    spotifyConnection.queueSong(trackID, selectedDevice)
                 }
             }
         } else {
@@ -115,7 +126,7 @@ class LibraryFragment : Fragment() {
         val transaction = fragmentManager?.beginTransaction()
 
         if (transaction != null) {
-            transaction.replace(R.id.main_frame, AlbumFragment(album))
+            transaction.replace(R.id.main_frame, AlbumFragment(album, this))
             transaction.addToBackStack(null)
             transaction.commit()
         } else {
