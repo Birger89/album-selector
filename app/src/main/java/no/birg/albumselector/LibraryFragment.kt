@@ -1,6 +1,7 @@
 package no.birg.albumselector
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -18,6 +19,8 @@ class LibraryFragment : Fragment() {
 
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
+
+    private lateinit var state: Parcelable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +42,11 @@ class LibraryFragment : Fragment() {
         view.play_random_button.setOnClickListener{ playRandom() }
 
         return view
+    }
+
+    override fun onPause() {
+        state = library_albums.onSaveInstanceState()!!
+        super.onPause()
     }
 
     private fun goToSearch() {
@@ -121,6 +129,11 @@ class LibraryFragment : Fragment() {
             withContext(Dispatchers.Main) {
                 val adapter = context?.let { AlbumAdapter(it, albums, this@LibraryFragment) }
                 library_albums.adapter = adapter
+
+                if (this@LibraryFragment::state.isInitialized) {
+                    Log.d("LibraryFragment", "State restored: $state")
+                    library_albums.onRestoreInstanceState(state)
+                }
             }
         }
     }
