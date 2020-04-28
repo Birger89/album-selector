@@ -15,6 +15,8 @@ class SearchFragment : Fragment() {
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
 
+    private lateinit var searchView: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -26,13 +28,18 @@ class SearchFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        displayUsername()
 
-        val view = inflater.inflate(R.layout.fragment_search, container, false)
-        view.library_button.setOnClickListener{ goToLibrary() }
-        view.search_button.setOnClickListener{ search() }
-
-        return view
+        /* This stores the entire view for retrieving when going back from viewing album details.
+         * This might not otherwise be good practice, but is acceptable here since there will never
+         * be more than one searchView and other views do not need to be stored this way.
+         */
+        if (!this::searchView.isInitialized) {
+            displayUsername()
+            searchView = inflater.inflate(R.layout.fragment_search, container, false)
+            searchView.library_button.setOnClickListener{ goToLibrary() }
+            searchView.search_button.setOnClickListener{ search() }
+        }
+        return searchView
     }
 
     private fun goToLibrary() {
