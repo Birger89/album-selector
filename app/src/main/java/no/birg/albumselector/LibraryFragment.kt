@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
+import no.birg.albumselector.database.CategoryWithAlbums
 import kotlin.random.Random
 
 class LibraryFragment : Fragment() {
@@ -29,6 +30,8 @@ class LibraryFragment : Fragment() {
     private var queueState = false
     private var shuffleState = false
     private var selectedDevice: String = ""
+    private lateinit var albums: ArrayList<Album>
+    val selectedCategories: MutableList<CategoryWithAlbums> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +47,7 @@ class LibraryFragment : Fragment() {
     ): View? {
         displayAlbums()
         displayDevices()
+        displayCategories()
         setShuffleState()
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
@@ -112,10 +116,6 @@ class LibraryFragment : Fragment() {
         displayAlbumDetails(album)
     }
 
-    private fun getAlbums(): ArrayList<Album> {
-        return albumDao.getAll().reversed() as ArrayList<Album>
-    }
-
     fun deleteAlbum(album: Album) {
         val adapter = library_albums.adapter as AlbumAdapter
         GlobalScope.launch(Dispatchers.Default) {
@@ -139,16 +139,36 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun displayAlbums() {
+    fun displayAlbums() {
+        val isInit = this::albums.isInitialized
         GlobalScope.launch(Dispatchers.Default) {
-            val albums = getAlbums()
+            if (!isInit) {
+                albums = albumDao.getAll().reversed() as ArrayList<Album>
+            }
             withContext(Dispatchers.Main) {
-                val adapter = context?.let { AlbumAdapter(it, albums, this@LibraryFragment) }
+                val displayedAlbums = albums.toMutableList()
+                if (selectedCategories.isNotEmpty()) {
+                    for (category in selectedCategories) {
+                        displayedAlbums.retainAll(category.albums)
+                    }
+                }
+                val adapter = context?.let { AlbumAdapter(it, displayedAlbums, this@LibraryFragment) }
                 library_albums.adapter = adapter
 
                 if (this@LibraryFragment::state.isInitialized) {
                     Log.d("LibraryFragment", "State restored: $state")
                     library_albums.onRestoreInstanceState(state)
+                }
+            }
+        }
+    }
+
+    private fun displayCategories() {
+        GlobalScope.launch(Dispatchers.Default) {
+            val categories = categoryDao.getAllWithAlbums()
+            withContext(Dispatchers.Main) {
+                category_spinner.adapter = context?.let {
+                    CategorySelectorAdapter(it, categories, this@LibraryFragment)
                 }
             }
         }

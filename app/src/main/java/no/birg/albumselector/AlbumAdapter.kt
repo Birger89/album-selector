@@ -10,7 +10,7 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.library_item.view.*
 import no.birg.albumselector.database.Album
 
-class AlbumAdapter(context: Context, private val albums: ArrayList<Album>, fragment: LibraryFragment) : BaseAdapter() {
+class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fragment: LibraryFragment) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater

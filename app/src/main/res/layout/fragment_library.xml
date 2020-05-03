@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <Spinner
         android:id="@+id/devices"
@@ -12,7 +11,7 @@
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
         android:spinnerMode="dropdown"
-        app:layout_constraintBottom_toTopOf="@+id/library_albums"
+        app:layout_constraintBottom_toTopOf="@+id/category_spinner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -68,5 +67,14 @@
         app:layout_constraintBottom_toTopOf="@+id/library_albums"
         app:layout_constraintEnd_toEndOf="@+id/shuffle_switch"
         app:layout_constraintTop_toBottomOf="@+id/shuffle_switch" />
+
+    <Spinner
+        android:id="@+id/category_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        app:layout_constraintBottom_toTopOf="@+id/library_albums"
+        app:layout_constraintEnd_toEndOf="@+id/devices"
+        app:layout_constraintTop_toBottomOf="@+id/devices" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
