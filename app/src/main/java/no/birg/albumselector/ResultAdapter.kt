@@ -8,6 +8,7 @@ import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.result_item.view.*
+import no.birg.albumselector.database.Album
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -50,15 +51,14 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
         val result = getItem(position) as JSONObject
         val title = result.getString("name")
         val id = result.getString("id")
-        val uri = result.getString("uri")
 
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            mFragment.addAlbum(id, title, uri)
+            mFragment.addAlbum(id, title)
         }
         resultView.setOnClickListener {
-            val album = Album(id, title, uri)
+            val album = Album(id, title)
             mFragment.displayAlbumDetails(album)
         }
 

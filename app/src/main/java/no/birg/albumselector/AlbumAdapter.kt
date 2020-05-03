@@ -8,6 +8,7 @@ import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.library_item.view.*
+import no.birg.albumselector.database.Album
 
 class AlbumAdapter(context: Context, private val albums: ArrayList<Album>, fragment: LibraryFragment) : BaseAdapter() {
 

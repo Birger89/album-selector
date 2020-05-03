@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.*
+import no.birg.albumselector.database.Album
+import no.birg.albumselector.database.AlbumDao
 
 class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
@@ -86,9 +88,9 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
         }
     }
 
-    fun addAlbum(albumID: String, albumTitle: String, spotifyURI: String) {
+    fun addAlbum(albumID: String, albumTitle: String) {
         GlobalScope.launch(Dispatchers.Default) {
-            val album = Album(albumID, albumTitle, spotifyURI)
+            val album = Album(albumID, albumTitle)
             albumDao.insert(album)
         }
     }

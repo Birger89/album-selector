@@ -3,6 +3,8 @@ package no.birg.albumselector
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import no.birg.albumselector.database.AlbumDao
+import no.birg.albumselector.database.AppDatabase
 
 class MainActivity : AppCompatActivity() {
 

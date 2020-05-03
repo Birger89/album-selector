@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.view.*
 import kotlinx.coroutines.*
+import no.birg.albumselector.database.Album
 
 class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 

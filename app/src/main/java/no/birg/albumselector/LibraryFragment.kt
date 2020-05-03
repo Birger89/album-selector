@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import no.birg.albumselector.database.Album
+import no.birg.albumselector.database.AlbumDao
 import kotlin.random.Random
 
 class LibraryFragment : Fragment() {
