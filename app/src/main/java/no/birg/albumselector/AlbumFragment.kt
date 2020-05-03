@@ -6,13 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.bumptech.glide.Glide
+import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
 import kotlinx.coroutines.*
 import no.birg.albumselector.database.Album
+import no.birg.albumselector.database.Category
+import no.birg.albumselector.database.CategoryAlbumCrossRef
+import no.birg.albumselector.database.CategoryWithAlbums
 
 class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 
-    private val mAlbum = album
+    val mAlbum = album
     private val libraryFragment = fragment
     private lateinit var spotifyConnection: SpotifyConnection
 
@@ -34,6 +38,9 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         GlobalScope.launch(Dispatchers.Default) {
             val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
 
+            val categories = (activity as MainActivity).getCategoryDao()
+                                .getAllWithAlbums() as ArrayList<CategoryWithAlbums>
+
             withContext(Dispatchers.Main) {
                 view.artist_name.text =
                     albumDetails.getJSONArray("artists").getJSONObject(0).getString("name")
@@ -45,8 +52,46 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                         .into(view.album_cover)
                 }
                 view.play_button.setOnClickListener { libraryFragment.playAlbum(mAlbum.aid) }
+
+                view.category_listview.adapter = context?.let {
+                    CategoryAdapter(it, categories, this@AlbumFragment)
+                }
+
+                view.add_category_button.setOnClickListener {
+                    addCategory(view.category_name.text.toString())
+                }
             }
         }
         return view
+    }
+
+    private fun addCategory(categoryName: String) {
+        if (categoryName != "") {
+            val category = Category(categoryName)
+            val adapter = category_listview.adapter as CategoryAdapter
+
+            GlobalScope.launch(Dispatchers.Default) {
+                (activity as MainActivity).getCategoryDao().insert(Category(categoryName))
+
+                withContext(Dispatchers.Main) {
+                    adapter.addItem(CategoryWithAlbums(category, mutableListOf()))
+                    adapter.notifyDataSetChanged()
+                }
+            }
+        }
+    }
+
+    fun setCategory(category: Category) {
+        val crossRef = CategoryAlbumCrossRef(category.cid, mAlbum.aid)
+        GlobalScope.launch(Dispatchers.Default) {
+            (activity as MainActivity).getCategoryDao().insertAlbumCrossRef(crossRef)
+        }
+    }
+
+    fun unsetCategory(category: Category) {
+        val crossRef = CategoryAlbumCrossRef(category.cid, mAlbum.aid)
+        GlobalScope.launch(Dispatchers.Default) {
+            (activity as MainActivity).getCategoryDao().deleteAlbumCrossRef(crossRef)
+        }
     }
 }

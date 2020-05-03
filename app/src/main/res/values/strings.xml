@@ -12,6 +12,7 @@
     <string name="queue">Queue</string>
     <string name="library">Library</string>
     <string name="album_cover_image">Album cover</string>
+    <string name="categories">Categories</string>
     <item name="TAG_ID" type="id" />
     <item name="TAG_URI" type="id" />
 </resources>

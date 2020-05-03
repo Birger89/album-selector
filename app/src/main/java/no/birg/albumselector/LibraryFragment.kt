@@ -16,11 +16,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
+import no.birg.albumselector.database.CategoryDao
 import kotlin.random.Random
 
 class LibraryFragment : Fragment() {
 
     private lateinit var albumDao: AlbumDao
+    private lateinit var categoryDao: CategoryDao
     private lateinit var spotifyConnection: SpotifyConnection
 
     private lateinit var state: Parcelable
@@ -32,6 +34,7 @@ class LibraryFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         albumDao = (activity as MainActivity).getAlbumDao()
+        categoryDao = (activity as MainActivity).getCategoryDao()
         spotifyConnection = SpotifyConnection()
     }
 
