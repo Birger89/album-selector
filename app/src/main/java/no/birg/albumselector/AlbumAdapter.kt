@@ -21,7 +21,7 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>, fragm
         return albums.size
     }
 
-    override fun getItem(position: Int): Any {
+    override fun getItem(position: Int): Album {
         return albums[position]
     }
 
@@ -51,7 +51,7 @@ class AlbumAdapter(context: Context, private val albums: ArrayList<Album>, fragm
             holder = convertView.tag as ViewHolder
         }
 
-        val album = getItem(position) as Album
+        val album = getItem(position)
 
         holder.titleTextView.text = album.albumTitle
 

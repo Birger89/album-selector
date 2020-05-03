@@ -105,7 +105,7 @@ class LibraryFragment : Fragment() {
 
     private fun playRandom() {
         val adapter = library_albums.adapter as AlbumAdapter
-        val album = adapter.getItem(Random.nextInt(adapter.count)) as Album
+        val album = adapter.getItem(Random.nextInt(adapter.count))
         displayAlbumDetails(album)
     }
 
