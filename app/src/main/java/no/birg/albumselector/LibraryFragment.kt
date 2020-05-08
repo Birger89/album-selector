@@ -52,7 +52,7 @@ class LibraryFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
         view.search_button.setOnClickListener{ goToSearch() }
-        view.play_random_button.setOnClickListener{ playRandom() }
+        view.play_random_button.setOnClickListener{ displayRandomAlbum() }
         view.queue_switch.setOnCheckedChangeListener { _, isChecked -> queueState = isChecked }
         view.shuffle_switch.setOnCheckedChangeListener { _, isChecked -> shuffleState = isChecked }
         view.devices.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -110,7 +110,7 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun playRandom() {
+    private fun displayRandomAlbum() {
         val adapter = library_albums.adapter as AlbumAdapter
         val album = adapter.getItem(Random.nextInt(adapter.count))
         displayAlbumDetails(album)
