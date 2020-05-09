@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
@@ -72,11 +73,17 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
             val adapter = category_listview.adapter as CategoryAdapter
 
             GlobalScope.launch(Dispatchers.Default) {
-                (activity as MainActivity).getCategoryDao().insert(Category(categoryName))
-
-                withContext(Dispatchers.Main) {
-                    adapter.addItem(CategoryWithAlbums(category, mutableListOf()))
-                    adapter.notifyDataSetChanged()
+                val dao = (activity as MainActivity).getCategoryDao()
+                if (dao.checkRecord(categoryName)) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(activity, "Category already exists", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    dao.insert(Category(categoryName))
+                    withContext(Dispatchers.Main) {
+                        adapter.addItem(CategoryWithAlbums(category, mutableListOf()))
+                        adapter.notifyDataSetChanged()
+                    }
                 }
             }
         }
