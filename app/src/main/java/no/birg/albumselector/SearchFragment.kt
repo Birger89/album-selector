@@ -70,7 +70,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
         val transaction = fragmentManager?.beginTransaction()
 
         if (transaction != null) {
-            transaction.replace(R.id.main_frame, AlbumFragment(album, libraryFragment))
+            transaction.replace(R.id.main_frame, ResultDetailsFragment(album, this))
             transaction.addToBackStack(null)
             transaction.commit()
         } else {
