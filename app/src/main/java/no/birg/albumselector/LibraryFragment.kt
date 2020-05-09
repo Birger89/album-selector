@@ -45,11 +45,6 @@ class LibraryFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        displayAlbums()
-        displayDevices()
-        displayCategories()
-        setShuffleState()
-
         val view = inflater.inflate(R.layout.fragment_library, container, false)
         view.search_button.setOnClickListener{ goToSearch() }
         view.play_random_button.setOnClickListener{ displayRandomAlbum() }
@@ -65,6 +60,15 @@ class LibraryFragment : Fragment() {
         }
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        displayAlbums()
+        displayDevices()
+        displayCategories()
+        setShuffleState()
     }
 
     override fun onPause() {
