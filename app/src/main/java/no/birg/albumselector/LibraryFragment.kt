@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
 import kotlinx.coroutines.Dispatchers
@@ -129,8 +130,14 @@ class LibraryFragment : Fragment() {
     }
 
     fun addAlbum(album: Album) {
-        albumDao.insert(album)
-        albums.add(0, album)
+        if (albumDao.checkRecord(album.aid)) {
+            GlobalScope.launch(Dispatchers.Main) {
+                Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            albumDao.insert(album)
+            albums.add(0, album)
+        }
     }
 
     fun deleteAlbum(album: Album) {

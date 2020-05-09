@@ -11,6 +11,9 @@ interface AlbumDao {
     @Query("SELECT * FROM albums")
     fun getAllWithCategories(): List<AlbumWithCategories>
 
+    @Query("SELECT COUNT(1) FROM albums WHERE aid = :aid")
+    fun checkRecord(aid: String): Boolean
+
     @Insert
     fun insert(album: Album)
 
