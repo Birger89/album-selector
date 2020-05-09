@@ -18,7 +18,6 @@ import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
 import no.birg.albumselector.database.CategoryWithAlbums
-import kotlin.random.Random
 
 class LibraryFragment : Fragment() {
 
@@ -31,6 +30,8 @@ class LibraryFragment : Fragment() {
     private var shuffleState = false
     private var selectedDevice: String = ""
     private lateinit var albums: ArrayList<Album>
+    private lateinit var displayedAlbums: MutableList<Album>
+    private lateinit var shuffledAlbumList: MutableList<Album>
     val selectedCategories: MutableList<CategoryWithAlbums> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,9 +116,13 @@ class LibraryFragment : Fragment() {
     }
 
     private fun displayRandomAlbum() {
-        val adapter = library_albums.adapter as AlbumAdapter
-        val album = adapter.getItem(Random.nextInt(adapter.count))
-        displayAlbumDetails(album)
+        if (displayedAlbums.size != 0) {
+            if (shuffledAlbumList.size == 0) {
+                shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
+            }
+            val album = shuffledAlbumList.removeAt(0)
+            displayAlbumDetails(album)
+        }
     }
 
     fun deleteAlbum(album: Album) {
@@ -143,20 +148,28 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    fun displayAlbums() {
+    fun updateAlbumSelection() {
+        displayedAlbums = albums.toMutableList()
+        if (selectedCategories.isNotEmpty()) {
+            for (category in selectedCategories) {
+                displayedAlbums.retainAll(category.albums)
+            }
+        }
+        shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
+        displayAlbums()
+    }
+
+    private fun displayAlbums() {
         val isInit = this::albums.isInitialized
         GlobalScope.launch(Dispatchers.Default) {
             if (!isInit) {
                 albums = albumDao.getAll().reversed() as ArrayList<Album>
+                displayedAlbums = albums
+                shuffledAlbumList = albums.shuffled() as MutableList<Album>
             }
+            val adapter = context?.let { AlbumAdapter(it, displayedAlbums, this@LibraryFragment) }
+
             withContext(Dispatchers.Main) {
-                val displayedAlbums = albums.toMutableList()
-                if (selectedCategories.isNotEmpty()) {
-                    for (category in selectedCategories) {
-                        displayedAlbums.retainAll(category.albums)
-                    }
-                }
-                val adapter = context?.let { AlbumAdapter(it, displayedAlbums, this@LibraryFragment) }
                 library_albums.adapter = adapter
 
                 if (this@LibraryFragment::state.isInitialized) {
