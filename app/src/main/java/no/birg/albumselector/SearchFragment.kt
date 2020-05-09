@@ -10,11 +10,9 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.*
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.database.AlbumDao
 
 class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
-    private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
 
     private val libraryFragment = fragment
@@ -24,7 +22,6 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        albumDao = (activity as MainActivity).getAlbumDao()
         spotifyConnection = SpotifyConnection()
     }
 
@@ -91,7 +88,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
     fun addAlbum(albumID: String, albumTitle: String) {
         GlobalScope.launch(Dispatchers.Default) {
             val album = Album(albumID, albumTitle)
-            albumDao.insert(album)
+            libraryFragment.addAlbum(album)
         }
     }
 }

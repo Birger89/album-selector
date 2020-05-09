@@ -125,6 +125,11 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    fun addAlbum(album: Album) {
+        albumDao.insert(album)
+        albums.add(0, album)
+    }
+
     fun deleteAlbum(album: Album) {
         val adapter = library_albums.adapter as AlbumAdapter
         GlobalScope.launch(Dispatchers.Default) {
