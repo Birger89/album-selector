@@ -14,6 +14,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import no.birg.albumselector.adapters.AlbumAdapter
+import no.birg.albumselector.adapters.CategorySelectorAdapter
+import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
@@ -172,7 +175,9 @@ class LibraryFragment : Fragment() {
                 displayedAlbums = albums
                 shuffledAlbumList = albums.shuffled() as MutableList<Album>
             }
-            val adapter = context?.let { AlbumAdapter(it, displayedAlbums, this@LibraryFragment) }
+            val adapter = context?.let {
+                AlbumAdapter(it, displayedAlbums, this@LibraryFragment)
+            }
 
             withContext(Dispatchers.Main) {
                 library_albums.adapter = adapter

@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import kotlinx.android.synthetic.main.device_item.view.*
+import no.birg.albumselector.R
 
 class DeviceAdapter(context: Context, private val devices: MutableList<Pair<String, String>>) : BaseAdapter() {
 

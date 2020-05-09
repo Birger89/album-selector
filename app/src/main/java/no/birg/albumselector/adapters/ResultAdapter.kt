@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,6 +8,8 @@ import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
 import kotlinx.android.synthetic.main.result_item.view.*
+import no.birg.albumselector.R
+import no.birg.albumselector.SearchFragment
 import no.birg.albumselector.database.Album
 import org.json.JSONArray
 import org.json.JSONObject

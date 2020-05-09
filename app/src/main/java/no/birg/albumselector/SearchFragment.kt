@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.*
+import no.birg.albumselector.adapters.ResultAdapter
 import no.birg.albumselector.database.Album
 
 class SearchFragment(fragment: LibraryFragment) : Fragment() {
@@ -54,7 +55,9 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
             if (query != "") {
                 val results = spotifyConnection.search(search_field.text.toString())
                 withContext(Dispatchers.Main) {
-                    val adapter = context?.let { ResultAdapter(it, results, this@SearchFragment) }
+                    val adapter = context?.let {
+                        ResultAdapter(it, results, this@SearchFragment)
+                    }
                     search_results.adapter = adapter
                 }
             } else {
