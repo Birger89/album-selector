@@ -40,6 +40,7 @@ class LibraryFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
 
         albumDao = (activity as MainActivity).getAlbumDao()
         categoryDao = (activity as MainActivity).getCategoryDao()
@@ -79,6 +80,13 @@ class LibraryFragment : Fragment() {
     override fun onPause() {
         state = library_albums.onSaveInstanceState()!!
         super.onPause()
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        val item = menu.findItem(R.id.home_button)
+        if (item != null) {
+            item.isVisible = false
+        }
     }
 
     private fun goToSearch() {
