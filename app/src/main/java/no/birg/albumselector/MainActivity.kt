@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         setContentView(R.layout.activity_main)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         val transaction = supportFragmentManager.beginTransaction()
         transaction.add(R.id.main_frame, LibraryFragment())
