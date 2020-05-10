@@ -54,6 +54,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                         .into(view.album_cover)
                 }
                 view.play_button.setOnClickListener { libraryFragment.playAlbum(mAlbum.aid) }
+                view.next_random_button.setOnClickListener { libraryFragment.displayRandomAlbum() }
 
                 view.category_listview.adapter = context?.let {
                     CategoryAdapter(it, categories, this@AlbumFragment)

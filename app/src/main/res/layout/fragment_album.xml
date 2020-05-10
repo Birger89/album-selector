@@ -52,7 +52,7 @@
         android:layout_marginBottom="16dp"
         android:text="@string/play_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/next_random_button" />
 
     <ListView
         android:id="@+id/category_listview"
@@ -102,5 +102,16 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/add_category_button"
         app:layout_constraintStart_toEndOf="@+id/category_header"
         android:importantForAutofill="no" />
+
+    <Button
+        android:id="@+id/next_random_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/play_random"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

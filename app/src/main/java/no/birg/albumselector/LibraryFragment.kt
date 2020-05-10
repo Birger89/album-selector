@@ -119,7 +119,7 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun displayRandomAlbum() {
+    fun displayRandomAlbum() {
         if (displayedAlbums.size != 0) {
             if (shuffledAlbumList.size == 0) {
                 shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
