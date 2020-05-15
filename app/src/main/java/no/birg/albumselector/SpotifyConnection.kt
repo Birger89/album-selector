@@ -177,21 +177,19 @@ class SpotifyConnection : Activity() {
 
     }
 
-    fun queueSong(songID: String, deviceID: String) {
+    fun queueSong(songID: String, deviceID: String) = runBlocking {
         val songURI = "spotify:track:$songID"
         val queueURL =
             URL("https://api.spotify.com/v1/me/player/queue?uri=$songURI&device_id=$deviceID")
 
-        GlobalScope.launch(Dispatchers.Default) {
-            val connection =
-                withContext(Dispatchers.IO) { queueURL.openConnection() as HttpsURLConnection }
-            connection.requestMethod = "POST"
-            connection.setRequestProperty(
-                "Authorization", "Bearer ${SpotifyToken.getToken()}"
-            )
-            connection.responseCode
-            connection.disconnect()
-        }
+        val connection =
+            withContext(Dispatchers.IO) { queueURL.openConnection() as HttpsURLConnection }
+        connection.requestMethod = "POST"
+        connection.setRequestProperty(
+            "Authorization", "Bearer ${SpotifyToken.getToken()}"
+        )
+        connection.responseCode
+        connection.disconnect()
     }
 
     fun fetchShuffleState() : Boolean = runBlocking {
