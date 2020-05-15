@@ -30,8 +30,8 @@ class LibraryFragment : Fragment() {
     private lateinit var spotifyConnection: SpotifyConnection
 
     private lateinit var state: Parcelable
-    private var queueState = false
-    private var shuffleState = false
+    var queueState = false
+    var shuffleState = false
     private var selectedDevice: String = ""
     private lateinit var albums: ArrayList<Album>
     private lateinit var displayedAlbums: MutableList<Album>
@@ -45,6 +45,8 @@ class LibraryFragment : Fragment() {
         albumDao = (activity as MainActivity).getAlbumDao()
         categoryDao = (activity as MainActivity).getCategoryDao()
         spotifyConnection = SpotifyConnection()
+
+        setShuffleState()
     }
 
     override fun onCreateView(
@@ -54,8 +56,6 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
         view.search_button.setOnClickListener{ goToSearch() }
         view.display_random_button.setOnClickListener{ displayRandomAlbum() }
-        view.queue_switch.setOnCheckedChangeListener { _, isChecked -> queueState = isChecked }
-        view.shuffle_switch.setOnCheckedChangeListener { _, isChecked -> shuffleState = isChecked }
         view.devices.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 if (parent != null) {
@@ -74,7 +74,6 @@ class LibraryFragment : Fragment() {
         displayAlbums()
         displayDevices()
         displayCategories()
-        setShuffleState()
     }
 
     override fun onPause() {
@@ -230,10 +229,7 @@ class LibraryFragment : Fragment() {
 
     private fun setShuffleState() {
         GlobalScope.launch(Dispatchers.Default) {
-            val shuffleState = spotifyConnection.fetchShuffleState()
-            withContext(Dispatchers.Main) {
-                shuffle_switch.isChecked = shuffleState
-            }
+            shuffleState = spotifyConnection.fetchShuffleState()
         }
     }
 }

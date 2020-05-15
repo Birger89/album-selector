@@ -37,6 +37,9 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         val view = inflater.inflate(R.layout.fragment_album, container, false)
         view.album_title.text = mAlbum.albumTitle
 
+        view.shuffle_switch.isChecked = libraryFragment.shuffleState
+        view.queue_switch.isChecked = libraryFragment.queueState
+
         GlobalScope.launch(Dispatchers.Default) {
             val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
 
@@ -55,6 +58,8 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                 }
                 view.play_button.setOnClickListener { libraryFragment.playAlbum(mAlbum.aid) }
                 view.next_random_button.setOnClickListener { libraryFragment.displayRandomAlbum() }
+                view.queue_switch.setOnCheckedChangeListener { _, isChecked -> libraryFragment.queueState = isChecked }
+                view.shuffle_switch.setOnCheckedChangeListener { _, isChecked -> libraryFragment.shuffleState = isChecked }
 
                 view.category_listview.adapter = context?.let {
                     CategoryAdapter(it, categories, this@AlbumFragment)
