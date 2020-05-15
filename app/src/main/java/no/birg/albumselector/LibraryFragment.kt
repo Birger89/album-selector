@@ -118,6 +118,9 @@ class LibraryFragment : Fragment() {
         if (selectedDevice != "") {
             GlobalScope.launch(Dispatchers.Default) {
                 val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
+                if (shuffleState) {
+                    trackIDs.shuffle()
+                }
                 for (trackID in trackIDs) {
                     spotifyConnection.queueSong(trackID, selectedDevice)
                 }
