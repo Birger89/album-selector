@@ -51,6 +51,7 @@ class ResultDetailsFragment(private val albumID: String,
 
             view.add_button.setOnClickListener {
                 searchFragment.addAlbum(albumID, albumTitle, albumArtist)
+                context?.let { view.add_button.setTextColor(ContextCompat.getColor(it, R.color.spotifyGreen)) }
             }
 
             GlobalScope.launch(Dispatchers.Default) {
