@@ -36,6 +36,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
         view.album_title.text = mAlbum.title
+        view.artist_name.text = mAlbum.artistName
 
         view.shuffle_switch.isChecked = libraryFragment.shuffleState
         view.queue_switch.isChecked = libraryFragment.queueState
@@ -47,8 +48,6 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                                 .getAllWithAlbums() as ArrayList<CategoryWithAlbums>
 
             withContext(Dispatchers.Main) {
-                view.artist_name.text =
-                    albumDetails.getJSONArray("artists").getJSONObject(0).getString("name")
 
                 val imageUrl = albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
                 if (!imageUrl.isNullOrEmpty()) {
