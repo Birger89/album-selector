@@ -66,11 +66,11 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
         }
     }
 
-    fun displayAlbumDetails(album: Album) {
+    fun displayAlbumDetails(aid: String, title: String, artist: String) {
         val transaction = fragmentManager?.beginTransaction()
 
         if (transaction != null) {
-            transaction.replace(R.id.main_frame, ResultDetailsFragment(album, this))
+            transaction.replace(R.id.main_frame, ResultDetailsFragment(aid, title, artist, this))
             transaction.addToBackStack(null)
             transaction.commit()
         } else {
@@ -88,9 +88,10 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
         }
     }
 
-    fun addAlbum(albumID: String, albumTitle: String) {
+    fun addAlbum(id: String, title: String, artistName: String) {
         GlobalScope.launch(Dispatchers.Default) {
-            val album = Album(albumID, albumTitle)
+            val durationMS = spotifyConnection.fetchAlbumDurationMS(id)
+            val album = Album(id, title, artistName, durationMS)
             libraryFragment.addAlbum(album)
         }
     }

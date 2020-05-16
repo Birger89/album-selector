@@ -204,7 +204,7 @@ class LibraryFragment : Fragment() {
             }
         }
         displayedAlbums.retainAll { album ->
-            (album.albumTitle?.contains(filter_text.text, ignoreCase = true) == true)
+            (album.title?.contains(filter_text.text, ignoreCase = true) == true)
         }
         shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
         displayAlbums()

@@ -5,7 +5,9 @@ import androidx.room.*
 @Entity(tableName = "albums")
 data class Album(
     @PrimaryKey val aid: String,
-    @ColumnInfo(name = "album_title") val albumTitle: String?
+    val title: String?,
+    @ColumnInfo(name = "artist_name") val artistName: String?,
+    @ColumnInfo(name = "duration_ms", defaultValue = "0") val durationMS: Int
 )
 
 data class AlbumWithCategories(

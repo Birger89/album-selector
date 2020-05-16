@@ -21,10 +21,12 @@ class DatabaseTest {
 
     private val TEST_AID = "test_aid"
     private val TEST_TITLE = "test_title"
+    private val TEST_ARTIST = "test_artist"
+    private val TEST_DURATION = 60000 // One minute
     private val TEST_CID = "test_cid"
 
     private fun getTestAlbum() : Album {
-        return Album(TEST_AID, TEST_TITLE)
+        return Album(TEST_AID, TEST_TITLE, TEST_ARTIST, TEST_DURATION)
     }
     private fun getTestCategory() : Category {
         return Category(TEST_CID)

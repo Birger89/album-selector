@@ -177,6 +177,34 @@ class SpotifyConnection : Activity() {
 
     }
 
+    fun fetchAlbumDurationMS(albumID: String) : Int = runBlocking {
+        val albumURL = URL("https://api.spotify.com/v1/albums/$albumID/tracks?limit=50")
+
+        val connection =
+            withContext(Dispatchers.IO) { albumURL.openConnection() as HttpsURLConnection }
+        connection.requestMethod = "GET"
+        connection.setRequestProperty("Authorization", "Bearer ${SpotifyToken.getToken()}")
+
+        val responseCode = connection.responseCode
+        if (responseCode == 200) {
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
+            val tracksJSON = JSONObject(response).getJSONArray("items")
+
+            var durationMS = 0
+            for (i in 0 until tracksJSON.length()) {
+                durationMS += tracksJSON.getJSONObject(i).getInt("duration_ms")
+            }
+            connection.disconnect()
+            Log.d("SpotifyConnection", "Duration fetched: $durationMS")
+            durationMS
+        } else {
+            connection.disconnect()
+
+            Log.e("SpotifyConnection", "No duration was received")
+            0
+        }
+    }
+
     fun queueSong(songID: String, deviceID: String) = runBlocking {
         val songURI = "spotify:track:$songID"
         val queueURL =

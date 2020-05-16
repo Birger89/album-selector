@@ -8,7 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import no.birg.albumselector.*
 
-@Database(entities = [Album::class, Category::class, CategoryAlbumCrossRef::class], version = 2)
+@Database(entities = [Album::class, Category::class, CategoryAlbumCrossRef::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun albumDao(): AlbumDao
     abstract fun categoryDao(): CategoryDao
@@ -32,7 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
             return Room.databaseBuilder(context, AppDatabase::class.java,
                 Constants.DATABASE_NAME
             )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
         }
     }
@@ -47,5 +47,18 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         database.execSQL("CREATE TABLE albums (aid TEXT PRIMARY KEY NOT NULL, album_title TEXT)")
         database.execSQL("INSERT INTO albums (aid, album_title) SELECT aid, album_title FROM Album")
         database.execSQL("DROP TABLE Album")
+    }
+}
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        // Rename album_title to just title
+        database.execSQL("CREATE TABLE albums_new (aid TEXT PRIMARY KEY NOT NULL, title TEXT)")
+        database.execSQL("INSERT INTO albums_new (aid, title) SELECT aid, album_title FROM albums")
+        database.execSQL("DROP TABLE albums")
+        database.execSQL("ALTER TABLE albums_new RENAME TO albums")
+
+        database.execSQL("ALTER TABLE albums ADD COLUMN artist_name TEXT")
+        database.execSQL("ALTER TABLE albums ADD COLUMN duration_ms INTEGER DEFAULT 0 NOT NULL")
     }
 }

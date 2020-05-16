@@ -11,9 +11,11 @@ import kotlinx.android.synthetic.main.fragment_result_details.view.*
 import kotlinx.coroutines.*
 import no.birg.albumselector.database.Album
 
-class ResultDetailsFragment(album: Album, fragment: SearchFragment) : Fragment() {
+class ResultDetailsFragment(private val albumID: String,
+                            private val albumTitle: String,
+                            private val albumArtist: String,
+                            fragment: SearchFragment) : Fragment() {
 
-    private val mAlbum = album
     private val searchFragment = fragment
     private lateinit var spotifyConnection: SpotifyConnection
 
@@ -30,10 +32,10 @@ class ResultDetailsFragment(album: Album, fragment: SearchFragment) : Fragment()
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_result_details, container, false)
-        view.album_title.text = mAlbum.albumTitle
+        view.album_title.text = albumTitle
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
+            val albumDetails = spotifyConnection.fetchAlbumDetails(albumID)
 
             withContext(Dispatchers.Main) {
                 view.artist_name.text =
@@ -47,10 +49,12 @@ class ResultDetailsFragment(album: Album, fragment: SearchFragment) : Fragment()
                 }
             }
 
-            view.add_button.setOnClickListener { searchFragment.addAlbum(mAlbum.aid, mAlbum.albumTitle.toString()) }
+            view.add_button.setOnClickListener {
+                searchFragment.addAlbum(albumID, albumTitle, albumArtist)
+            }
 
             GlobalScope.launch(Dispatchers.Default) {
-                if (searchFragment.checkRecord(mAlbum.aid)) {
+                if (searchFragment.checkRecord(albumID)) {
                     withContext(Dispatchers.Main) {
                         context?.let { view.add_button.setTextColor(ContextCompat.getColor(it, R.color.spotifyGreen)) }
                     }

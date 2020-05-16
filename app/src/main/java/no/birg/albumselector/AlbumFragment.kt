@@ -35,7 +35,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
-        view.album_title.text = mAlbum.albumTitle
+        view.album_title.text = mAlbum.title
 
         view.shuffle_switch.isChecked = libraryFragment.shuffleState
         view.queue_switch.isChecked = libraryFragment.queueState

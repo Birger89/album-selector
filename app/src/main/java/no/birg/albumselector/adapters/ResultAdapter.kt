@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.SearchFragment
-import no.birg.albumselector.database.Album
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -60,10 +59,19 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
         val title = result.getString("name")
         val id = result.getString("id")
 
+        var artistName = "No Artist Info"
+        val artists = result.getJSONArray("artists")
+        if (artists.length() == 1) {
+            val artist = artists.getJSONObject(0)
+            artistName = artist.getString("name")
+        } else if (artists.length() > 1) {
+            artistName = "Several Artists"
+        }
+
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            mFragment.addAlbum(id, title)
+            mFragment.addAlbum(id, title, artistName)
             holder.addButton.setTextColor(ContextCompat.getColor(mContext, R.color.spotifyGreen))
         }
 
@@ -79,8 +87,7 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
         }
 
         resultView.setOnClickListener {
-            val album = Album(id, title)
-            mFragment.displayAlbumDetails(album)
+            mFragment.displayAlbumDetails(id, title, artistName)
         }
 
         return resultView

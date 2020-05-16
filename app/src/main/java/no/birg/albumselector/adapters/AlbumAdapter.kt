@@ -55,7 +55,7 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
 
         val album = getItem(position)
 
-        holder.titleTextView.text = album.albumTitle
+        holder.titleTextView.text = album.title
 
         holder.playButton.setOnClickListener {
             mFragment.playAlbum(album.aid)
