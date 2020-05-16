@@ -43,6 +43,7 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
             albumView = inflater.inflate(R.layout.library_item, parent, false)
 
             holder = ViewHolder()
+            holder.artistTextView = albumView.artist_name as TextView
             holder.titleTextView = albumView.album_title as TextView
             holder.playButton = albumView.play_button as Button
             holder.removeButtor = albumView.remove_button as Button
@@ -56,6 +57,7 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
         val album = getItem(position)
 
         holder.titleTextView.text = album.title
+        holder.artistTextView.text = album.artistName
 
         holder.playButton.setOnClickListener {
             mFragment.playAlbum(album.aid)
@@ -72,6 +74,7 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
 
     private class ViewHolder {
         lateinit var titleTextView: TextView
+        lateinit var artistTextView: TextView
         lateinit var playButton: Button
         lateinit var removeButtor: Button
     }

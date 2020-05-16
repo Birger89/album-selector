@@ -8,13 +8,14 @@
 
     <TextView
         android:id="@+id/album_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
+        android:singleLine="true"
         android:text="@string/empty_string"
-        app:layout_constraintBaseline_toBaselineOf="@+id/play_button"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/artist_name"
+        app:layout_constraintStart_toStartOf="@+id/artist_name"
+        app:layout_constraintTop_toBottomOf="@+id/artist_name"
         tools:text="Album Title" />
 
     <Button
@@ -39,5 +40,20 @@
         android:text="@string/remove_button"
         app:layout_constraintBaseline_toBaselineOf="@+id/play_button"
         app:layout_constraintEnd_toStartOf="@+id/play_button" />
+
+    <TextView
+        android:id="@+id/artist_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:singleLine="true"
+        android:text="@string/artist_name"
+        app:layout_constraintBottom_toTopOf="@+id/album_title"
+        app:layout_constraintEnd_toStartOf="@+id/remove_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
