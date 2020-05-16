@@ -205,7 +205,8 @@ class LibraryFragment : Fragment() {
             }
         }
         displayedAlbums.retainAll { album ->
-            (album.title?.contains(filter_text.text, ignoreCase = true) == true)
+            val artistAndTitle = "${album.artistName} ${album.title}"
+            artistAndTitle.contains(filter_text.text, ignoreCase = true)
         }
         shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
         displayAlbums()
