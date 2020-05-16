@@ -5,10 +5,8 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_library.*
@@ -72,6 +70,18 @@ class LibraryFragment : Fragment() {
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) { }
+        }
+        view.delete_selected_categories.setOnClickListener {
+            GlobalScope.launch(Dispatchers.Default) {
+                for (cat in selectedCategories) {
+                    categoryDao.delete(cat.category)
+                    selectedCategories.remove(cat)
+                }
+                withContext(Dispatchers.Main) {
+                    displayCategories()
+                    updateAlbumSelection()
+                }
+            }
         }
 
         return view
