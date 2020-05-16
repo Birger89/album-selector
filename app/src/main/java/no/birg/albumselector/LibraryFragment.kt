@@ -2,6 +2,8 @@ package no.birg.albumselector
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -56,6 +58,13 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
         view.search_button.setOnClickListener{ goToSearch() }
         view.display_random_button.setOnClickListener{ displayRandomAlbum() }
+        view.filter_text.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                updateAlbumSelection()
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+        })
         view.devices.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 if (parent != null) {
@@ -179,6 +188,9 @@ class LibraryFragment : Fragment() {
             for (category in selectedCategories) {
                 displayedAlbums.retainAll(category.albums)
             }
+        }
+        displayedAlbums.retainAll { album ->
+            (album.albumTitle?.contains(filter_text.text, ignoreCase = true) == true)
         }
         shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
         displayAlbums()
