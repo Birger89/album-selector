@@ -19,6 +19,18 @@ class DatabaseTest {
     private lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
 
+    private val TEST_AID = "test_aid"
+    private val TEST_TITLE = "test_title"
+    private val TEST_CID = "test_cid"
+
+    private fun getTestAlbum() : Album {
+        return Album(TEST_AID, TEST_TITLE)
+    }
+    private fun getTestCategory() : Category {
+        return Category(TEST_CID)
+    }
+
+
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -37,7 +49,7 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun addAndDeleteAlbum() {
-        val album = Album("test_id", "test_title")
+        val album = getTestAlbum()
         albumDao.insert(album)
         assertEquals(album, albumDao.getAll()[0])
 
@@ -48,7 +60,7 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun addAndDeleteCategory() {
-        val category = Category("test_id")
+        val category = getTestCategory()
         categoryDao.insert(category)
         assertEquals(category, categoryDao.getAll()[0])
 
@@ -59,18 +71,16 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun addAndDeleteRelation() {
-        val testAid = "test_aid"
-        val testCid = "test_cid"
-        albumDao.insert(Album(testAid, "test_title"))
-        categoryDao.insert(Category(testCid))
-        categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(testCid, testAid))
+        albumDao.insert(getTestAlbum())
+        categoryDao.insert(getTestCategory())
+        categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
         val album = albumDao.getAllWithCategories()[0]
         val category = categoryDao.getAllWithAlbums()[0]
-        assertEquals(testCid, album.categories[0].cid)
-        assertEquals(testAid, category.albums[0].aid)
+        assertEquals(TEST_CID, album.categories[0].cid)
+        assertEquals(TEST_AID, category.albums[0].aid)
 
-        categoryDao.deleteAlbumCrossRef(CategoryAlbumCrossRef(testCid, testAid))
+        categoryDao.deleteAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
         assertEquals(0, categoryDao.getAllWithAlbums()[0].albums.size)
         assertEquals(0, albumDao.getAllWithCategories()[0].categories.size)
     }
@@ -78,14 +88,11 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun removeAlbumWithRelation() {
-        val testAid = "test_aid"
-        val testTitle = "test_title"
-        val testCid = "test_cid"
-        albumDao.insert(Album(testAid, testTitle))
-        categoryDao.insert(Category(testCid))
-        categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(testCid, testAid))
+        albumDao.insert(getTestAlbum())
+        categoryDao.insert(getTestCategory())
+        categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
-        albumDao.delete(Album(testAid, testTitle))
+        albumDao.delete(getTestAlbum())
         assertEquals(1, categoryDao.getAll().size)
         assertEquals(0, categoryDao.getAllWithAlbums()[0].albums.size)
     }
@@ -93,14 +100,11 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun removeCategoryWithRelation() {
-        val testAid = "test_aid"
-        val testTitle = "test_title"
-        val testCid = "test_cid"
-        albumDao.insert(Album(testAid, testTitle))
-        categoryDao.insert(Category(testCid))
-        categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(testCid, testAid))
+        albumDao.insert(getTestAlbum())
+        categoryDao.insert(getTestCategory())
+        categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
-        categoryDao.delete(Category(testCid))
+        categoryDao.delete(getTestCategory())
         assertEquals(1, albumDao.getAll().size)
         assertEquals(0, albumDao.getAllWithCategories()[0].categories.size)
     }
