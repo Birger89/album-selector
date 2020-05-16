@@ -178,6 +178,7 @@ class LibraryFragment : Fragment() {
         GlobalScope.launch(Dispatchers.Default) {
             albumDao.delete(album)
             withContext(Dispatchers.Main) {
+                albums.remove(album)
                 adapter.removeItem(album)
                 adapter.notifyDataSetChanged()
             }
