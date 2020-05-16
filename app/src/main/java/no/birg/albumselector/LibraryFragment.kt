@@ -159,6 +159,10 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    fun checkRecord(albumID: String) : Boolean {
+        return albumDao.checkRecord(albumID)
+    }
+
     fun deleteAlbum(album: Album) {
         val adapter = library_albums.adapter as AlbumAdapter
         GlobalScope.launch(Dispatchers.Default) {

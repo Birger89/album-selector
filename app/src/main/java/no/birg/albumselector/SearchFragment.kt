@@ -94,4 +94,8 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
             libraryFragment.addAlbum(album)
         }
     }
+
+    fun checkRecord(albumID: String) : Boolean {
+        return libraryFragment.checkRecord(albumID)
+    }
 }

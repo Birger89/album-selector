@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_result_details.view.*
 import kotlinx.coroutines.*
@@ -47,6 +48,14 @@ class ResultDetailsFragment(album: Album, fragment: SearchFragment) : Fragment()
             }
 
             view.add_button.setOnClickListener { searchFragment.addAlbum(mAlbum.aid, mAlbum.albumTitle.toString()) }
+
+            GlobalScope.launch(Dispatchers.Default) {
+                if (searchFragment.checkRecord(mAlbum.aid)) {
+                    withContext(Dispatchers.Main) {
+                        context?.let { view.add_button.setTextColor(ContextCompat.getColor(it, R.color.spotifyGreen)) }
+                    }
+                }
+            }
         }
         return view
     }

@@ -7,7 +7,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.result_item.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.SearchFragment
 import no.birg.albumselector.database.Album
@@ -20,6 +25,7 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     private val mFragment: SearchFragment = fragment
+    private val mContext = context
 
     override fun getCount(): Int {
         return results.length()
@@ -58,7 +64,20 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
 
         holder.addButton.setOnClickListener {
             mFragment.addAlbum(id, title)
+            holder.addButton.setTextColor(ContextCompat.getColor(mContext, R.color.spotifyGreen))
         }
+
+        GlobalScope.launch(Dispatchers.Default) {
+            val inLibrary = mFragment.checkRecord(id)
+            withContext(Dispatchers.Main) {
+                if (inLibrary) {
+                    holder.addButton.setTextColor(ContextCompat.getColor(mContext, R.color.spotifyGreen))
+                } else {
+                    holder.addButton.setTextColor(ContextCompat.getColor(mContext, android.R.color.white))
+                }
+            }
+        }
+
         resultView.setOnClickListener {
             val album = Album(id, title)
             mFragment.displayAlbumDetails(album)
