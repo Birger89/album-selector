@@ -11,6 +11,9 @@ interface CategoryDao {
     @Query("SELECT * FROM categories")
     fun getAllWithAlbums(): List<CategoryWithAlbums>
 
+    @Query("SELECT * FROM categories WHERE cid = :cid")
+    fun getCategoryByID(cid: String): CategoryWithAlbums
+
     @Query("SELECT COUNT(1) FROM categories WHERE cid = :cid")
     fun checkRecord(cid: String): Boolean
 

@@ -18,7 +18,7 @@ import no.birg.albumselector.database.CategoryWithAlbums
 
 class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 
-    val mAlbum = album
+    var mAlbum = album
     private val libraryFragment = fragment
     private lateinit var spotifyConnection: SpotifyConnection
 
@@ -35,6 +35,20 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
     ): View? {
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
+
+        if (mAlbum.title == null || mAlbum.artistName == null || mAlbum.durationMS == 0) {
+            GlobalScope.launch(Dispatchers.Default) {
+                libraryFragment.refreshAlbum(mAlbum.aid)
+
+                val album = libraryFragment.albumDao.getByID(mAlbum.aid)
+
+                withContext(Dispatchers.Main) {
+                    view.album_title.text = album.title
+                    view.artist_name.text = album.artistName
+                }
+            }
+        }
+
         view.album_title.text = mAlbum.title
         view.artist_name.text = mAlbum.artistName
 

@@ -7,6 +7,9 @@ interface AlbumDao {
     @Query("SELECT * FROM albums")
     fun getAll(): List<Album>
 
+    @Query("SELECT * FROM albums WHERE aid = :aid")
+    fun getByID(aid: String): Album
+
     @Transaction
     @Query("SELECT * FROM albums")
     fun getAllWithCategories(): List<AlbumWithCategories>
@@ -19,4 +22,7 @@ interface AlbumDao {
 
     @Delete
     fun delete(album: Album)
+
+    @Update
+    fun update(album: Album)
 }

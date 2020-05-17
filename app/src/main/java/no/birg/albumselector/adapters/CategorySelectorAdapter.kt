@@ -56,9 +56,11 @@ class CategorySelectorAdapter(context: Context, private val categories: List<Cat
             if (isChecked) {
                 mFragment.selectedCategories.add(category)
                 mFragment.updateAlbumSelection()
+                mFragment.displayAlbums()
             } else {
                 mFragment.selectedCategories.remove(category)
                 mFragment.updateAlbumSelection()
+                mFragment.displayAlbums()
             }
         }
 

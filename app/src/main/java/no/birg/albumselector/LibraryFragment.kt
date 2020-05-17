@@ -11,10 +11,7 @@ import android.widget.AdapterView
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import no.birg.albumselector.adapters.AlbumAdapter
 import no.birg.albumselector.adapters.CategorySelectorAdapter
 import no.birg.albumselector.adapters.DeviceAdapter
@@ -25,7 +22,7 @@ import no.birg.albumselector.database.CategoryWithAlbums
 
 class LibraryFragment : Fragment() {
 
-    private lateinit var albumDao: AlbumDao
+    lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
     private lateinit var spotifyConnection: SpotifyConnection
 
@@ -33,6 +30,7 @@ class LibraryFragment : Fragment() {
     var queueState = false
     var shuffleState = false
     private var selectedDevice: String = ""
+    private var filterText: String = ""
     private lateinit var albums: ArrayList<Album>
     private lateinit var displayedAlbums: MutableList<Album>
     private lateinit var shuffledAlbumList: MutableList<Album>
@@ -58,7 +56,9 @@ class LibraryFragment : Fragment() {
         view.display_random_button.setOnClickListener{ displayRandomAlbum() }
         view.filter_text.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
+                filterText = filter_text.text.toString()
                 updateAlbumSelection()
+                displayAlbums()
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
@@ -80,6 +80,7 @@ class LibraryFragment : Fragment() {
                 withContext(Dispatchers.Main) {
                     displayCategories()
                     updateAlbumSelection()
+                    displayAlbums()
                 }
             }
         }
@@ -169,6 +170,31 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    fun refreshAlbum(albumID: String) = runBlocking {
+        if (checkRecord(albumID)) {
+            val details = spotifyConnection.fetchAlbumDetails(albumID)
+            val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
+
+            val albumTitle = details.getString("name")
+
+            var artistName = "No Artist Info"
+            val artists = details.getJSONArray("artists")
+            if (artists.length() == 1) {
+                val artist = artists.getJSONObject(0)
+                artistName = artist.getString("name")
+            } else if (artists.length() > 1) {
+                artistName = "Several Artists"
+            }
+
+            val album = Album(albumID, albumTitle, artistName, durationMS)
+            albumDao.update(album)
+
+            albums = albumDao.getAll().reversed() as ArrayList<Album>
+            updateCategories()
+            updateAlbumSelection()
+        }
+    }
+
     fun checkRecord(albumID: String) : Boolean {
         return albumDao.checkRecord(albumID)
     }
@@ -206,13 +232,20 @@ class LibraryFragment : Fragment() {
         }
         displayedAlbums.retainAll { album ->
             val artistAndTitle = "${album.artistName} ${album.title}"
-            artistAndTitle.contains(filter_text.text, ignoreCase = true)
+            artistAndTitle.contains(filterText, ignoreCase = true)
         }
         shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
-        displayAlbums()
     }
 
-    private fun displayAlbums() {
+    private fun updateCategories() {
+        val oldCategories = selectedCategories.toList()
+        selectedCategories.clear()
+        for (c in oldCategories) {
+            selectedCategories.add(categoryDao.getCategoryByID(c.category.cid))
+        }
+    }
+
+    fun displayAlbums() {
         val isInit = this::albums.isInitialized
         GlobalScope.launch(Dispatchers.Default) {
             if (!isInit) {
