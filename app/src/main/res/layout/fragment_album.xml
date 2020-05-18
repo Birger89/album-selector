@@ -23,9 +23,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
         android:singleLine="true"
         android:text="@string/empty_string"
-        app:layout_constraintEnd_toEndOf="@+id/album_title"
+        app:layout_constraintEnd_toStartOf="@+id/album_duration"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="@+id/album_title"
         app:layout_constraintTop_toBottomOf="@+id/album_title"
         tools:text="Artist name" />
@@ -135,5 +138,14 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/shuffle_switch"
         app:layout_constraintTop_toBottomOf="@+id/shuffle_switch" />
+
+    <TextView
+        android:id="@+id/album_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/empty_string"
+        app:layout_constraintBaseline_toBaselineOf="@+id/artist_name"
+        app:layout_constraintEnd_toEndOf="@+id/album_title"
+        tools:text="1 hr 10 min" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

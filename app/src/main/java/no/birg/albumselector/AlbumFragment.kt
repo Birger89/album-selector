@@ -46,6 +46,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                 withContext(Dispatchers.Main) {
                     view.album_title.text = album.title
                     view.artist_name.text = album.artistName
+                    view.album_duration.text = toHoursAndMinutes(album.durationMS)
                 }
             }
         }
@@ -132,5 +133,17 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         GlobalScope.launch(Dispatchers.Default) {
             (activity as MainActivity).getCategoryDao().deleteAlbumCrossRef(crossRef)
         }
+    }
+
+    private fun toHoursAndMinutes(milliseconds: Int) : String {
+        val hours = milliseconds / 1000 / 60 / 60
+        val minutes = milliseconds / 1000 / 60 % 60
+
+        var time = ""
+        if (hours > 0) {
+            time = "$hours hr "
+        }
+        time += "$minutes min"
+        return time
     }
 }
