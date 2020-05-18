@@ -1,5 +1,6 @@
 package no.birg.albumselector
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -50,7 +51,18 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         }
 
         view.album_title.text = mAlbum.title
+        view.album_title.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                view.album_title.isSingleLine = !view.album_title.isSingleLine
+            }
+        }
         view.artist_name.text = mAlbum.artistName
+        view.artist_name.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                view.artist_name.isSingleLine = !view.artist_name.isSingleLine
+            }
+        }
+        view.album_duration.text = toHoursAndMinutes(mAlbum.durationMS)
 
         view.shuffle_switch.isChecked = libraryFragment.shuffleState
         view.queue_switch.isChecked = libraryFragment.queueState
