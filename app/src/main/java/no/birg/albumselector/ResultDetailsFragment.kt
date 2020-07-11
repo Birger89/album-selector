@@ -37,15 +37,20 @@ class ResultDetailsFragment(private val albumID: String,
         GlobalScope.launch(Dispatchers.Default) {
             val albumDetails = spotifyConnection.fetchAlbumDetails(albumID)
 
-            withContext(Dispatchers.Main) {
-                view.artist_name.text =
-                    albumDetails.getJSONArray("artists").getJSONObject(0).getString("name")
+            if (albumDetails == null) {
+                Log.e("AlbumFragment", "No album details found")
+            } else {
+                withContext(Dispatchers.Main) {
+                    view.artist_name.text =
+                        albumDetails.getJSONArray("artists").getJSONObject(0).getString("name")
 
-                val imageUrl = albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
-                if (!imageUrl.isNullOrEmpty()) {
-                    Glide.with(view.context)
-                        .load(imageUrl)
-                        .into(view.album_cover)
+                    val imageUrl =
+                        albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Glide.with(view.context)
+                            .load(imageUrl)
+                            .into(view.album_cover)
+                    }
                 }
             }
 

@@ -75,12 +75,17 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                                 .getAllWithAlbums() as ArrayList<CategoryWithAlbums>
 
             withContext(Dispatchers.Main) {
-
-                val imageUrl = albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
-                if (!imageUrl.isNullOrEmpty()) {
-                    Glide.with(view.context)
-                        .load(imageUrl)
-                        .into(view.album_cover)
+                if (albumDetails == null) {
+                    Log.e("AlbumFragment", "No album details found")
+                } else if ( !albumDetails.has("images")) {
+                    Log.w("AlbumFragment", "Album has no images")
+                } else {
+                    val imageUrl = albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Glide.with(view.context)
+                            .load(imageUrl)
+                            .into(view.album_cover)
+                    }
                 }
                 view.play_button.setOnClickListener { libraryFragment.playAlbum(mAlbum.aid) }
                 view.next_random_button.setOnClickListener { libraryFragment.displayRandomAlbum() }
