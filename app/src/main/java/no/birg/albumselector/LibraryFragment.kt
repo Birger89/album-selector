@@ -175,19 +175,21 @@ class LibraryFragment : Fragment() {
             val details = spotifyConnection.fetchAlbumDetails(albumID)
             val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
 
-            val albumTitle = details.getString("name")
+            if (details.has("name") && details.has("artists")) {
+                val albumTitle = details.getString("name")
 
-            var artistName = "No Artist Info"
-            val artists = details.getJSONArray("artists")
-            if (artists.length() == 1) {
-                val artist = artists.getJSONObject(0)
-                artistName = artist.getString("name")
-            } else if (artists.length() > 1) {
-                artistName = "Several Artists"
+                var artistName = "No Artist Info"
+
+                val artists = details.getJSONArray("artists")
+                if (artists.length() == 1) {
+                    val artist = artists.getJSONObject(0)
+                    artistName = artist.getString("name")
+                } else if (artists.length() > 1) {
+                    artistName = "Several Artists"
+                }
+                val album = Album(albumID, albumTitle, artistName, durationMS)
+                albumDao.update(album)
             }
-
-            val album = Album(albumID, albumTitle, artistName, durationMS)
-            albumDao.update(album)
 
             albums = albumDao.getAll().reversed() as ArrayList<Album>
             updateCategories()
