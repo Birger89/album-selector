@@ -15,6 +15,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
 
+    private var startUp = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -35,12 +37,16 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        if (startUp) {
+            setContentView(R.layout.activity_main)
+            setSupportActionBar(findViewById(R.id.toolbar))
 
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.add(R.id.main_frame, LibraryFragment())
-        transaction.commit()
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.add(R.id.main_frame, LibraryFragment())
+            transaction.commit()
+
+            startUp = false
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
