@@ -36,7 +36,11 @@ class SpotifyConnection : Activity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (Constants.AUTH_TOKEN_REQUEST_CODE == requestCode) {
             val response = AuthenticationClient.getResponse(resultCode, data)
-            SpotifyToken.setToken(response.accessToken)
+            if (response != null) {
+                SpotifyToken.setToken(response.accessToken)
+            } else {
+                Log.e("SpotifyConnection", "something went wrong with authentication")
+            }
             finish()
         }
     }
