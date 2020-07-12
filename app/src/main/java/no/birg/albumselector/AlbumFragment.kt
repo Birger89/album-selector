@@ -70,7 +70,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         view.queue_switch.isChecked = libraryFragment.queueState
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
+            val albumDetails = activity?.let { spotifyConnection.fetchAlbumDetails(mAlbum.aid, it) }
 
             val categories = (activity as MainActivity).getCategoryDao()
                                 .getAllWithAlbums() as ArrayList<CategoryWithAlbums>

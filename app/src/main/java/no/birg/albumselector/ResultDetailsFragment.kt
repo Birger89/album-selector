@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_result_details.view.*
 import kotlinx.coroutines.*
-import no.birg.albumselector.database.Album
 
 class ResultDetailsFragment(private val albumID: String,
                             private val albumTitle: String,
@@ -36,7 +35,7 @@ class ResultDetailsFragment(private val albumID: String,
         view.album_title.text = albumTitle
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = spotifyConnection.fetchAlbumDetails(albumID)
+            val albumDetails = activity?.let { spotifyConnection.fetchAlbumDetails(albumID, it) }
 
             if (albumDetails == null) {
                 Log.e("AlbumFragment", "No album details found")
