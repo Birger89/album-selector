@@ -1,7 +1,6 @@
 package no.birg.albumselector
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -35,22 +34,18 @@ class ResultDetailsFragment(private val albumID: String,
         view.album_title.text = albumTitle
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = activity?.let { spotifyConnection.fetchAlbumDetails(albumID, it) }
+            val albumDetails = spotifyConnection.fetchAlbumDetails(albumID)
 
-            if (albumDetails == null) {
-                Log.e("AlbumFragment", "No album details found")
-            } else {
-                withContext(Dispatchers.Main) {
-                    view.artist_name.text =
-                        albumDetails.getJSONArray("artists").getJSONObject(0).getString("name")
+            withContext(Dispatchers.Main) {
+                view.artist_name.text =
+                    albumDetails.getJSONArray("artists").getJSONObject(0).getString("name")
 
-                    val imageUrl =
-                        albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
-                    if (!imageUrl.isNullOrEmpty()) {
-                        Glide.with(view.context)
-                            .load(imageUrl)
-                            .into(view.album_cover)
-                    }
+                val imageUrl =
+                    albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
+                if (!imageUrl.isNullOrEmpty()) {
+                    Glide.with(view.context)
+                        .load(imageUrl)
+                        .into(view.album_cover)
                 }
             }
 

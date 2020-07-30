@@ -1,6 +1,5 @@
 package no.birg.albumselector
 
-import android.app.Activity
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -123,26 +122,26 @@ class LibraryFragment : Fragment() {
 
     fun playAlbum(albumID: String) {
         if (queueState) {
-            activity?.let { queueAlbum(albumID, it) }
+            queueAlbum(albumID)
         } else {
             if (selectedDevice != "") {
-                activity?.let { spotifyConnection.setShuffle(shuffleState, selectedDevice, it) }
-                activity?.let { spotifyConnection.playAlbum(albumID, selectedDevice, it) }
+                spotifyConnection.setShuffle(shuffleState, selectedDevice)
+                spotifyConnection.playAlbum(albumID, selectedDevice)
             } else {
                 Log.w("LibraryActivity", "No device selected")
             }
         }
     }
 
-    private fun queueAlbum(albumID: String, activity: Activity) {
+    private fun queueAlbum(albumID: String) {
         if (selectedDevice != "") {
             GlobalScope.launch(Dispatchers.Default) {
-                val trackIDs = spotifyConnection.fetchAlbumTracks(albumID, activity)
+                val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
                 if (shuffleState) {
                     trackIDs.shuffle()
                 }
                 for (trackID in trackIDs) {
-                    spotifyConnection.queueSong(trackID, selectedDevice, activity)
+                    spotifyConnection.queueSong(trackID, selectedDevice)
                 }
             }
         } else {
@@ -173,8 +172,8 @@ class LibraryFragment : Fragment() {
 
     fun refreshAlbum(albumID: String) = runBlocking {
         if (checkRecord(albumID)) {
-            val durationMS = activity?.let { spotifyConnection.fetchAlbumDurationMS(albumID, it) }!!
-            val details = activity?.let { spotifyConnection.fetchAlbumDetails(albumID, it) }!!
+            val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
+            val details = spotifyConnection.fetchAlbumDetails(albumID)
 
             if (details.has("name") && details.has("artists")) {
                 val albumTitle = details.getString("name")
@@ -284,7 +283,7 @@ class LibraryFragment : Fragment() {
 
     private fun displayDevices() {
         GlobalScope.launch(Dispatchers.Default) {
-            val deviceList = activity?.let { spotifyConnection.fetchDevices(it) }!!
+            val deviceList = spotifyConnection.fetchDevices()
             withContext(Dispatchers.Main) {
                 devices.adapter = context?.let { DeviceAdapter(it, deviceList) }
             }
@@ -293,7 +292,7 @@ class LibraryFragment : Fragment() {
 
     private fun setShuffleState() {
         GlobalScope.launch(Dispatchers.Default) {
-            shuffleState = activity?.let { spotifyConnection.fetchShuffleState(it) }!!
+            shuffleState = spotifyConnection.fetchShuffleState()
         }
     }
 }

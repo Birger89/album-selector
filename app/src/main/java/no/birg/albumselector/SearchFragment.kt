@@ -53,8 +53,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
             val query = search_field.text.toString()
 
             if (query != "") {
-                val results =
-                    activity?.let { spotifyConnection.search(search_field.text.toString(), it) }!!
+                val results = spotifyConnection.search(search_field.text.toString())
                 withContext(Dispatchers.Main) {
                     val adapter = context?.let {
                         ResultAdapter(it, results, this@SearchFragment)
@@ -81,7 +80,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
     private fun displayUsername() {
         GlobalScope.launch(Dispatchers.Default) {
-            val username = activity?.let { spotifyConnection.fetchUsername(it) }
+            val username = spotifyConnection.fetchUsername()
 
             withContext(Dispatchers.Main) {
                 name_text_view.text = username
@@ -91,7 +90,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
     fun addAlbum(id: String, title: String, artistName: String) {
         GlobalScope.launch(Dispatchers.Default) {
-            val durationMS = activity?.let { spotifyConnection.fetchAlbumDurationMS(id, it) }!!
+            val durationMS = spotifyConnection.fetchAlbumDurationMS(id)
             val album = Album(id, title, artistName, durationMS)
             libraryFragment.addAlbum(album)
         }

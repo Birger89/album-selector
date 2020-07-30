@@ -70,15 +70,13 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         view.queue_switch.isChecked = libraryFragment.queueState
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = activity?.let { spotifyConnection.fetchAlbumDetails(mAlbum.aid, it) }
+            val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
 
             val categories = (activity as MainActivity).categoryDao
                                 .getAllWithAlbums() as ArrayList<CategoryWithAlbums>
 
             withContext(Dispatchers.Main) {
-                if (albumDetails == null) {
-                    Log.e("AlbumFragment", "No album details found")
-                } else if ( !albumDetails.has("images")) {
+                if ( !albumDetails.has("images")) {
                     Log.w("AlbumFragment", "Album has no images")
                 } else {
                     val imageUrl = albumDetails.getJSONArray("images").getJSONObject(0).getString("url")
