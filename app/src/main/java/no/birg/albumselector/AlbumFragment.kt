@@ -72,7 +72,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         GlobalScope.launch(Dispatchers.Default) {
             val albumDetails = activity?.let { spotifyConnection.fetchAlbumDetails(mAlbum.aid, it) }
 
-            val categories = (activity as MainActivity).getCategoryDao()
+            val categories = (activity as MainActivity).categoryDao
                                 .getAllWithAlbums() as ArrayList<CategoryWithAlbums>
 
             withContext(Dispatchers.Main) {
@@ -111,7 +111,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
             val adapter = category_listview.adapter as CategoryAdapter
 
             GlobalScope.launch(Dispatchers.Default) {
-                val dao = (activity as MainActivity).getCategoryDao()
+                val dao = (activity as MainActivity).categoryDao
                 if (dao.checkRecord(categoryName)) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(activity, "Category already exists", Toast.LENGTH_SHORT).show()
@@ -130,14 +130,14 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
     fun setCategory(category: Category) {
         val crossRef = CategoryAlbumCrossRef(category.cid, mAlbum.aid)
         GlobalScope.launch(Dispatchers.Default) {
-            (activity as MainActivity).getCategoryDao().insertAlbumCrossRef(crossRef)
+            (activity as MainActivity).categoryDao.insertAlbumCrossRef(crossRef)
         }
     }
 
     fun unsetCategory(category: Category) {
         val crossRef = CategoryAlbumCrossRef(category.cid, mAlbum.aid)
         GlobalScope.launch(Dispatchers.Default) {
-            (activity as MainActivity).getCategoryDao().deleteAlbumCrossRef(crossRef)
+            (activity as MainActivity).categoryDao.deleteAlbumCrossRef(crossRef)
         }
     }
 

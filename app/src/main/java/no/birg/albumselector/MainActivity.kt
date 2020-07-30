@@ -12,8 +12,8 @@ import no.birg.albumselector.database.CategoryDao
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var albumDao: AlbumDao
-    private lateinit var categoryDao: CategoryDao
+    lateinit var albumDao: AlbumDao
+    lateinit var categoryDao: CategoryDao
     lateinit var spotifyConnection: SpotifyConnection
 
     private var startUp = true
@@ -26,14 +26,6 @@ class MainActivity : AppCompatActivity() {
         spotifyConnection = SpotifyConnection()
 
         spotifyConnection.fetchAccessToken(this)
-    }
-
-    fun getAlbumDao() : AlbumDao {
-        return albumDao
-    }
-
-    fun getCategoryDao() : CategoryDao {
-        return categoryDao
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

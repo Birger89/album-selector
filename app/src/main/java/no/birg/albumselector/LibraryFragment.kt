@@ -41,8 +41,8 @@ class LibraryFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
-        albumDao = (activity as MainActivity).getAlbumDao()
-        categoryDao = (activity as MainActivity).getCategoryDao()
+        albumDao = (activity as MainActivity).albumDao
+        categoryDao = (activity as MainActivity).categoryDao
         spotifyConnection = (activity as MainActivity).spotifyConnection
 
         setShuffleState()
