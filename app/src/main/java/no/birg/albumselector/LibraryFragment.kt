@@ -43,7 +43,7 @@ class LibraryFragment : Fragment() {
 
         albumDao = (activity as MainActivity).getAlbumDao()
         categoryDao = (activity as MainActivity).getCategoryDao()
-        spotifyConnection = SpotifyConnection()
+        spotifyConnection = (activity as MainActivity).spotifyConnection
 
         setShuffleState()
     }

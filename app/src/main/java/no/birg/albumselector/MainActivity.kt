@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
+    lateinit var spotifyConnection: SpotifyConnection
 
     private var startUp = true
 
@@ -22,8 +23,9 @@ class MainActivity : AppCompatActivity() {
 
         albumDao = AppDatabase.getInstance(this).albumDao()
         categoryDao = AppDatabase.getInstance(this).categoryDao()
+        spotifyConnection = SpotifyConnection()
 
-        SpotifyConnection().fetchAccessToken(this)
+        spotifyConnection.fetchAccessToken(this)
     }
 
     fun getAlbumDao() : AlbumDao {

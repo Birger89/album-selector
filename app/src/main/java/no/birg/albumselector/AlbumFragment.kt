@@ -27,7 +27,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        spotifyConnection = SpotifyConnection()
+        spotifyConnection = (activity as MainActivity).spotifyConnection
     }
 
     override fun onCreateView(
