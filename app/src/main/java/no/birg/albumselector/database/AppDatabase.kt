@@ -6,7 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import no.birg.albumselector.*
 
 @Database(entities = [Album::class, Category::class, CategoryAlbumCrossRef::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
