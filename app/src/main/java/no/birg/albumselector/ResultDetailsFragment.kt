@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_result_details.view.*
 import kotlinx.coroutines.*
+import no.birg.albumselector.spotify.SpotifyConnection
 
 class ResultDetailsFragment(private val albumID: String,
                             private val albumTitle: String,

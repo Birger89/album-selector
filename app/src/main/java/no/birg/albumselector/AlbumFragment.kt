@@ -17,6 +17,7 @@ import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryAlbumCrossRef
 import no.birg.albumselector.database.CategoryWithAlbums
+import no.birg.albumselector.spotify.SpotifyConnection
 
 class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 

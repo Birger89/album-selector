@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
+import no.birg.albumselector.spotify.SpotifyConnection
 
 class MainActivity : AppCompatActivity() {
 

@@ -19,6 +19,7 @@ import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
 import no.birg.albumselector.database.CategoryWithAlbums
+import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
 

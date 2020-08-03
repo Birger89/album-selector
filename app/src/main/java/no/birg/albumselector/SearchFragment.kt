@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.*
 import no.birg.albumselector.adapters.ResultAdapter
 import no.birg.albumselector.database.Album
+import no.birg.albumselector.spotify.SpotifyConnection
 
 class SearchFragment(fragment: LibraryFragment) : Fragment() {
 

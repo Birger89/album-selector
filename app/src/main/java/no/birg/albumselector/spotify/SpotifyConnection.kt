@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.spotify
 
 import android.app.Activity
 import android.app.Service

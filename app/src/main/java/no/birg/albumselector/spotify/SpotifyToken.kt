@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.spotify
 
 object SpotifyToken {
     private var accessToken = ""
