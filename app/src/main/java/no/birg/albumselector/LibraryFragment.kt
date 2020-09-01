@@ -55,36 +55,9 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
         view.search_button.setOnClickListener{ goToSearch() }
         view.display_random_button.setOnClickListener{ displayRandomAlbum() }
-        view.filter_text.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                filterText = filter_text.text.toString()
-                updateAlbumSelection()
-                displayAlbums()
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-        })
-        view.devices.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-                if (parent != null) {
-                    selectedDevice = (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) { }
-        }
-        view.delete_selected_categories.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Default) {
-                for (cat in selectedCategories) {
-                    categoryDao.delete(cat.category)
-                    selectedCategories.remove(cat)
-                }
-                withContext(Dispatchers.Main) {
-                    displayCategories()
-                    updateAlbumSelection()
-                    displayAlbums()
-                }
-            }
-        }
+        view.filter_text.addTextChangedListener(filterTextChangeListener())
+        view.devices.onItemSelectedListener = deviceSelectedListener()
+        view.delete_selected_categories.setOnClickListener { deleteSelectedCategories() }
 
         return view
     }
@@ -106,6 +79,44 @@ class LibraryFragment : Fragment() {
         val item = menu.findItem(R.id.home_button)
         if (item != null) {
             item.isVisible = false
+        }
+    }
+
+    private fun filterTextChangeListener() : TextWatcher {
+        return object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                filterText = filter_text.text.toString()
+                updateAlbumSelection()
+                displayAlbums()
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+        }
+    }
+
+    private fun deviceSelectedListener() : AdapterView.OnItemSelectedListener {
+        return object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                if (parent != null) {
+                    selectedDevice = (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun deleteSelectedCategories() {
+        GlobalScope.launch(Dispatchers.Default) {
+            for (cat in selectedCategories) {
+                categoryDao.delete(cat.category)
+                selectedCategories.remove(cat)
+            }
+            withContext(Dispatchers.Main) {
+                displayCategories()
+                updateAlbumSelection()
+                displayAlbums()
+            }
         }
     }
 
