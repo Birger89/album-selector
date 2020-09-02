@@ -46,7 +46,7 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
             holder.artistTextView = albumView.artist_name as TextView
             holder.titleTextView = albumView.album_title as TextView
             holder.playButton = albumView.play_button as Button
-            holder.removeButtor = albumView.remove_button as Button
+            holder.removeButton = albumView.remove_button as Button
 
             albumView.tag = holder
         } else {
@@ -62,7 +62,7 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
         holder.playButton.setOnClickListener {
             mFragment.playAlbum(album.aid)
         }
-        holder.removeButtor.setOnClickListener {
+        holder.removeButton.setOnClickListener {
             mFragment.deleteAlbum(album)
         }
         albumView.setOnClickListener {
@@ -76,6 +76,6 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
         lateinit var titleTextView: TextView
         lateinit var artistTextView: TextView
         lateinit var playButton: Button
-        lateinit var removeButtor: Button
+        lateinit var removeButton: Button
     }
 }
