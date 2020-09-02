@@ -51,14 +51,14 @@ class CategorySelectorAdapter(context: Context, private val categories: List<Cat
 
         // Clears the checkListener to avoid unwanted updates from recycling views.
         holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        holder.categoryCheckBox.isChecked = category in mFragment.selectedCategories
+        holder.categoryCheckBox.isChecked = category in mFragment.viewModel.selectedCategories
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                mFragment.selectedCategories.add(category)
+                mFragment.viewModel.selectedCategories.add(category)
                 mFragment.updateAlbumSelection()
                 mFragment.displayAlbums()
             } else {
-                mFragment.selectedCategories.remove(category)
+                mFragment.viewModel.selectedCategories.remove(category)
                 mFragment.updateAlbumSelection()
                 mFragment.displayAlbums()
             }

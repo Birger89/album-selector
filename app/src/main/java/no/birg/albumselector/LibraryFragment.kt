@@ -9,6 +9,7 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
 import kotlinx.coroutines.*
@@ -23,19 +24,13 @@ import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
 
+    lateinit var viewModel: LibraryViewModel
+
     lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
     private lateinit var spotifyConnection: SpotifyConnection
 
     private lateinit var state: Parcelable
-    var queueState = false
-    var shuffleState = false
-    private var selectedDevice: String = ""
-    private var filterText: String = ""
-    private lateinit var albums: ArrayList<Album>
-    private lateinit var displayedAlbums: MutableList<Album>
-    private lateinit var shuffledAlbumList: MutableList<Album>
-    val selectedCategories: MutableList<CategoryWithAlbums> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +47,10 @@ class LibraryFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = ViewModelProvider(this).get(LibraryViewModel::class.java)
+
         val view = inflater.inflate(R.layout.fragment_library, container, false)
+
         view.search_button.setOnClickListener{ goToSearch() }
         view.display_random_button.setOnClickListener{ displayRandomAlbum() }
         view.filter_text.addTextChangedListener(filterTextChangeListener())
@@ -85,7 +83,7 @@ class LibraryFragment : Fragment() {
     private fun filterTextChangeListener() : TextWatcher {
         return object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                filterText = filter_text.text.toString()
+                viewModel.filterText = filter_text.text.toString()
                 updateAlbumSelection()
                 displayAlbums()
             }
@@ -98,7 +96,7 @@ class LibraryFragment : Fragment() {
         return object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 if (parent != null) {
-                    selectedDevice = (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
+                    viewModel.selectedDevice = (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
                 }
             }
 
@@ -108,9 +106,9 @@ class LibraryFragment : Fragment() {
 
     private fun deleteSelectedCategories() {
         GlobalScope.launch(Dispatchers.Default) {
-            for (cat in selectedCategories) {
+            for (cat in viewModel.selectedCategories) {
                 categoryDao.delete(cat.category)
-                selectedCategories.remove(cat)
+                viewModel.selectedCategories.remove(cat)
             }
             withContext(Dispatchers.Main) {
                 displayCategories()
@@ -133,12 +131,12 @@ class LibraryFragment : Fragment() {
     }
 
     fun playAlbum(albumID: String) {
-        if (queueState) {
+        if (viewModel.queueState) {
             queueAlbum(albumID)
         } else {
-            if (selectedDevice != "") {
-                spotifyConnection.setShuffle(shuffleState, selectedDevice)
-                spotifyConnection.playAlbum(albumID, selectedDevice)
+            if (viewModel.selectedDevice != "") {
+                spotifyConnection.setShuffle(viewModel.shuffleState, viewModel.selectedDevice)
+                spotifyConnection.playAlbum(albumID, viewModel.selectedDevice)
             } else {
                 Log.w("LibraryActivity", "No device selected")
             }
@@ -146,14 +144,14 @@ class LibraryFragment : Fragment() {
     }
 
     private fun queueAlbum(albumID: String) {
-        if (selectedDevice != "") {
+        if (viewModel.selectedDevice != "") {
             GlobalScope.launch(Dispatchers.Default) {
                 val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
-                if (shuffleState) {
+                if (viewModel.shuffleState) {
                     trackIDs.shuffle()
                 }
                 for (trackID in trackIDs) {
-                    spotifyConnection.queueSong(trackID, selectedDevice)
+                    spotifyConnection.queueSong(trackID, viewModel.selectedDevice)
                 }
             }
         } else {
@@ -162,11 +160,11 @@ class LibraryFragment : Fragment() {
     }
 
     fun displayRandomAlbum() {
-        if (displayedAlbums.size != 0) {
-            if (shuffledAlbumList.size == 0) {
-                shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
+        if (viewModel.displayedAlbums.size != 0) {
+            if (viewModel.shuffledAlbumList.size == 0) {
+                viewModel.shuffledAlbumList = viewModel.displayedAlbums.shuffled() as MutableList<Album>
             }
-            val album = shuffledAlbumList.removeAt(0)
+            val album = viewModel.shuffledAlbumList.removeAt(0)
             displayAlbumDetails(album)
         }
     }
@@ -178,7 +176,7 @@ class LibraryFragment : Fragment() {
             }
         } else {
             albumDao.insert(album)
-            albums.add(0, album)
+            viewModel.albums.add(0, album)
         }
     }
 
@@ -203,7 +201,7 @@ class LibraryFragment : Fragment() {
                 albumDao.update(album)
             }
 
-            albums = albumDao.getAll().reversed() as ArrayList<Album>
+            viewModel.albums = albumDao.getAll().reversed() as ArrayList<Album>
             updateCategories()
             updateAlbumSelection()
         }
@@ -218,7 +216,7 @@ class LibraryFragment : Fragment() {
         GlobalScope.launch(Dispatchers.Default) {
             albumDao.delete(album)
             withContext(Dispatchers.Main) {
-                albums.remove(album)
+                viewModel.albums.remove(album)
                 adapter.removeItem(album)
                 adapter.notifyDataSetChanged()
             }
@@ -238,37 +236,36 @@ class LibraryFragment : Fragment() {
     }
 
     fun updateAlbumSelection() {
-        displayedAlbums = albums.toMutableList()
-        if (selectedCategories.isNotEmpty()) {
-            for (category in selectedCategories) {
-                displayedAlbums.retainAll(category.albums)
+        viewModel.displayedAlbums = viewModel.albums.toMutableList()
+        if (viewModel.selectedCategories.isNotEmpty()) {
+            for (category in viewModel.selectedCategories) {
+                viewModel.displayedAlbums.retainAll(category.albums)
             }
         }
-        displayedAlbums.retainAll { album ->
+        viewModel.displayedAlbums.retainAll { album ->
             val artistAndTitle = "${album.artistName} ${album.title}"
-            artistAndTitle.contains(filterText, ignoreCase = true)
+            artistAndTitle.contains(viewModel.filterText, ignoreCase = true)
         }
-        shuffledAlbumList = displayedAlbums.shuffled() as MutableList<Album>
+        viewModel.shuffledAlbumList = viewModel.displayedAlbums.shuffled() as MutableList<Album>
     }
 
     private fun updateCategories() {
-        val oldCategories = selectedCategories.toList()
-        selectedCategories.clear()
+        val oldCategories = viewModel.selectedCategories.toList()
+        viewModel.selectedCategories.clear()
         for (c in oldCategories) {
-            selectedCategories.add(categoryDao.getCategoryByID(c.category.cid))
+            viewModel.selectedCategories.add(categoryDao.getCategoryByID(c.category.cid))
         }
     }
 
     fun displayAlbums() {
-        val isInit = this::albums.isInitialized
         GlobalScope.launch(Dispatchers.Default) {
-            if (!isInit) {
-                albums = albumDao.getAll().reversed() as ArrayList<Album>
-                displayedAlbums = albums
-                shuffledAlbumList = albums.shuffled() as MutableList<Album>
+            if (viewModel.albums.isEmpty()) {
+                viewModel.albums = albumDao.getAll().reversed() as ArrayList<Album>
+                viewModel.displayedAlbums = viewModel.albums
+                viewModel.shuffledAlbumList = viewModel.albums.shuffled() as MutableList<Album>
             }
             val adapter = context?.let {
-                AlbumAdapter(it, displayedAlbums, this@LibraryFragment)
+                AlbumAdapter(it, viewModel.displayedAlbums, this@LibraryFragment)
             }
 
             withContext(Dispatchers.Main) {
@@ -304,7 +301,7 @@ class LibraryFragment : Fragment() {
 
     private fun setShuffleState() {
         GlobalScope.launch(Dispatchers.Default) {
-            shuffleState = spotifyConnection.fetchShuffleState()
+            viewModel.shuffleState = spotifyConnection.fetchShuffleState()
         }
     }
 }

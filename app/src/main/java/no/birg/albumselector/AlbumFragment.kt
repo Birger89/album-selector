@@ -67,8 +67,8 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         }
         view.album_duration.text = toHoursAndMinutes(mAlbum.durationMS)
 
-        view.shuffle_switch.isChecked = libraryFragment.shuffleState
-        view.queue_switch.isChecked = libraryFragment.queueState
+        view.shuffle_switch.isChecked = libraryFragment.viewModel.shuffleState
+        view.queue_switch.isChecked = libraryFragment.viewModel.queueState
 
         GlobalScope.launch(Dispatchers.Default) {
             val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
@@ -89,8 +89,8 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
                 }
                 view.play_button.setOnClickListener { libraryFragment.playAlbum(mAlbum.aid) }
                 view.next_random_button.setOnClickListener { libraryFragment.displayRandomAlbum() }
-                view.queue_switch.setOnCheckedChangeListener { _, isChecked -> libraryFragment.queueState = isChecked }
-                view.shuffle_switch.setOnCheckedChangeListener { _, isChecked -> libraryFragment.shuffleState = isChecked }
+                view.queue_switch.setOnCheckedChangeListener { _, isChecked -> libraryFragment.viewModel.queueState = isChecked }
+                view.shuffle_switch.setOnCheckedChangeListener { _, isChecked -> libraryFragment.viewModel.shuffleState = isChecked }
 
                 view.category_listview.adapter = context?.let {
                     CategoryAdapter(it, categories, this@AlbumFragment)
