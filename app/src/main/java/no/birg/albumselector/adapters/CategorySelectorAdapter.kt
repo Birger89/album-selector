@@ -55,11 +55,11 @@ class CategorySelectorAdapter(context: Context, private val categories: List<Cat
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 mFragment.viewModel.selectedCategories.add(category)
-                mFragment.updateAlbumSelection()
+                mFragment.viewModel.updateAlbumSelection()
                 mFragment.displayAlbums()
             } else {
                 mFragment.viewModel.selectedCategories.remove(category)
-                mFragment.updateAlbumSelection()
+                mFragment.viewModel.updateAlbumSelection()
                 mFragment.displayAlbums()
             }
         }

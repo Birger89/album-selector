@@ -19,14 +19,14 @@ import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
-import no.birg.albumselector.database.CategoryWithAlbums
-import no.birg.albumselector.spotify.SpotifyConnection
+ import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
 
+    private lateinit var viewModelFactory: LibraryViewModelFactory
     lateinit var viewModel: LibraryViewModel
 
-    lateinit var albumDao: AlbumDao
+    private lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
     private lateinit var spotifyConnection: SpotifyConnection
 
@@ -47,7 +47,8 @@ class LibraryFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModel = ViewModelProvider(this).get(LibraryViewModel::class.java)
+        viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(LibraryViewModel::class.java)
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
@@ -84,7 +85,7 @@ class LibraryFragment : Fragment() {
         return object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 viewModel.filterText = filter_text.text.toString()
-                updateAlbumSelection()
+                viewModel.updateAlbumSelection()
                 displayAlbums()
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
@@ -105,17 +106,10 @@ class LibraryFragment : Fragment() {
     }
 
     private fun deleteSelectedCategories() {
-        GlobalScope.launch(Dispatchers.Default) {
-            for (cat in viewModel.selectedCategories) {
-                categoryDao.delete(cat.category)
-                viewModel.selectedCategories.remove(cat)
-            }
-            withContext(Dispatchers.Main) {
-                displayCategories()
-                updateAlbumSelection()
-                displayAlbums()
-            }
-        }
+        viewModel.deleteSelectedCategories()
+        viewModel.updateAlbumSelection()
+        displayCategories()
+        displayAlbums()
     }
 
     private fun goToSearch() {
@@ -160,28 +154,22 @@ class LibraryFragment : Fragment() {
     }
 
     fun displayRandomAlbum() {
-        if (viewModel.displayedAlbums.size != 0) {
-            if (viewModel.shuffledAlbumList.size == 0) {
-                viewModel.shuffledAlbumList = viewModel.displayedAlbums.shuffled() as MutableList<Album>
-            }
-            val album = viewModel.shuffledAlbumList.removeAt(0)
+        val album = viewModel.getRandomAlbum()
+        if (album != null) {
             displayAlbumDetails(album)
         }
     }
 
     fun addAlbum(album: Album) {
-        if (albumDao.checkRecord(album.aid)) {
+        if (!viewModel.addAlbum(album)) {
             GlobalScope.launch(Dispatchers.Main) {
                 Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
             }
-        } else {
-            albumDao.insert(album)
-            viewModel.albums.add(0, album)
         }
     }
 
     fun refreshAlbum(albumID: String) = runBlocking {
-        if (checkRecord(albumID)) {
+        if (viewModel.checkForAlbum(albumID)) {
             val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
             val details = spotifyConnection.fetchAlbumDetails(albumID)
 
@@ -198,29 +186,20 @@ class LibraryFragment : Fragment() {
                     artistName = "Several Artists"
                 }
                 val album = Album(albumID, albumTitle, artistName, durationMS)
-                albumDao.update(album)
+                viewModel.updateAlbum(album)
             }
 
-            viewModel.albums = albumDao.getAll().reversed() as ArrayList<Album>
-            updateCategories()
-            updateAlbumSelection()
+            viewModel.fetchAlbums()
+            viewModel.updateCategories()
+            viewModel.updateAlbumSelection()
         }
-    }
-
-    fun checkRecord(albumID: String) : Boolean {
-        return albumDao.checkRecord(albumID)
     }
 
     fun deleteAlbum(album: Album) {
         val adapter = library_albums.adapter as AlbumAdapter
-        GlobalScope.launch(Dispatchers.Default) {
-            albumDao.delete(album)
-            withContext(Dispatchers.Main) {
-                viewModel.albums.remove(album)
-                adapter.removeItem(album)
-                adapter.notifyDataSetChanged()
-            }
-        }
+        viewModel.deleteAlbum(album)
+        adapter.removeItem(album)
+        adapter.notifyDataSetChanged()
     }
 
     fun displayAlbumDetails(album: Album) {
@@ -235,34 +214,10 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    fun updateAlbumSelection() {
-        viewModel.displayedAlbums = viewModel.albums.toMutableList()
-        if (viewModel.selectedCategories.isNotEmpty()) {
-            for (category in viewModel.selectedCategories) {
-                viewModel.displayedAlbums.retainAll(category.albums)
-            }
-        }
-        viewModel.displayedAlbums.retainAll { album ->
-            val artistAndTitle = "${album.artistName} ${album.title}"
-            artistAndTitle.contains(viewModel.filterText, ignoreCase = true)
-        }
-        viewModel.shuffledAlbumList = viewModel.displayedAlbums.shuffled() as MutableList<Album>
-    }
-
-    private fun updateCategories() {
-        val oldCategories = viewModel.selectedCategories.toList()
-        viewModel.selectedCategories.clear()
-        for (c in oldCategories) {
-            viewModel.selectedCategories.add(categoryDao.getCategoryByID(c.category.cid))
-        }
-    }
-
     fun displayAlbums() {
         GlobalScope.launch(Dispatchers.Default) {
             if (viewModel.albums.isEmpty()) {
-                viewModel.albums = albumDao.getAll().reversed() as ArrayList<Album>
-                viewModel.displayedAlbums = viewModel.albums
-                viewModel.shuffledAlbumList = viewModel.albums.shuffled() as MutableList<Album>
+                viewModel.fetchAlbums()
             }
             val adapter = context?.let {
                 AlbumAdapter(it, viewModel.displayedAlbums, this@LibraryFragment)
@@ -281,7 +236,7 @@ class LibraryFragment : Fragment() {
 
     private fun displayCategories() {
         GlobalScope.launch(Dispatchers.Default) {
-            val categories = categoryDao.getAllWithAlbums()
+            val categories = viewModel.getCategories()
             withContext(Dispatchers.Main) {
                 category_spinner.adapter = context?.let {
                     CategorySelectorAdapter(it, categories, this@LibraryFragment)

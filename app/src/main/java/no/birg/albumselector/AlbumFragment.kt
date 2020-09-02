@@ -15,7 +15,6 @@ import kotlinx.coroutines.*
 import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.Category
-import no.birg.albumselector.database.CategoryAlbumCrossRef
 import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.spotify.SpotifyConnection
 
@@ -43,7 +42,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
             GlobalScope.launch(Dispatchers.Default) {
                 libraryFragment.refreshAlbum(mAlbum.aid)
 
-                val album = libraryFragment.albumDao.getByID(mAlbum.aid)
+                val album = libraryFragment.viewModel.getAlbumById(mAlbum.aid)
 
                 withContext(Dispatchers.Main) {
                     view.album_title.text = album.title
@@ -73,8 +72,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         GlobalScope.launch(Dispatchers.Default) {
             val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
 
-            val categories = (activity as MainActivity).categoryDao
-                                .getAllWithAlbums() as ArrayList<CategoryWithAlbums>
+            val categories = libraryFragment.viewModel.getCategories()
 
             withContext(Dispatchers.Main) {
                 if ( !albumDetails.has("images")) {
@@ -110,13 +108,12 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
             val adapter = category_listview.adapter as CategoryAdapter
 
             GlobalScope.launch(Dispatchers.Default) {
-                val dao = (activity as MainActivity).categoryDao
-                if (dao.checkRecord(categoryName)) {
+                if (libraryFragment.viewModel.checkForCategory(categoryName)) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(activity, "Category already exists", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    dao.insert(Category(categoryName))
+                    libraryFragment.viewModel.addCategory(categoryName)
                     withContext(Dispatchers.Main) {
                         adapter.addItem(CategoryWithAlbums(category, mutableListOf()))
                         adapter.notifyDataSetChanged()
@@ -127,17 +124,11 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
     }
 
     fun setCategory(category: Category) {
-        val crossRef = CategoryAlbumCrossRef(category.cid, mAlbum.aid)
-        GlobalScope.launch(Dispatchers.Default) {
-            (activity as MainActivity).categoryDao.insertAlbumCrossRef(crossRef)
-        }
+        libraryFragment.viewModel.setCategory(category, mAlbum)
     }
 
     fun unsetCategory(category: Category) {
-        val crossRef = CategoryAlbumCrossRef(category.cid, mAlbum.aid)
-        GlobalScope.launch(Dispatchers.Default) {
-            (activity as MainActivity).categoryDao.deleteAlbumCrossRef(crossRef)
-        }
+        libraryFragment.viewModel.unsetCategory(category, mAlbum)
     }
 
     private fun toHoursAndMinutes(milliseconds: Int) : String {

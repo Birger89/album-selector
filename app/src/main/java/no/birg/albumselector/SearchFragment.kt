@@ -98,6 +98,6 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
     }
 
     fun checkRecord(albumID: String) : Boolean {
-        return libraryFragment.checkRecord(albumID)
+        return libraryFragment.viewModel.checkForAlbum(albumID)
     }
 }
