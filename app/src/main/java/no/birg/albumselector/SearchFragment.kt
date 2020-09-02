@@ -11,21 +11,13 @@ import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.*
 import no.birg.albumselector.adapters.ResultAdapter
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.spotify.SpotifyConnection
+import org.json.JSONObject
 
 class SearchFragment(fragment: LibraryFragment) : Fragment() {
-
-    private lateinit var spotifyConnection: SpotifyConnection
 
     private val libraryFragment = fragment
 
     private lateinit var searchView: View
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        spotifyConnection = (activity as MainActivity).spotifyConnection
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,7 +46,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
             val query = search_field.text.toString()
 
             if (query != "") {
-                val results = spotifyConnection.search(search_field.text.toString())
+                val results = libraryFragment.viewModel.search(search_field.text.toString())
                 withContext(Dispatchers.Main) {
                     val adapter = context?.let {
                         ResultAdapter(it, results, this@SearchFragment)
@@ -81,7 +73,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
     private fun displayUsername() {
         GlobalScope.launch(Dispatchers.Default) {
-            val username = spotifyConnection.fetchUsername()
+            val username = libraryFragment.viewModel.fetchUsername()
 
             withContext(Dispatchers.Main) {
                 name_text_view.text = username
@@ -91,7 +83,7 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
     fun addAlbum(id: String, title: String, artistName: String) {
         GlobalScope.launch(Dispatchers.Default) {
-            val durationMS = spotifyConnection.fetchAlbumDurationMS(id)
+            val durationMS = libraryFragment.viewModel.fetchAlbumDurationMS(id)
             val album = Album(id, title, artistName, durationMS)
             libraryFragment.addAlbum(album)
         }
@@ -99,5 +91,9 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
 
     fun checkRecord(albumID: String) : Boolean {
         return libraryFragment.viewModel.checkForAlbum(albumID)
+    }
+
+    fun fetchAlbumDetails(albumID: String) : JSONObject {
+        return libraryFragment.viewModel.fetchAlbumDetails(albumID)
     }
 }

@@ -16,19 +16,11 @@ import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
-import no.birg.albumselector.spotify.SpotifyConnection
 
 class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 
     var mAlbum = album
     private val libraryFragment = fragment
-    private lateinit var spotifyConnection: SpotifyConnection
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        spotifyConnection = (activity as MainActivity).spotifyConnection
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,7 +32,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
 
         if (mAlbum.title == null || mAlbum.artistName == null || mAlbum.durationMS == 0) {
             GlobalScope.launch(Dispatchers.Default) {
-                libraryFragment.refreshAlbum(mAlbum.aid)
+                libraryFragment.viewModel.refreshAlbum(mAlbum.aid)
 
                 val album = libraryFragment.viewModel.getAlbumById(mAlbum.aid)
 
@@ -70,7 +62,7 @@ class AlbumFragment(album: Album, fragment: LibraryFragment) : Fragment() {
         view.queue_switch.isChecked = libraryFragment.viewModel.queueState
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = spotifyConnection.fetchAlbumDetails(mAlbum.aid)
+            val albumDetails = libraryFragment.viewModel.fetchAlbumDetails(mAlbum.aid)
 
             val categories = libraryFragment.viewModel.getCategories()
 

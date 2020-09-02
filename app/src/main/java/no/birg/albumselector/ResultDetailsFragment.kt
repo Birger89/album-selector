@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_result_details.view.*
 import kotlinx.coroutines.*
-import no.birg.albumselector.spotify.SpotifyConnection
 
 class ResultDetailsFragment(private val albumID: String,
                             private val albumTitle: String,
@@ -17,13 +16,6 @@ class ResultDetailsFragment(private val albumID: String,
                             fragment: SearchFragment) : Fragment() {
 
     private val searchFragment = fragment
-    private lateinit var spotifyConnection: SpotifyConnection
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        spotifyConnection = (activity as MainActivity).spotifyConnection
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +27,7 @@ class ResultDetailsFragment(private val albumID: String,
         view.album_title.text = albumTitle
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = spotifyConnection.fetchAlbumDetails(albumID)
+            val albumDetails = searchFragment.fetchAlbumDetails(albumID)
 
             withContext(Dispatchers.Main) {
                 view.artist_name.text =

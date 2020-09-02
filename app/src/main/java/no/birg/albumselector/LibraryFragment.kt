@@ -19,7 +19,7 @@ import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
- import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
 
@@ -39,15 +39,13 @@ class LibraryFragment : Fragment() {
         albumDao = (activity as MainActivity).albumDao
         categoryDao = (activity as MainActivity).categoryDao
         spotifyConnection = (activity as MainActivity).spotifyConnection
-
-        setShuffleState()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao)
+        viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyConnection)
         viewModel = ViewModelProvider(this, viewModelFactory).get(LibraryViewModel::class.java)
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
@@ -64,6 +62,7 @@ class LibraryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.fetchShuffleState()
         displayAlbums()
         displayDevices()
         displayCategories()
@@ -105,6 +104,8 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    /** Methods for listeners **/
+
     private fun deleteSelectedCategories() {
         viewModel.deleteSelectedCategories()
         viewModel.updateAlbumSelection()
@@ -124,35 +125,6 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    fun playAlbum(albumID: String) {
-        if (viewModel.queueState) {
-            queueAlbum(albumID)
-        } else {
-            if (viewModel.selectedDevice != "") {
-                spotifyConnection.setShuffle(viewModel.shuffleState, viewModel.selectedDevice)
-                spotifyConnection.playAlbum(albumID, viewModel.selectedDevice)
-            } else {
-                Log.w("LibraryActivity", "No device selected")
-            }
-        }
-    }
-
-    private fun queueAlbum(albumID: String) {
-        if (viewModel.selectedDevice != "") {
-            GlobalScope.launch(Dispatchers.Default) {
-                val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
-                if (viewModel.shuffleState) {
-                    trackIDs.shuffle()
-                }
-                for (trackID in trackIDs) {
-                    spotifyConnection.queueSong(trackID, viewModel.selectedDevice)
-                }
-            }
-        } else {
-            Log.w("LibraryActivity", "No device selected")
-        }
-    }
-
     fun displayRandomAlbum() {
         val album = viewModel.getRandomAlbum()
         if (album != null) {
@@ -168,31 +140,8 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    fun refreshAlbum(albumID: String) = runBlocking {
-        if (viewModel.checkForAlbum(albumID)) {
-            val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
-            val details = spotifyConnection.fetchAlbumDetails(albumID)
-
-            if (details.has("name") && details.has("artists")) {
-                val albumTitle = details.getString("name")
-
-                var artistName = "No Artist Info"
-
-                val artists = details.getJSONArray("artists")
-                if (artists.length() == 1) {
-                    val artist = artists.getJSONObject(0)
-                    artistName = artist.getString("name")
-                } else if (artists.length() > 1) {
-                    artistName = "Several Artists"
-                }
-                val album = Album(albumID, albumTitle, artistName, durationMS)
-                viewModel.updateAlbum(album)
-            }
-
-            viewModel.fetchAlbums()
-            viewModel.updateCategories()
-            viewModel.updateAlbumSelection()
-        }
+    fun playAlbum(albumID: String) {
+        viewModel.playAlbum(albumID)
     }
 
     fun deleteAlbum(album: Album) {
@@ -201,6 +150,8 @@ class LibraryFragment : Fragment() {
         adapter.removeItem(album)
         adapter.notifyDataSetChanged()
     }
+
+    /** Methods for updating the UI **/
 
     fun displayAlbumDetails(album: Album) {
         val transaction = fragmentManager?.beginTransaction()
@@ -247,16 +198,10 @@ class LibraryFragment : Fragment() {
 
     private fun displayDevices() {
         GlobalScope.launch(Dispatchers.Default) {
-            val deviceList = spotifyConnection.fetchDevices()
+            val deviceList = viewModel.fetchDevices()
             withContext(Dispatchers.Main) {
                 devices.adapter = context?.let { DeviceAdapter(it, deviceList) }
             }
-        }
-    }
-
-    private fun setShuffleState() {
-        GlobalScope.launch(Dispatchers.Default) {
-            viewModel.shuffleState = spotifyConnection.fetchShuffleState()
         }
     }
 }
