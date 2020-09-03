@@ -10,7 +10,6 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.fragment_library.*
@@ -21,13 +20,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
-import no.birg.albumselector.screens.search.SearchFragment
 import no.birg.albumselector.adapters.AlbumAdapter
 import no.birg.albumselector.adapters.CategorySelectorAdapter
 import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
+import no.birg.albumselector.screens.search.SearchFragment
 import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
@@ -145,11 +144,7 @@ class LibraryFragment : Fragment() {
     }
 
     fun addAlbum(album: Album) {
-        if (!viewModel.addAlbum(album)) {
-            GlobalScope.launch(Dispatchers.Main) {
-                Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
-            }
-        }
+        viewModel.addAlbum(album)
     }
 
     fun playAlbum(albumID: String) {

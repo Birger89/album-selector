@@ -8,7 +8,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import no.birg.albumselector.database.*
 import no.birg.albumselector.spotify.SpotifyConnection
-import org.json.JSONArray
 import org.json.JSONObject
 
 class LibraryViewModel constructor(
@@ -28,13 +27,8 @@ class LibraryViewModel constructor(
 
     /** Methods dealing with albums **/
 
-    fun addAlbum(album: Album) : Boolean {
-        if (!albumDao.checkRecord(album.aid)) {
-            albumDao.insert(album)
-            albums.add(0, album)
-            return true
-        }
-        return false
+    fun addAlbum(album: Album) {
+        albums.add(0, album)
     }
 
     fun deleteAlbum(album: Album) {
@@ -69,7 +63,7 @@ class LibraryViewModel constructor(
         albumDao.update(album)
     }
 
-    fun checkForAlbum(albumID: String) : Boolean {
+    private fun checkForAlbum(albumID: String) : Boolean {
         return albumDao.checkRecord(albumID)
     }
 
@@ -134,20 +128,8 @@ class LibraryViewModel constructor(
 
     /** Methods accessing Spotify **/
 
-    fun search(query: String) : JSONArray {
-        return spotifyConnection.search(query)
-    }
-
-    fun fetchUsername() : String {
-        return spotifyConnection.fetchUsername()
-    }
-
     fun fetchAlbumDetails(albumID: String) : JSONObject {
         return spotifyConnection.fetchAlbumDetails(albumID)
-    }
-
-    fun fetchAlbumDurationMS(albumID: String) : Int {
-        return spotifyConnection.fetchAlbumDurationMS(albumID)
     }
 
     fun refreshAlbum(albumID: String) = runBlocking {

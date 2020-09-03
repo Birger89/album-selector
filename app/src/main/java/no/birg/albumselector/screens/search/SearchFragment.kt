@@ -5,30 +5,51 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.ResultAdapter
 import no.birg.albumselector.database.Album
+import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.screens.library.LibraryFragment
+import no.birg.albumselector.spotify.SpotifyConnection
 import org.json.JSONObject
 
 class SearchFragment(
     private val libraryFragment: LibraryFragment
 ) : Fragment() {
 
+    private lateinit var viewModelFactory: SearchViewModelFactory
+    lateinit var viewModel: SearchViewModel
+
+    private lateinit var albumDao: AlbumDao
+    private lateinit var spotifyConnection: SpotifyConnection
+
     private lateinit var searchView: View
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        albumDao = (activity as MainActivity).albumDao
+        spotifyConnection = (activity as MainActivity).spotifyConnection
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        viewModelFactory = SearchViewModelFactory(albumDao, spotifyConnection)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(SearchViewModel::class.java)
 
         /* This stores the entire view for retrieving when going back from viewing album details.
          * This might not otherwise be good practice, but is acceptable here since there will never
@@ -52,7 +73,7 @@ class SearchFragment(
             val query = search_field.text.toString()
 
             if (query != "") {
-                val results = libraryFragment.viewModel.search(search_field.text.toString())
+                val results = viewModel.search(search_field.text.toString())
                 withContext(Dispatchers.Main) {
                     val adapter = context?.let {
                         ResultAdapter(it, results, this@SearchFragment)
@@ -80,7 +101,7 @@ class SearchFragment(
 
     private fun displayUsername() {
         GlobalScope.launch(Dispatchers.Default) {
-            val username = libraryFragment.viewModel.fetchUsername()
+            val username = viewModel.fetchUsername()
 
             withContext(Dispatchers.Main) {
                 name_text_view.text = username
@@ -90,17 +111,24 @@ class SearchFragment(
 
     fun addAlbum(id: String, title: String, artistName: String) {
         GlobalScope.launch(Dispatchers.Default) {
-            val durationMS = libraryFragment.viewModel.fetchAlbumDurationMS(id)
+            val durationMS = viewModel.fetchAlbumDurationMS(id)
             val album = Album(id, title, artistName, durationMS)
-            libraryFragment.addAlbum(album)
+
+            if (!viewModel.addAlbum(album)) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                libraryFragment.addAlbum(album)
+            }
         }
     }
 
     fun checkRecord(albumID: String) : Boolean {
-        return libraryFragment.viewModel.checkForAlbum(albumID)
+        return viewModel.checkForAlbum(albumID)
     }
 
     fun fetchAlbumDetails(albumID: String) : JSONObject {
-        return libraryFragment.viewModel.fetchAlbumDetails(albumID)
+        return viewModel.fetchAlbumDetails(albumID)
     }
 }
