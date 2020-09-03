@@ -21,7 +21,7 @@ import org.json.JSONObject
 class ResultAdapter(
     private val context: Context,
     private val results: JSONArray,
-    private val fragment: SearchFragment
+    private val searchFragment: SearchFragment
 ) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -72,12 +72,12 @@ class ResultAdapter(
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            fragment.addAlbum(id, title, artistName)
+            searchFragment.addAlbum(id, title, artistName)
             holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
         }
 
         GlobalScope.launch(Dispatchers.Default) {
-            val inLibrary = fragment.checkRecord(id)
+            val inLibrary = searchFragment.checkRecord(id)
             withContext(Dispatchers.Main) {
                 if (inLibrary) {
                     holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
@@ -88,7 +88,7 @@ class ResultAdapter(
         }
 
         resultView.setOnClickListener {
-            fragment.displayAlbumDetails(id, title, artistName)
+            searchFragment.displayAlbumDetails(id, title, artistName)
         }
 
         return resultView
