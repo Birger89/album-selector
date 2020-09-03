@@ -14,7 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
-import no.birg.albumselector.SearchFragment
+import no.birg.albumselector.screens.search.SearchFragment
 import org.json.JSONArray
 import org.json.JSONObject
 

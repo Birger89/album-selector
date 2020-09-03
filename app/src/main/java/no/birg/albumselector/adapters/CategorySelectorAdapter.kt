@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.CheckBox
 import kotlinx.android.synthetic.main.category_item.view.*
-import no.birg.albumselector.LibraryFragment
 import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
+import no.birg.albumselector.screens.library.LibraryFragment
 
 class CategorySelectorAdapter(context: Context, private val categories: List<CategoryWithAlbums>, fragment: LibraryFragment) : BaseAdapter() {
 

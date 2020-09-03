@@ -1,26 +1,32 @@
-package no.birg.albumselector
+package no.birg.albumselector.screens.search
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import no.birg.albumselector.R
 import no.birg.albumselector.adapters.ResultAdapter
 import no.birg.albumselector.database.Album
+import no.birg.albumselector.screens.library.LibraryFragment
 import org.json.JSONObject
 
-class SearchFragment(fragment: LibraryFragment) : Fragment() {
-
-    private val libraryFragment = fragment
+class SearchFragment(
+    private val libraryFragment: LibraryFragment
+) : Fragment() {
 
     private lateinit var searchView: View
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
@@ -63,7 +69,8 @@ class SearchFragment(fragment: LibraryFragment) : Fragment() {
         val transaction = fragmentManager?.beginTransaction()
 
         if (transaction != null) {
-            transaction.replace(R.id.main_frame, ResultDetailsFragment(aid, title, artist, this))
+            transaction.replace(R.id.main_frame,
+                ResultDetailsFragment(aid, title, artist, this))
             transaction.addToBackStack(null)
             transaction.commit()
         } else {

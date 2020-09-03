@@ -1,18 +1,27 @@
-package no.birg.albumselector
+package no.birg.albumselector.screens.library
 
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.*
-import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import no.birg.albumselector.MainActivity
+import no.birg.albumselector.R
+import no.birg.albumselector.screens.search.SearchFragment
 import no.birg.albumselector.adapters.AlbumAdapter
 import no.birg.albumselector.adapters.CategorySelectorAdapter
 import no.birg.albumselector.adapters.DeviceAdapter
@@ -42,9 +51,11 @@ class LibraryFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyConnection)
         viewModel = ViewModelProvider(this, viewModelFactory).get(LibraryViewModel::class.java)
 
@@ -96,7 +107,8 @@ class LibraryFragment : Fragment() {
         return object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 if (parent != null) {
-                    viewModel.selectedDevice = (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
+                    viewModel.selectedDevice =
+                        (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
                 }
             }
 

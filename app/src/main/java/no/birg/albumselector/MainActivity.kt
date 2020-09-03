@@ -1,14 +1,15 @@
 package no.birg.albumselector
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
+import no.birg.albumselector.screens.library.LibraryFragment
 import no.birg.albumselector.spotify.SpotifyConnection
 
 class MainActivity : AppCompatActivity() {

@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.screens.library
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
