@@ -11,12 +11,14 @@ import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.screens.library.LibraryFragment
 
-class CategorySelectorAdapter(context: Context, private val categories: List<CategoryWithAlbums>, fragment: LibraryFragment) : BaseAdapter() {
+class CategorySelectorAdapter(
+    context: Context,
+    private val categories: List<CategoryWithAlbums>,
+    private val libraryFragment: LibraryFragment
+) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    private val mFragment = fragment
 
     override fun getCount(): Int {
         return categories.count()
@@ -51,16 +53,16 @@ class CategorySelectorAdapter(context: Context, private val categories: List<Cat
 
         // Clears the checkListener to avoid unwanted updates from recycling views.
         holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        holder.categoryCheckBox.isChecked = category in mFragment.viewModel.selectedCategories
+        holder.categoryCheckBox.isChecked = category in libraryFragment.viewModel.selectedCategories
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                mFragment.viewModel.selectedCategories.add(category)
-                mFragment.viewModel.updateAlbumSelection()
-                mFragment.displayAlbums()
+                libraryFragment.viewModel.selectedCategories.add(category)
+                libraryFragment.viewModel.updateAlbumSelection()
+                libraryFragment.displayAlbums()
             } else {
-                mFragment.viewModel.selectedCategories.remove(category)
-                mFragment.viewModel.updateAlbumSelection()
-                mFragment.displayAlbums()
+                libraryFragment.viewModel.selectedCategories.remove(category)
+                libraryFragment.viewModel.updateAlbumSelection()
+                libraryFragment.displayAlbums()
             }
         }
 

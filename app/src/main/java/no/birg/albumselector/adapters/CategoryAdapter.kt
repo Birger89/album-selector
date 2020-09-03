@@ -11,12 +11,14 @@ import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.screens.library.AlbumFragment
 
-class CategoryAdapter(context: Context, private val categories: ArrayList<CategoryWithAlbums>, fragment: AlbumFragment) : BaseAdapter() {
+class CategoryAdapter(
+    context: Context,
+    private val categories: ArrayList<CategoryWithAlbums>,
+    private val albumFragment: AlbumFragment
+) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    private val mFragment = fragment
 
     override fun getCount(): Int {
         return categories.size
@@ -55,14 +57,14 @@ class CategoryAdapter(context: Context, private val categories: ArrayList<Catego
 
         // Clears the checkListener to avoid unwanted updates from recycling views.
         holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        holder.categoryCheckBox.isChecked = mFragment.mAlbum in category.albums
+        holder.categoryCheckBox.isChecked = albumFragment.album in category.albums
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                category.albums.add(mFragment.mAlbum)
-                mFragment.setCategory(category.category)
+                category.albums.add(albumFragment.album)
+                albumFragment.setCategory(category.category)
             } else {
-                category.albums.remove(mFragment.mAlbum)
-                mFragment.unsetCategory(category.category)
+                category.albums.remove(albumFragment.album)
+                albumFragment.unsetCategory(category.category)
             }
         }
         return categoryView
@@ -71,4 +73,3 @@ class CategoryAdapter(context: Context, private val categories: ArrayList<Catego
         lateinit var categoryCheckBox: CheckBox
     }
 }
-

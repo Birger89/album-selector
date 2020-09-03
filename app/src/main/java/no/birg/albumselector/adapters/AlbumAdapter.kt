@@ -12,12 +12,14 @@ import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.screens.library.LibraryFragment
 
-class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fragment: LibraryFragment) : BaseAdapter() {
+class AlbumAdapter(
+    context: Context,
+    private val albums: MutableList<Album>,
+    private val libraryFragment: LibraryFragment
+) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    private val mFragment: LibraryFragment = fragment
 
     override fun getCount(): Int {
         return albums.size
@@ -60,13 +62,13 @@ class AlbumAdapter(context: Context, private val albums: MutableList<Album>, fra
         holder.artistTextView.text = album.artistName
 
         holder.playButton.setOnClickListener {
-            mFragment.playAlbum(album.aid)
+            libraryFragment.playAlbum(album.aid)
         }
         holder.removeButton.setOnClickListener {
-            mFragment.deleteAlbum(album)
+            libraryFragment.deleteAlbum(album)
         }
         albumView.setOnClickListener {
-            mFragment.displayAlbumDetails(album)
+            libraryFragment.displayAlbumDetails(album)
         }
 
         return albumView

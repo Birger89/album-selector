@@ -10,7 +10,10 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.device_item.view.*
 import no.birg.albumselector.R
 
-class DeviceAdapter(context: Context, private val devices: MutableList<Pair<String, String>>) : BaseAdapter() {
+class DeviceAdapter(
+    context: Context,
+    private val devices: MutableList<Pair<String, String>>
+) : BaseAdapter() {
 
     private val inflater: LayoutInflater
             = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater

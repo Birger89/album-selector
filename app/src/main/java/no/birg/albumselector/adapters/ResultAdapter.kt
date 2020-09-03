@@ -18,13 +18,14 @@ import no.birg.albumselector.screens.search.SearchFragment
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ResultAdapter(context: Context, private val results: JSONArray, fragment: SearchFragment) : BaseAdapter() {
+class ResultAdapter(
+    private val context: Context,
+    private val results: JSONArray,
+    private val fragment: SearchFragment
+) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    private val mFragment: SearchFragment = fragment
-    private val mContext = context
 
     override fun getCount(): Int {
         return results.length()
@@ -71,23 +72,23 @@ class ResultAdapter(context: Context, private val results: JSONArray, fragment: 
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            mFragment.addAlbum(id, title, artistName)
-            holder.addButton.setTextColor(ContextCompat.getColor(mContext, R.color.spotifyGreen))
+            fragment.addAlbum(id, title, artistName)
+            holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
         }
 
         GlobalScope.launch(Dispatchers.Default) {
-            val inLibrary = mFragment.checkRecord(id)
+            val inLibrary = fragment.checkRecord(id)
             withContext(Dispatchers.Main) {
                 if (inLibrary) {
-                    holder.addButton.setTextColor(ContextCompat.getColor(mContext, R.color.spotifyGreen))
+                    holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
                 } else {
-                    holder.addButton.setTextColor(ContextCompat.getColor(mContext, android.R.color.white))
+                    holder.addButton.setTextColor(ContextCompat.getColor(context, android.R.color.white))
                 }
             }
         }
 
         resultView.setOnClickListener {
-            mFragment.displayAlbumDetails(id, title, artistName)
+            fragment.displayAlbumDetails(id, title, artistName)
         }
 
         return resultView
