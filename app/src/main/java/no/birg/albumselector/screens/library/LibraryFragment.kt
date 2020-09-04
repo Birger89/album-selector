@@ -31,7 +31,6 @@ import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
 
-    private lateinit var viewModelFactory: LibraryViewModelFactory
     lateinit var viewModel: LibraryViewModel
 
     private lateinit var albumDao: AlbumDao
@@ -55,8 +54,8 @@ class LibraryFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyConnection)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(LibraryViewModel::class.java)
+        val viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyConnection)
+        viewModel = activity?.let { ViewModelProvider(it, viewModelFactory).get(LibraryViewModel::class.java) }!!
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 

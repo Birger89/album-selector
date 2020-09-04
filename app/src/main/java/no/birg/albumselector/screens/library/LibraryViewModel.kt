@@ -21,9 +21,9 @@ class LibraryViewModel constructor(
     var filterText: String = ""
     var albums: ArrayList<Album> = arrayListOf()
     var displayedAlbums: MutableList<Album> = arrayListOf()
-    var shuffledAlbumList: MutableList<Album> = arrayListOf()
+    private var shuffledAlbumList: MutableList<Album> = arrayListOf()
     val selectedCategories: MutableList<CategoryWithAlbums> = mutableListOf()
-
+    var selectedAlbum: Album = Album("","","",0)
 
     /** Methods dealing with albums **/
 

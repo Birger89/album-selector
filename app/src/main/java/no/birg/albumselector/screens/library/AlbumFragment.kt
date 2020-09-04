@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
@@ -21,10 +22,10 @@ import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
 
-class AlbumFragment(
-    val album: Album,
-    private val libraryFragment: LibraryFragment
-) : Fragment() {
+class AlbumFragment : Fragment() {
+
+    private lateinit var viewModel: LibraryViewModel
+    lateinit var album: Album
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,13 +33,16 @@ class AlbumFragment(
         savedInstanceState: Bundle?
     ): View? {
 
+        viewModel = activity?.let { ViewModelProvider(it).get(LibraryViewModel::class.java) }!!
+        album = viewModel.selectedAlbum
+
         val view = inflater.inflate(R.layout.fragment_album, container, false)
 
         if (album.title == null || album.artistName == null || album.durationMS == 0) {
             GlobalScope.launch(Dispatchers.Default) {
-                libraryFragment.viewModel.refreshAlbum(album.aid)
+                viewModel.refreshAlbum(album.aid)
 
-                val refreshedAlbum = libraryFragment.viewModel.getAlbumById(album.aid)
+                val refreshedAlbum = viewModel.getAlbumById(album.aid)
 
                 withContext(Dispatchers.Main) {
                     view.album_title.text = refreshedAlbum.title
@@ -62,13 +66,13 @@ class AlbumFragment(
         }
         view.album_duration.text = toHoursAndMinutes(album.durationMS)
 
-        view.shuffle_switch.isChecked = libraryFragment.viewModel.shuffleState
-        view.queue_switch.isChecked = libraryFragment.viewModel.queueState
+        view.shuffle_switch.isChecked = viewModel.shuffleState
+        view.queue_switch.isChecked = viewModel.queueState
 
         GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = libraryFragment.viewModel.fetchAlbumDetails(album.aid)
+            val albumDetails = viewModel.fetchAlbumDetails(album.aid)
 
-            val categories = libraryFragment.viewModel.getCategories()
+            val categories = viewModel.getCategories()
 
             withContext(Dispatchers.Main) {
                 if ( !albumDetails.has("images")) {
@@ -82,12 +86,12 @@ class AlbumFragment(
                             .into(view.album_cover)
                     }
                 }
-                view.play_button.setOnClickListener { libraryFragment.playAlbum(album.aid) }
-                view.next_random_button.setOnClickListener { libraryFragment.displayRandomAlbum() }
+                view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
+//                view.next_random_button.setOnClickListener { selectRandomAlbum() }
                 view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
-                    libraryFragment.viewModel.queueState = isChecked }
+                    viewModel.queueState = isChecked }
                 view.shuffle_switch.setOnCheckedChangeListener { _, isChecked ->
-                    libraryFragment.viewModel.shuffleState = isChecked }
+                    viewModel.shuffleState = isChecked }
 
                 view.category_listview.adapter = context?.let {
                     CategoryAdapter(it, categories, this@AlbumFragment)
@@ -107,13 +111,13 @@ class AlbumFragment(
             val adapter = category_listview.adapter as CategoryAdapter
 
             GlobalScope.launch(Dispatchers.Default) {
-                if (libraryFragment.viewModel.checkForCategory(categoryName)) {
+                if (viewModel.checkForCategory(categoryName)) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(activity, "Category already exists",
                             Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    libraryFragment.viewModel.addCategory(categoryName)
+                    viewModel.addCategory(categoryName)
                     withContext(Dispatchers.Main) {
                         adapter.addItem(CategoryWithAlbums(category, mutableListOf()))
                         adapter.notifyDataSetChanged()
@@ -124,11 +128,11 @@ class AlbumFragment(
     }
 
     fun setCategory(category: Category) {
-        libraryFragment.viewModel.setCategory(category, album)
+        viewModel.setCategory(category, album)
     }
 
     fun unsetCategory(category: Category) {
-        libraryFragment.viewModel.unsetCategory(category, album)
+        viewModel.unsetCategory(category, album)
     }
 
     private fun toHoursAndMinutes(milliseconds: Int) : String {
