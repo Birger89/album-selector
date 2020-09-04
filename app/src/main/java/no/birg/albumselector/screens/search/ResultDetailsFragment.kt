@@ -45,7 +45,7 @@ class ResultDetailsFragment(
             }
 
             view.add_button.setOnClickListener {
-                searchFragment.addAlbum(albumID, albumTitle, albumArtist)
+                searchFragment.addAlbum(Album(albumID, albumTitle, albumArtist, 0))
                 context?.let { view.add_button.setTextColor(
                     ContextCompat.getColor(it, R.color.spotifyGreen)
                 ) }

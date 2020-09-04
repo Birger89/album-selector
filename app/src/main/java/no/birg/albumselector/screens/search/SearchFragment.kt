@@ -109,17 +109,14 @@ class SearchFragment(
         }
     }
 
-    fun addAlbum(id: String, title: String, artistName: String) {
+    fun addAlbum(album: Album) {
         GlobalScope.launch(Dispatchers.Default) {
-            val durationMS = viewModel.fetchAlbumDurationMS(id)
-            val album = Album(id, title, artistName, durationMS)
-
-            if (!viewModel.addAlbum(album)) {
+            if (viewModel.addAlbum(album)) {
+                libraryViewModel.addAlbum(album)
+            } else {
                 GlobalScope.launch(Dispatchers.Main) {
                     Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                libraryFragment.addAlbum(album)
             }
         }
     }
