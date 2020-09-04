@@ -21,7 +21,7 @@ import no.birg.albumselector.screens.library.LibraryViewModel
 class ResultDetailsFragment: Fragment() {
 
     private lateinit var viewModel: SearchViewModel
-    lateinit var libraryViewModel: LibraryViewModel
+    private lateinit var libraryViewModel: LibraryViewModel
     lateinit var album: Album
 
     override fun onCreateView(

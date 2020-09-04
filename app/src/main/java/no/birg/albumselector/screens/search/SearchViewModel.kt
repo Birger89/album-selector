@@ -48,7 +48,7 @@ class SearchViewModel constructor(
         return spotifyConnection.fetchAlbumDetails(albumID)
     }
 
-    fun fetchAlbumDurationMS(albumID: String) : Int {
+    private fun fetchAlbumDurationMS(albumID: String) : Int {
         return spotifyConnection.fetchAlbumDurationMS(albumID)
     }
 }

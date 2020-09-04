@@ -22,13 +22,12 @@ import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.screens.library.LibraryViewModel
 import no.birg.albumselector.spotify.SpotifyConnection
-import org.json.JSONObject
 
 class SearchFragment : Fragment() {
 
     private lateinit var viewModelFactory: SearchViewModelFactory
     lateinit var viewModel: SearchViewModel
-    lateinit var libraryViewModel: LibraryViewModel
+    private lateinit var libraryViewModel: LibraryViewModel
 
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
@@ -118,9 +117,5 @@ class SearchFragment : Fragment() {
 
     fun checkRecord(albumID: String) : Boolean {
         return viewModel.checkForAlbum(albumID)
-    }
-
-    fun fetchAlbumDetails(albumID: String) : JSONObject {
-        return viewModel.fetchAlbumDetails(albumID)
     }
 }
