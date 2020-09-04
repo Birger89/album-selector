@@ -12,6 +12,8 @@ class SearchViewModel constructor(
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
 
+    var selectedResult: Album = Album("","","",0)
+
     /** Methods dealing with albums **/
 
     fun addAlbum(album: Album) : Boolean {

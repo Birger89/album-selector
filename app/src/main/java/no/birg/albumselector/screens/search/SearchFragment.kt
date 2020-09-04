@@ -19,16 +19,15 @@ import no.birg.albumselector.R
 import no.birg.albumselector.adapters.ResultAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
-import no.birg.albumselector.screens.library.LibraryFragment
+import no.birg.albumselector.screens.library.LibraryViewModel
 import no.birg.albumselector.spotify.SpotifyConnection
 import org.json.JSONObject
 
-class SearchFragment(
-    private val libraryFragment: LibraryFragment
-) : Fragment() {
+class SearchFragment : Fragment() {
 
     private lateinit var viewModelFactory: SearchViewModelFactory
     lateinit var viewModel: SearchViewModel
+    lateinit var libraryViewModel: LibraryViewModel
 
     private lateinit var albumDao: AlbumDao
     private lateinit var spotifyConnection: SpotifyConnection
@@ -49,7 +48,11 @@ class SearchFragment(
     ): View? {
 
         viewModelFactory = SearchViewModelFactory(albumDao, spotifyConnection)
-        viewModel = ViewModelProvider(this, viewModelFactory).get(SearchViewModel::class.java)
+        viewModel = activity?.let {
+            ViewModelProvider(it, viewModelFactory).get(SearchViewModel::class.java) }!!
+
+        libraryViewModel = activity?.let {
+            ViewModelProvider(it).get(LibraryViewModel::class.java) }!!
 
         /* This stores the entire view for retrieving when going back from viewing album details.
          * This might not otherwise be good practice, but is acceptable here since there will never

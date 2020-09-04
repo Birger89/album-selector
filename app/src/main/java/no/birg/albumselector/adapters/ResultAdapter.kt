@@ -89,7 +89,8 @@ class ResultAdapter(
         }
 
         resultView.setOnClickListener {
-            searchFragment.displayAlbumDetails(id, title, artistName)
+            searchFragment.viewModel.selectedResult = Album(id, title, artistName, 0 )
+            searchFragment.displayAlbumDetails()
         }
 
         return resultView
