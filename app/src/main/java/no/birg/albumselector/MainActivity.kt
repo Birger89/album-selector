@@ -5,11 +5,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentManager
+import androidx.navigation.findNavController
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
-import no.birg.albumselector.screens.library.LibraryFragment
 import no.birg.albumselector.spotify.SpotifyConnection
 
 class MainActivity : AppCompatActivity() {
@@ -36,11 +35,6 @@ class MainActivity : AppCompatActivity() {
         if (startUp) {
             setContentView(R.layout.activity_main)
             setSupportActionBar(findViewById(R.id.toolbar))
-
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.add(R.id.main_frame, LibraryFragment())
-            transaction.commit()
-
             startUp = false
         }
     }
@@ -51,12 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.home_button -> {
-            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            true
-        }
-        else -> {
-            super.onOptionsItemSelected(item)
-        }
+        R.id.home_button -> { findNavController(R.id.nav_host_fragment_container).navigateUp() }
+        else -> { super.onOptionsItemSelected(item) }
     }
 }

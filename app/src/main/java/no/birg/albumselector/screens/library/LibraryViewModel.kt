@@ -48,7 +48,14 @@ class LibraryViewModel constructor(
         return albumDao.getByID(albumID)
     }
 
-    fun getRandomAlbum() : Album? {
+    fun selectRandomAlbum() {
+        val album = getRandomAlbum()
+        if (album != null) {
+            selectedAlbum = album
+        }
+    }
+
+    private fun getRandomAlbum() : Album? {
         var album: Album? = null
         if (displayedAlbums.size != 0) {
             if (shuffledAlbumList.size == 0) {

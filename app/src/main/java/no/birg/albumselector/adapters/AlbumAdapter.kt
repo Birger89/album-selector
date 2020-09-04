@@ -61,15 +61,9 @@ class AlbumAdapter(
         holder.titleTextView.text = album.title
         holder.artistTextView.text = album.artistName
 
-        holder.playButton.setOnClickListener {
-            libraryFragment.playAlbum(album.aid)
-        }
-        holder.removeButton.setOnClickListener {
-            libraryFragment.deleteAlbum(album)
-        }
-        albumView.setOnClickListener {
-            libraryFragment.displayAlbumDetails(album)
-        }
+        holder.playButton.setOnClickListener { libraryFragment.playAlbum(album.aid) }
+        holder.removeButton.setOnClickListener { libraryFragment.deleteAlbum(album) }
+        albumView.setOnClickListener { libraryFragment.selectAlbum(album) }
 
         return albumView
     }

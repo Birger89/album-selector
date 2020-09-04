@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,6 @@ import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
-import no.birg.albumselector.screens.search.SearchFragment
 import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
@@ -60,7 +60,7 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
         view.search_button.setOnClickListener{ goToSearch() }
-        view.display_random_button.setOnClickListener{ displayRandomAlbum() }
+        view.display_random_button.setOnClickListener{ selectRandomAlbum() }
         view.filter_text.addTextChangedListener(filterTextChangeListener())
         view.devices.onItemSelectedListener = deviceSelectedListener()
         view.delete_selected_categories.setOnClickListener { deleteSelectedCategories() }
@@ -114,6 +114,16 @@ class LibraryFragment : Fragment() {
         }
     }
 
+    /** Navigation methods **/
+
+    private fun goToSearch() {
+        view?.findNavController()?.navigate(R.id.action_libraryFragment_to_searchFragment)
+    }
+
+    private fun displayAlbumDetails() {
+        view?.findNavController()?.navigate(R.id.action_libraryFragment_to_albumFragment)
+    }
+
     /** Methods for listeners **/
 
     private fun deleteSelectedCategories() {
@@ -123,27 +133,14 @@ class LibraryFragment : Fragment() {
         displayAlbums()
     }
 
-    private fun goToSearch() {
-        val transaction = fragmentManager?.beginTransaction()
-
-        if (transaction != null) {
-            transaction.replace(R.id.main_frame, SearchFragment(this))
-            transaction.addToBackStack(null)
-            transaction.commit()
-        } else {
-            Log.e("LibraryFragment", "fragmentManager is null")
-        }
+    fun selectAlbum(album: Album) {
+        viewModel.selectedAlbum = album
+        displayAlbumDetails()
     }
 
-    fun displayRandomAlbum() {
-        val album = viewModel.getRandomAlbum()
-        if (album != null) {
-            displayAlbumDetails(album)
-        }
-    }
-
-    fun addAlbum(album: Album) {
-        viewModel.addAlbum(album)
+    private fun selectRandomAlbum() {
+        viewModel.selectRandomAlbum()
+        displayAlbumDetails()
     }
 
     fun playAlbum(albumID: String) {
@@ -158,18 +155,6 @@ class LibraryFragment : Fragment() {
     }
 
     /** Methods for updating the UI **/
-
-    fun displayAlbumDetails(album: Album) {
-        val transaction = fragmentManager?.beginTransaction()
-
-        if (transaction != null) {
-            transaction.replace(R.id.main_frame, AlbumFragment(album, this))
-            transaction.addToBackStack(null)
-            transaction.commit()
-        } else {
-            Log.e("LibraryFragment", "fragmentManager is null")
-        }
-    }
 
     fun displayAlbums() {
         GlobalScope.launch(Dispatchers.Default) {

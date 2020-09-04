@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
@@ -87,7 +88,7 @@ class AlbumFragment : Fragment() {
                     }
                 }
                 view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
-//                view.next_random_button.setOnClickListener { selectRandomAlbum() }
+                view.next_random_button.setOnClickListener { selectRandomAlbum() }
                 view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
                     viewModel.queueState = isChecked }
                 view.shuffle_switch.setOnCheckedChangeListener { _, isChecked ->
@@ -103,6 +104,11 @@ class AlbumFragment : Fragment() {
             }
         }
         return view
+    }
+
+    private fun selectRandomAlbum() {
+        viewModel.selectRandomAlbum()
+        view?.findNavController()?.navigate(R.id.action_albumFragment_self)
     }
 
     private fun addCategory(categoryName: String) {
