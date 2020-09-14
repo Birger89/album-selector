@@ -63,7 +63,7 @@ class LibraryFragment : Fragment() {
             displayAlbums(it.asReversed())
         })
         viewModel.categories.observe(viewLifecycleOwner, Observer {
-            displayCategories(it as ArrayList<CategoryWithAlbums>)
+            displayCategories(it)
         })
         viewModel.selectedCategories.observe(viewLifecycleOwner, Observer {
             viewModel.updateAlbumSelection()
@@ -153,7 +153,7 @@ class LibraryFragment : Fragment() {
 
     /** Methods for updating the UI **/
 
-    private fun displayAlbums(albums: MutableList<Album>) {
+    private fun displayAlbums(albums: List<Album>) {
         library_albums.adapter = context?.let {
             AlbumAdapter(it, albums, this@LibraryFragment)
         }
@@ -163,13 +163,13 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
+    private fun displayCategories(categories: List<CategoryWithAlbums>) {
         category_spinner.adapter = context?.let {
             CategorySelectorAdapter(it, categories, viewModel)
         }
     }
 
-    private fun displayDevices(deviceList: MutableList<Pair<String, String>>) {
+    private fun displayDevices(deviceList: List<Pair<String, String>>) {
         devices.adapter = context?.let { DeviceAdapter(it, deviceList) }
 
         // Restore selected device

@@ -13,7 +13,7 @@ import no.birg.albumselector.screens.library.AlbumFragment
 
 class CategoryAdapter(
     context: Context,
-    private val categories: ArrayList<CategoryWithAlbums>,
+    private val categories: List<CategoryWithAlbums>,
     private val albumFragment: AlbumFragment
 ) : BaseAdapter() {
 

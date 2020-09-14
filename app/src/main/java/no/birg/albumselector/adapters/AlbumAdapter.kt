@@ -14,7 +14,7 @@ import no.birg.albumselector.screens.library.LibraryFragment
 
 class AlbumAdapter(
     context: Context,
-    private val albums: MutableList<Album>,
+    private val albums: List<Album>,
     private val libraryFragment: LibraryFragment
 ) : BaseAdapter() {
 

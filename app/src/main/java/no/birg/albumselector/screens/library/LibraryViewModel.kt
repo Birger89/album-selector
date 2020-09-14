@@ -19,15 +19,15 @@ class LibraryViewModel constructor(
     var queueState = false
     val shuffleState = MutableLiveData<Boolean>()
 
-    val devices = MutableLiveData<MutableList<Pair<String, String>>>()
+    val devices = MutableLiveData<List<Pair<String, String>>>()
     var selectedDevice: String = ""
 
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
-    val selectedCategories = MutableLiveData<MutableSet<String>>()
+    val selectedCategories = MutableLiveData<Set<String>>()
     var filterText: String = ""
 
     val albums: LiveData<List<Album>> = albumDao.getAll()
-    val displayedAlbums = MutableLiveData<MutableList<Album>>()
+    val displayedAlbums = MutableLiveData<List<Album>>()
     private var shuffledAlbumList: MutableList<Album> = arrayListOf()
     val selectedAlbum = MutableLiveData<Album>()
     val selectedAlbumDetails = MutableLiveData<JSONObject>()
@@ -35,9 +35,9 @@ class LibraryViewModel constructor(
 
     init {
         shuffleState.value = false
-        devices.value = mutableListOf()
+        devices.value = listOf()
         displayedAlbums.value = mutableListOf()
-        selectedCategories.value = mutableSetOf()
+        selectedCategories.value = setOf()
         selectedAlbumDetails.value = JSONObject()
         selectedAlbum.value = Album("","","",0)
         fetchDevices()
@@ -85,17 +85,18 @@ class LibraryViewModel constructor(
 
     fun updateAlbumSelection() {
         if (albums.value != null) {
-            displayedAlbums.value = albums.value?.toMutableList()
+            val filteredAlbums = albums.value?.toMutableList()
             if (selectedCategories.value?.isNotEmpty()!!) {
                 for (category in selectedCategories.value!!) {
-                    displayedAlbums.value?.retainAll(getCategory(category).albums)
+                    filteredAlbums?.retainAll(getCategory(category).albums)
                 }
             }
-            displayedAlbums.value?.retainAll { album ->
+            filteredAlbums?.retainAll { album ->
                 val artistAndTitle = "${album.artistName} ${album.title}"
                 artistAndTitle.contains(filterText, ignoreCase = true)
             }
-            shuffledAlbumList = displayedAlbums.value?.shuffled() as MutableList<Album>
+            shuffledAlbumList = filteredAlbums?.shuffled() as MutableList<Album>
+            displayedAlbums.value = filteredAlbums
         }
     }
 
@@ -235,17 +236,22 @@ class LibraryViewModel constructor(
 
     /** Extension functions **/
 
-    private fun <T> MutableLiveData<MutableSet<T>>.add(item: T) {
-        this.value?.add(item)
-        this.value = this.value
+    private fun <T> MutableLiveData<Set<T>>.add(item: T) {
+        var set = mutableSetOf<T>()
+        if (this.value?.isNotEmpty()!!) {
+            set = this.value as MutableSet
+        }
+        set.add(item)
+        this.value = set
     }
 
-    private fun <T> MutableLiveData<MutableSet<T>>.remove(item: T) {
-        this.value?.remove(item)
-        this.value = this.value
+    private fun <T> MutableLiveData<Set<T>>.remove(item: T) {
+        val set = this.value as MutableSet
+        set.remove(item)
+        this.value = set
     }
 
-    private fun <T> MutableLiveData<MutableSet<T>>.clear() {
+    private fun <T> MutableLiveData<Set<T>>.clear() {
         this.value = mutableSetOf()
     }
 }

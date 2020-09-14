@@ -12,7 +12,7 @@ import no.birg.albumselector.R
 
 class DeviceAdapter(
     context: Context,
-    private val devices: MutableList<Pair<String, String>>
+    private val devices: List<Pair<String, String>>
 ) : BaseAdapter() {
 
     private val inflater: LayoutInflater
