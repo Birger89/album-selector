@@ -1,11 +1,12 @@
 package no.birg.albumselector.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
 interface AlbumDao {
     @Query("SELECT * FROM albums")
-    fun getAll(): List<Album>
+    fun getAll(): LiveData<List<Album>>
 
     @Query("SELECT * FROM albums WHERE aid = :aid")
     fun getByID(aid: String): Album

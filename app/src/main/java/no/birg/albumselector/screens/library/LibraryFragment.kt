@@ -4,21 +4,17 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.AlbumAdapter
@@ -27,6 +23,7 @@ import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.CategoryDao
+import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
@@ -37,7 +34,8 @@ class LibraryFragment : Fragment() {
     private lateinit var categoryDao: CategoryDao
     private lateinit var spotifyConnection: SpotifyConnection
 
-    private lateinit var state: Parcelable
+    private lateinit var libraryAlbumsState: Parcelable
+    private lateinit var deviceSelectorState: Parcelable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +57,20 @@ class LibraryFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
+        /** Observers **/
+        viewModel.albums.observe(viewLifecycleOwner, Observer { viewModel.updateAlbumSelection() })
+        viewModel.displayedAlbums.observe(viewLifecycleOwner, Observer {
+            displayAlbums(it.asReversed())
+        })
+        viewModel.categories.observe(viewLifecycleOwner, Observer {
+            displayCategories(it as ArrayList<CategoryWithAlbums>)
+        })
+        viewModel.selectedCategories.observe(viewLifecycleOwner, Observer {
+            viewModel.updateAlbumSelection()
+        })
+        viewModel.devices.observe(viewLifecycleOwner, Observer { displayDevices(it) })
+
+        /** Event listeners **/
         view.search_button.setOnClickListener{ goToSearch() }
         view.display_random_button.setOnClickListener{ selectRandomAlbum() }
         view.filter_text.addTextChangedListener(filterTextChangeListener())
@@ -68,17 +80,9 @@ class LibraryFragment : Fragment() {
         return view
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        viewModel.fetchShuffleState()
-        displayAlbums()
-        displayDevices()
-        displayCategories()
-    }
-
     override fun onPause() {
-        state = library_albums.onSaveInstanceState()!!
+        libraryAlbumsState = library_albums.onSaveInstanceState()!!
+        deviceSelectorState = devices.onSaveInstanceState()!!
         super.onPause()
     }
 
@@ -89,30 +93,6 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    private fun filterTextChangeListener() : TextWatcher {
-        return object: TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                viewModel.filterText = filter_text.text.toString()
-                viewModel.updateAlbumSelection()
-                displayAlbums()
-            }
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
-        }
-    }
-
-    private fun deviceSelectedListener() : AdapterView.OnItemSelectedListener {
-        return object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-                if (parent != null) {
-                    viewModel.selectedDevice =
-                        (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-    }
 
     /** Navigation methods **/
 
@@ -128,13 +108,10 @@ class LibraryFragment : Fragment() {
 
     private fun deleteSelectedCategories() {
         viewModel.deleteSelectedCategories()
-        viewModel.updateAlbumSelection()
-        displayCategories()
-        displayAlbums()
     }
 
     fun selectAlbum(album: Album) {
-        viewModel.selectedAlbum = album
+        viewModel.selectAlbum(album)
         displayAlbumDetails()
     }
 
@@ -148,51 +125,56 @@ class LibraryFragment : Fragment() {
     }
 
     fun deleteAlbum(album: Album) {
-        val adapter = library_albums.adapter as AlbumAdapter
         viewModel.deleteAlbum(album)
-        adapter.removeItem(album)
-        adapter.notifyDataSetChanged()
+    }
+
+    private fun filterTextChangeListener() : TextWatcher {
+        return object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.filterText = filter_text.text.toString()
+                viewModel.updateAlbumSelection()
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+        }
+    }
+
+    private fun deviceSelectedListener() : AdapterView.OnItemSelectedListener {
+        return object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                if (parent != null) {
+                    viewModel.selectedDevice =
+                        (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
     }
 
     /** Methods for updating the UI **/
 
-    fun displayAlbums() {
-        GlobalScope.launch(Dispatchers.Default) {
-            if (viewModel.albums.isEmpty()) {
-                viewModel.fetchAlbums()
-            }
-            val adapter = context?.let {
-                AlbumAdapter(it, viewModel.displayedAlbums, this@LibraryFragment)
-            }
-
-            withContext(Dispatchers.Main) {
-                library_albums.adapter = adapter
-
-                if (this@LibraryFragment::state.isInitialized) {
-                    Log.d("LibraryFragment", "State restored: $state")
-                    library_albums.onRestoreInstanceState(state)
-                }
-            }
+    private fun displayAlbums(albums: MutableList<Album>) {
+        library_albums.adapter = context?.let {
+            AlbumAdapter(it, albums, this@LibraryFragment)
+        }
+        // Restore the scroll position
+        if (this@LibraryFragment::libraryAlbumsState.isInitialized) {
+            library_albums.onRestoreInstanceState(libraryAlbumsState)
         }
     }
 
-    private fun displayCategories() {
-        GlobalScope.launch(Dispatchers.Default) {
-            val categories = viewModel.getCategories()
-            withContext(Dispatchers.Main) {
-                category_spinner.adapter = context?.let {
-                    CategorySelectorAdapter(it, categories, this@LibraryFragment)
-                }
-            }
+    private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
+        category_spinner.adapter = context?.let {
+            CategorySelectorAdapter(it, categories, viewModel)
         }
     }
 
-    private fun displayDevices() {
-        GlobalScope.launch(Dispatchers.Default) {
-            val deviceList = viewModel.fetchDevices()
-            withContext(Dispatchers.Main) {
-                devices.adapter = context?.let { DeviceAdapter(it, deviceList) }
-            }
+    private fun displayDevices(deviceList: MutableList<Pair<String, String>>) {
+        devices.adapter = context?.let { DeviceAdapter(it, deviceList) }
+
+        // Restore selected device
+        if (this@LibraryFragment::deviceSelectorState.isInitialized) {
+            devices.onRestoreInstanceState(deviceSelectorState)
         }
     }
 }

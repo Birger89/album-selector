@@ -33,10 +33,6 @@ class AlbumAdapter(
         return position.toLong()
     }
 
-    fun removeItem(album: Album) {
-        albums.remove(album)
-    }
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val albumView: View
         val holder: ViewHolder

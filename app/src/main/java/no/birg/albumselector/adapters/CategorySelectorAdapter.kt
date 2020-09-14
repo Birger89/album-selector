@@ -9,12 +9,12 @@ import android.widget.CheckBox
 import kotlinx.android.synthetic.main.category_item.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
-import no.birg.albumselector.screens.library.LibraryFragment
+import no.birg.albumselector.screens.library.LibraryViewModel
 
 class CategorySelectorAdapter(
     context: Context,
     private val categories: List<CategoryWithAlbums>,
-    private val libraryFragment: LibraryFragment
+    private val viewModel: LibraryViewModel
 ) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -48,22 +48,18 @@ class CategorySelectorAdapter(
             holder = convertView.tag as ViewHolder
         }
 
-        val category = getItem(position)
-        holder.categoryCheckBox.text = category.category.cid
+        val category = getItem(position).category.cid
+        holder.categoryCheckBox.text = category
 
         // Clears the checkListener to avoid unwanted updates from recycling views.
         holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        holder.categoryCheckBox.isChecked = category in libraryFragment.viewModel.selectedCategories
+        val selectedCategories = viewModel.selectedCategories.value
+        if (selectedCategories != null) {
+            holder.categoryCheckBox.isChecked = category in selectedCategories
+        }
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                libraryFragment.viewModel.selectedCategories.add(category)
-                libraryFragment.viewModel.updateAlbumSelection()
-                libraryFragment.displayAlbums()
-            } else {
-                libraryFragment.viewModel.selectedCategories.remove(category)
-                libraryFragment.viewModel.updateAlbumSelection()
-                libraryFragment.displayAlbums()
-            }
+            if (isChecked) { viewModel.selectCategory(category) }
+            else { viewModel.deselectCategory(category) }
         }
 
         return categoryView

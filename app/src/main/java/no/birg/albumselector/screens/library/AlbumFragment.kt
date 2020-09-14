@@ -2,12 +2,15 @@ package no.birg.albumselector.screens.library
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
@@ -22,11 +25,14 @@ import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
+import org.json.JSONObject
 
 class AlbumFragment : Fragment() {
 
     private lateinit var viewModel: LibraryViewModel
     lateinit var album: Album
+
+    private lateinit var categorySelectorState: Parcelable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,98 +41,66 @@ class AlbumFragment : Fragment() {
     ): View? {
 
         viewModel = activity?.let { ViewModelProvider(it).get(LibraryViewModel::class.java) }!!
-        album = viewModel.selectedAlbum
+        album = viewModel.selectedAlbum.value!!
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
 
         if (album.title == null || album.artistName == null || album.durationMS == 0) {
-            GlobalScope.launch(Dispatchers.Default) {
-                viewModel.refreshAlbum(album.aid)
-
-                val refreshedAlbum = viewModel.getAlbumById(album.aid)
-
-                withContext(Dispatchers.Main) {
-                    view.album_title.text = refreshedAlbum.title
-                    view.artist_name.text = refreshedAlbum.artistName
-                    view.album_duration.text = toHoursAndMinutes(refreshedAlbum.durationMS)
-                }
-            }
+            viewModel.refreshAlbum(album.aid)
         }
 
-        view.album_title.text = album.title
-        view.album_title.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.album_title.isSingleLine = !view.album_title.isSingleLine
-            }
-        }
-        view.artist_name.text = album.artistName
-        view.artist_name.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                view.artist_name.isSingleLine = !view.artist_name.isSingleLine
-            }
-        }
-        view.album_duration.text = toHoursAndMinutes(album.durationMS)
-
-        view.shuffle_switch.isChecked = viewModel.shuffleState
         view.queue_switch.isChecked = viewModel.queueState
 
-        GlobalScope.launch(Dispatchers.Default) {
-            val albumDetails = viewModel.fetchAlbumDetails(album.aid)
+        /** Observers **/
+        viewModel.shuffleState.observe(viewLifecycleOwner, Observer {
+            view.shuffle_switch.isChecked = it
+        })
+        viewModel.selectedAlbum.observe(viewLifecycleOwner, Observer { displayAlbum(it) })
+        viewModel.selectedAlbumDetails.observe(viewLifecycleOwner, Observer {
+            displayMoreDetails(it)
+        })
+        viewModel.categories.observe(viewLifecycleOwner, Observer {
+            displayCategories(it.reversed() as ArrayList<CategoryWithAlbums>)
+        })
 
-            val categories = viewModel.getCategories()
-
-            withContext(Dispatchers.Main) {
-                if ( !albumDetails.has("images")) {
-                    Log.w("AlbumFragment", "Album has no images")
-                } else {
-                    val imageUrl = albumDetails.getJSONArray("images")
-                        .getJSONObject(0).getString("url")
-                    if (!imageUrl.isNullOrEmpty()) {
-                        Glide.with(view.context)
-                            .load(imageUrl)
-                            .into(view.album_cover)
-                    }
-                }
-                view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
-                view.next_random_button.setOnClickListener { selectRandomAlbum() }
-                view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
-                    viewModel.queueState = isChecked }
-                view.shuffle_switch.setOnCheckedChangeListener { _, isChecked ->
-                    viewModel.shuffleState = isChecked }
-
-                view.category_listview.adapter = context?.let {
-                    CategoryAdapter(it, categories, this@AlbumFragment)
-                }
-
-                view.add_category_button.setOnClickListener {
-                    addCategory(view.category_name.text.toString())
-                }
-            }
+        /** Event listeners **/
+        view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
+        view.next_random_button.setOnClickListener { selectRandomAlbum() }
+        view.album_title.setOnClickListener { toggleSingleLine(it.album_title) }
+        view.artist_name.setOnClickListener { toggleSingleLine(it.artist_name) }
+        view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.queueState = isChecked
         }
+        view.shuffle_switch.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.shuffleState.value = isChecked
+        }
+        view.add_category_button.setOnClickListener {
+            addCategory(view.category_name.text.toString())
+        }
+
         return view
     }
+
+    /** Methods for listeners **/
 
     private fun selectRandomAlbum() {
         viewModel.selectRandomAlbum()
         view?.findNavController()?.navigate(R.id.action_albumFragment_self)
     }
 
+    private fun toggleSingleLine(textView: TextView) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            textView.isSingleLine = !textView.isSingleLine
+        }
+    }
+
     private fun addCategory(categoryName: String) {
         if (categoryName != "") {
-            val category = Category(categoryName)
-            val adapter = category_listview.adapter as CategoryAdapter
-
             GlobalScope.launch(Dispatchers.Default) {
-                if (viewModel.checkForCategory(categoryName)) {
+                if (!viewModel.addCategory(categoryName)) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(activity, "Category already exists",
                             Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    viewModel.addCategory(categoryName)
-                    withContext(Dispatchers.Main) {
-                        adapter.addItem(CategoryWithAlbums(category, mutableListOf()))
-                        adapter.notifyDataSetChanged()
                     }
                 }
             }
@@ -134,12 +108,46 @@ class AlbumFragment : Fragment() {
     }
 
     fun setCategory(category: Category) {
+        categorySelectorState = category_listview.onSaveInstanceState()!!
         viewModel.setCategory(category, album)
     }
 
     fun unsetCategory(category: Category) {
+        categorySelectorState = category_listview.onSaveInstanceState()!!
         viewModel.unsetCategory(category, album)
     }
+
+    /** Methods for updating the UI **/
+
+    private fun displayAlbum(album: Album) {
+        album_title.text = album.title
+        artist_name.text = album.artistName
+        album_duration.text = toHoursAndMinutes(album.durationMS)
+    }
+
+    private fun displayMoreDetails(details: JSONObject) {
+        if ( !details.has("images")) {
+            Log.w("AlbumFragment", "Album has no images")
+        } else {
+            val imageUrl = details.getJSONArray("images")
+                .getJSONObject(0).getString("url")
+            if (!imageUrl.isNullOrEmpty()) {
+                Glide.with(context).load(imageUrl).into(album_cover)
+            }
+        }
+    }
+
+    private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
+        category_listview.adapter = context?.let {
+            CategoryAdapter(it, categories, this@AlbumFragment)
+        }
+        // Restore scroll position
+        if (this@AlbumFragment::categorySelectorState.isInitialized) {
+            category_listview.onRestoreInstanceState(categorySelectorState)
+        }
+    }
+
+    /** Utility **/
 
     private fun toHoursAndMinutes(milliseconds: Int) : String {
         val hours = milliseconds / 1000 / 60 / 60

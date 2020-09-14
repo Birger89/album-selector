@@ -1,5 +1,6 @@
 package no.birg.albumselector.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
@@ -9,7 +10,7 @@ interface CategoryDao {
 
     @Transaction
     @Query("SELECT * FROM categories")
-    fun getAllWithAlbums(): List<CategoryWithAlbums>
+    fun getAllWithAlbums(): LiveData<List<CategoryWithAlbums>>
 
     @Query("SELECT * FROM categories WHERE cid = :cid")
     fun getCategoryByID(cid: String): CategoryWithAlbums

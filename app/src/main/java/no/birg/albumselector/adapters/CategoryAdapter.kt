@@ -32,10 +32,6 @@ class CategoryAdapter(
         return position.toLong()
     }
 
-    fun addItem(category: CategoryWithAlbums) {
-        categories.add(0, category)
-    }
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val categoryView: View
         val holder: ViewHolder
