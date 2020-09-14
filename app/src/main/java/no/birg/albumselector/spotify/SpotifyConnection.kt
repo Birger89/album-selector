@@ -12,6 +12,8 @@ import java.net.URLEncoder
 import java.nio.charset.Charset
 import javax.net.ssl.HttpsURLConnection
 
+private const val API_URL = "https://api.spotify.com/v1"
+
 class SpotifyConnection(private val activity: Activity) : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -28,7 +30,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     /** Methods for retrieving user related data **/
 
     fun fetchUsername(retry: Boolean = false) : String {
-        val userURL = URL("https://api.spotify.com/v1/me")
+        val userURL = URL("$API_URL/me")
         val connection = createConnection(userURL, "GET")
 
         connection.doInput = true
@@ -58,7 +60,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     }
 
     fun fetchDevices(retry: Boolean = false) : ArrayList<Pair<String, String>> {
-        val devicesURL = URL("https://api.spotify.com/v1/me/player/devices")
+        val devicesURL = URL("$API_URL/me/player/devices")
         val connection = createConnection(devicesURL, "GET")
 
         val spotifyDevices = ArrayList<Pair<String, String>>()
@@ -97,7 +99,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     }
 
     fun fetchShuffleState(retry: Boolean = false) : Boolean {
-        val playerURL = URL("https://api.spotify.com/v1/me/player")
+        val playerURL = URL("$API_URL/me/player")
         val connection = createConnection(playerURL, "GET")
 
         val responseCode = connection.responseCode
@@ -139,7 +141,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
         var queryParam = URLEncoder.encode("q", "UTF-8") + "=" + URLEncoder.encode(query, "UTF-8")
         queryParam += "&" + URLEncoder.encode("type", "UTF-8") + "=" + URLEncoder.encode("album", "UTF-8")
         queryParam += "&" + URLEncoder.encode("limit", "UTF-8") + "=" + URLEncoder.encode("50", "UTF-8")
-        val searchURL = URL("https://api.spotify.com/v1/search?$queryParam")
+        val searchURL = URL("$API_URL/search?$queryParam")
         val connection = createConnection(searchURL, "GET")
 
         lateinit var jsonObject: JSONObject
@@ -168,7 +170,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     }
 
     fun fetchAlbumDetails(albumID: String, retry: Boolean = false) : JSONObject {
-        val albumURL = URL("https://api.spotify.com/v1/albums/$albumID")
+        val albumURL = URL("$API_URL/albums/$albumID")
         val connection = createConnection(albumURL, "GET")
 
         val responseCode = connection.responseCode
@@ -196,7 +198,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     }
 
     fun fetchAlbumTracks(albumID: String, retry: Boolean = false) : ArrayList<String> {
-        val albumURL = URL("https://api.spotify.com/v1/albums/$albumID/tracks?limit=50")
+        val albumURL = URL("$API_URL/albums/$albumID/tracks?limit=50")
         val connection = createConnection(albumURL, "GET")
 
         val responseCode = connection.responseCode
@@ -230,7 +232,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     }
 
     fun fetchAlbumDurationMS(albumID: String, retry: Boolean = false) : Int {
-        val albumURL = URL("https://api.spotify.com/v1/albums/$albumID/tracks?limit=50")
+        val albumURL = URL("$API_URL/albums/$albumID/tracks?limit=50")
         val connection = createConnection(albumURL, "GET")
 
         val responseCode = connection.responseCode
@@ -267,10 +269,10 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     /** Methods for controlling playback **/
 
     fun playAlbum(albumID: String, deviceID: String, retry: Boolean = false) {
-        val albumURI = "spotify:album:$albumID"
-        val playURL = URL("https://api.spotify.com/v1/me/player/play?device_id=$deviceID")
+        val playURL = URL("$API_URL/me/player/play?device_id=$deviceID")
         val connection = createConnection(playURL, "PUT")
 
+        val albumURI = "spotify:album:$albumID"
         val body = JSONObject().put("context_uri", albumURI).toString()
 
         connection.setRequestProperty("Content-Type", "application/json")
@@ -295,7 +297,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
 
     fun queueSong(songID: String, deviceID: String, retry: Boolean = false) : Boolean {
         val songURI = "spotify:track:$songID"
-        val queueURL = URL("https://api.spotify.com/v1/me/player/queue?uri=$songURI&device_id=$deviceID")
+        val queueURL = URL("$API_URL/me/player/queue?uri=$songURI&device_id=$deviceID")
         val connection = createConnection(queueURL, "POST")
 
         if (connection.responseCode == 401) {
@@ -315,7 +317,7 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     }
 
     fun setShuffle(shuffle: Boolean, deviceID: String, retry: Boolean = false) {
-        val shuffleURL = URL("https://api.spotify.com/v1/me/player/shuffle?state=$shuffle&device_id=$deviceID")
+        val shuffleURL = URL("$API_URL/me/player/shuffle?state=$shuffle&device_id=$deviceID")
         val connection = createConnection(shuffleURL, "PUT")
 
         if (connection.responseCode == 401) {
