@@ -1,9 +1,7 @@
 package no.birg.albumselector.spotify
 
 import android.app.Activity
-import android.app.Service
 import android.content.Intent
-import android.os.IBinder
 import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
@@ -14,13 +12,14 @@ import javax.net.ssl.HttpsURLConnection
 
 private const val API_URL = "https://api.spotify.com/v1"
 
-class SpotifyConnection(private val activity: Activity) : Service() {
+class SpotifyConnection(private val activity: Activity) {
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    init {
+        fetchAccessToken()
     }
 
-    fun fetchAccessToken() {
+
+    private fun fetchAccessToken() {
         SpotifyToken.fetchingToken = true
         val intent = Intent(activity, SpotifyAuthenticationActivity::class.java)
         activity.startActivityForResult(intent, 1)

@@ -25,8 +25,6 @@ class MainActivity : AppCompatActivity() {
         albumDao = AppDatabase.getInstance(this).albumDao()
         categoryDao = AppDatabase.getInstance(this).categoryDao()
         spotifyConnection = SpotifyConnection(this)
-
-        spotifyConnection.fetchAccessToken()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
