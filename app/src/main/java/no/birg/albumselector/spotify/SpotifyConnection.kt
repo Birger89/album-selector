@@ -31,60 +31,52 @@ class SpotifyConnection(private val activity: Activity) : Service() {
 
     fun fetchUsername(retry: Boolean = false) : String {
         val connection = createConnection("$API_URL/me", "GET")
-
         connection.doInput = true
         connection.doOutput = false
+
+        var username = "No name"
         if (connection.responseCode == 200) {
-            val response = connection.inputStream.bufferedReader()
-                .use { it.readText() }
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
             val jsonObject = JSONObject(response)
-            connection.disconnect()
-            return jsonObject.getString("display_name")
+            username = jsonObject.getString("display_name")
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                return fetchUsername(true)
+                username = fetchUsername(true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no username was received")
-                return "No name"
             }
         } else {
             Log.e("SpotifyConnection", "(fetchUsername) Something went wrong with Spotify request")
             Log.e("SpotifyConnection", connection.responseCode.toString() + ": " + connection.responseMessage.toString())
-            connection.disconnect()
-            return "No name"
         }
+        connection.disconnect()
+        return username
     }
 
     fun fetchDevices(retry: Boolean = false) : ArrayList<Pair<String, String>> {
         val connection = createConnection("$API_URL/me/player/devices", "GET")
 
         val spotifyDevices = ArrayList<Pair<String, String>>()
-
         if (connection.responseCode == 200) {
-            val response = connection.inputStream.bufferedReader()
-                .use { it.readText() }
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
             val deviceArray = JSONObject(response).getJSONArray("devices")
 
             for (i in 0 until deviceArray.length()) {
-                val deviceObj = deviceArray.getJSONObject(i)
-                val key = deviceObj.getString("id")
-                val value = deviceObj.getString("name")
-                val device = Pair(key, value)
-                if (deviceObj.getBoolean("is_active")) {
+                val obj = deviceArray.getJSONObject(i)
+                val device = Pair(obj.getString("id"), obj.getString("name"))
+                if (obj.getBoolean("is_active")) {
                     spotifyDevices.add(0, device)
                 } else {
                     spotifyDevices.add(device)
                 }
             }
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                fetchDevices(true)
+                spotifyDevices.addAll(fetchDevices(true))
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no devices were received")
             }
@@ -99,36 +91,27 @@ class SpotifyConnection(private val activity: Activity) : Service() {
     fun fetchShuffleState(retry: Boolean = false) : Boolean {
         val connection = createConnection("$API_URL/me/player", "GET")
 
-        val responseCode = connection.responseCode
-        if (responseCode == 200) {
+        var shuffleState = false
+        if (connection.responseCode == 200) {
             val response = connection.inputStream.bufferedReader().use { it.readText() }
-            val shuffleState = JSONObject(response).getBoolean("shuffle_state")
-            connection.disconnect()
-
+            shuffleState = JSONObject(response).getBoolean("shuffle_state")
             Log.i("SpotifyConnection", "Shuffle state received: $shuffleState")
-            return shuffleState
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
-                while (SpotifyToken.fetchingToken) {
-                    Thread.sleep(50)
-                }
-                return fetchShuffleState(true)
+                while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
+                shuffleState = fetchShuffleState(true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no shuffle state received")
-                return false
             }
         } else if (connection.responseCode == 204) {
-            connection.disconnect()
             Log.i("SpotifyConnection", "No current playback detected")
-            return false
         } else {
             Log.e("SpotifyConnection", "(fetchShuffleState) Something went wrong with Spotify request")
             Log.e("SpotifyConnection", connection.responseCode.toString() + ": " + connection.responseMessage.toString())
-            connection.disconnect()
-            return false
         }
+        connection.disconnect()
+        return shuffleState
     }
 
 
@@ -138,124 +121,104 @@ class SpotifyConnection(private val activity: Activity) : Service() {
         val connection = createConnection("$API_URL/search", "GET",
             listOf("q=$query", "type=album", "limit=50"))
 
-        lateinit var jsonObject: JSONObject
+        var result = JSONArray()
         if (connection.responseCode == 200) {
-            val response = connection.inputStream.bufferedReader()
-                .use { it.readText() }
-            jsonObject = JSONObject(response)
-            connection.disconnect()
-            return jsonObject.getJSONObject("albums").getJSONArray("items")
+            val response = connection.inputStream.bufferedReader().use { it.readText() }
+            result = JSONObject(response).getJSONObject("albums").getJSONArray("items")
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                return search(query, true)
+                result = search(query, true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no search result received")
-                return JSONArray()
             }
         } else {
             Log.e("SpotifyConnection", "(search) Something went wrong with Spotify request")
             Log.e("SpotifyConnection", connection.responseCode.toString() + ": " + connection.responseMessage.toString())
-            connection.disconnect()
-            return JSONArray()
         }
+        connection.disconnect()
+        return result
     }
 
     fun fetchAlbumDetails(albumID: String, retry: Boolean = false) : JSONObject {
         val connection = createConnection("$API_URL/albums/$albumID", "GET")
 
-        val responseCode = connection.responseCode
-        if (responseCode == 200) {
+        var details = JSONObject()
+        if (connection.responseCode == 200) {
             val response = connection.inputStream.bufferedReader().use { it.readText() }
-
-            connection.disconnect()
-            return JSONObject(response)
+            details = JSONObject(response)
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                return fetchAlbumDetails(albumID, true)
+                details = fetchAlbumDetails(albumID, true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no album details were received")
-                return JSONObject()
             }
         } else {
             Log.e("SpotifyConnection", "(fetchAlbumDetails) Something went wrong with Spotify request")
             Log.e("SpotifyConnection", connection.responseCode.toString() + ": " + connection.responseMessage.toString())
-            connection.disconnect()
-            return JSONObject()
         }
+        connection.disconnect()
+        return details
     }
 
     fun fetchAlbumTracks(albumID: String, retry: Boolean = false) : ArrayList<String> {
         val connection =
             createConnection("$API_URL/albums/$albumID/tracks?limit=50", "GET")
 
-        val responseCode = connection.responseCode
-        if (responseCode == 200) {
+        val tracks = arrayListOf<String>()
+        if (connection.responseCode == 200) {
             val response = connection.inputStream.bufferedReader().use { it.readText() }
             val tracksJSON = JSONObject(response).getJSONArray("items")
 
-            val tracks = ArrayList<String>()
             for (i in 0 until tracksJSON.length()) {
                 tracks.add(tracksJSON.getJSONObject(i).getString("id"))
             }
-
-            connection.disconnect()
-            return tracks
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                return fetchAlbumTracks(albumID, true)
+                tracks.addAll(fetchAlbumTracks(albumID, true))
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no tracks were received")
-                return ArrayList()
             }
         } else {
             Log.e("SpotifyConnection", "(fetchAlbumTracks) Something went wrong with Spotify request")
             Log.e("SpotifyConnection", connection.responseCode.toString() + ": " + connection.responseMessage.toString())
-            connection.disconnect()
-            return ArrayList()
         }
+        connection.disconnect()
+        return tracks
     }
 
     fun fetchAlbumDurationMS(albumID: String, retry: Boolean = false) : Int {
         val connection =
             createConnection("$API_URL/albums/$albumID/tracks?limit=50", "GET")
 
-        val responseCode = connection.responseCode
-        if (responseCode == 200) {
+        var durationMS = 0
+        if (connection.responseCode == 200) {
             val response = connection.inputStream.bufferedReader().use { it.readText() }
             val tracksJSON = JSONObject(response).getJSONArray("items")
 
-            var durationMS = 0
             for (i in 0 until tracksJSON.length()) {
                 durationMS += tracksJSON.getJSONObject(i).getInt("duration_ms")
             }
-            connection.disconnect()
             Log.d("SpotifyConnection", "Duration fetched: $durationMS")
-            return durationMS
         } else if (connection.responseCode == 401) {
-            connection.disconnect()
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                return fetchAlbumDurationMS(albumID, true)
+                durationMS = fetchAlbumDurationMS(albumID, true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no duration was received")
-                return 0
             }
         } else {
             Log.e("SpotifyConnection", "(fetchAlbumDurationMS) Something went wrong with Spotify request")
             Log.e("SpotifyConnection", connection.responseCode.toString() + ": " + connection.responseMessage.toString())
-            connection.disconnect()
-            return 0
         }
+        connection.disconnect()
+        return durationMS
     }
 
 
@@ -269,16 +232,14 @@ class SpotifyConnection(private val activity: Activity) : Service() {
 
         connection.setRequestProperty("Content-Type", "application/json")
         connection.doOutput = true
-        val os = connection.outputStream
         val output = body.toByteArray(Charset.forName("utf-8"))
-        os.write(output, 0, output.size)
-        os.close()
+        connection.outputStream.write(output, 0, output.size)
+        connection.outputStream.close()
 
         if (connection.responseCode == 401) {
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                Log.d("SpotifyConnection", SpotifyToken.getToken())
                 playAlbum(albumID, deviceID, true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no album played")
@@ -291,20 +252,21 @@ class SpotifyConnection(private val activity: Activity) : Service() {
         val connection = createConnection("$API_URL/me/player/queue", "POST",
             listOf("uri=spotify:track:$songID", "device_id=$deviceID"))
 
+        var queued = false
         if (connection.responseCode == 401) {
             if (!retry) {
                 fetchAccessToken()
                 while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
-                return queueSong(songID, deviceID, true)
+                queued = queueSong(songID, deviceID, true)
             } else {
                 Log.e("SpotifyConnection", "Unable to refresh token; no album played")
-                return false
             }
         } else {
             Log.i("SpotifyConnection", "Song queued: $songID")
-            connection.disconnect()
-            return true
+            queued = true
         }
+        connection.disconnect()
+        return queued
     }
 
     fun setShuffle(shuffle: Boolean, deviceID: String, retry: Boolean = false) {
