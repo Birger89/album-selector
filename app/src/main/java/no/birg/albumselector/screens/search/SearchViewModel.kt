@@ -32,17 +32,15 @@ class SearchViewModel constructor(
     /** Methods dealing with albums **/
 
     fun addAlbum(album: Album) : Boolean {
-        var newAlbum = album
-        if (album.durationMS == 0) {
-            newAlbum =
-                Album(album.aid, album.title, album.artistName, fetchAlbumDurationMS(album.aid))
-        }
-
-        if (!checkForAlbum(album.aid)) {
+        return if (!checkForAlbum(album.aid)) {
+            var newAlbum = album
+            if (album.durationMS == 0) {
+                newAlbum =
+                    Album(album.aid, album.title, album.artistName, fetchAlbumDurationMS(album.aid))
+            }
             albumDao.insert(newAlbum)
-            return true
-        }
-        return false
+            true
+        } else false
     }
 
     fun selectAlbum(album: Album) {
