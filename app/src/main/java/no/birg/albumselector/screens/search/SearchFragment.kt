@@ -5,20 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.ResultAdapter
-import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.spotify.SpotifyConnection
 import org.json.JSONArray
@@ -70,10 +65,6 @@ class SearchFragment : Fragment() {
         view?.findNavController()?.popBackStack()
     }
 
-    private fun displayAlbumDetails() {
-        view?.findNavController()?.navigate(R.id.action_searchFragment_to_resultDetailsFragment)
-    }
-
     /** Methods for listeners **/
 
     private fun search() {
@@ -85,37 +76,16 @@ class SearchFragment : Fragment() {
         }
     }
 
-    fun addAlbum(album: Album) {
-        GlobalScope.launch(Dispatchers.Default) {
-            if (!viewModel.addAlbum(album)) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    fun selectAlbum(album: Album) {
-        viewModel.selectAlbum(album)
-        displayAlbumDetails()
-    }
-
     /** Methods for updating the UI **/
 
     private fun displaySearchResults(results: JSONArray) {
         val adapter = context?.let {
-            ResultAdapter(it, results, this@SearchFragment)
+            ResultAdapter(it, results, viewModel)
         }
         search_results.adapter = adapter
     }
 
     private fun displayUsername(username: String) {
         name_text_view.text = username
-    }
-
-    /** Helpers **/
-
-    fun checkRecord(albumID: String) : Boolean {
-        return viewModel.checkForAlbum(albumID)
     }
 }

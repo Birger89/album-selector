@@ -62,9 +62,7 @@ class LibraryFragment : Fragment() {
         viewModel.displayedAlbums.observe(viewLifecycleOwner, Observer {
             displayAlbums(it.asReversed())
         })
-        viewModel.categories.observe(viewLifecycleOwner, Observer {
-            displayCategories(it)
-        })
+        viewModel.categories.observe(viewLifecycleOwner, Observer { displayCategories(it) })
         viewModel.selectedCategories.observe(viewLifecycleOwner, Observer {
             viewModel.updateAlbumSelection()
         })
@@ -110,23 +108,10 @@ class LibraryFragment : Fragment() {
         viewModel.deleteSelectedCategories()
     }
 
-    fun selectAlbum(album: Album) {
-        viewModel.selectAlbum(album)
-        displayAlbumDetails()
-    }
-
     private fun selectRandomAlbum() {
         if (viewModel.selectRandomAlbum()) {
             displayAlbumDetails()
         }
-    }
-
-    fun playAlbum(albumID: String) {
-        viewModel.playAlbum(albumID)
-    }
-
-    fun deleteAlbum(album: Album) {
-        viewModel.deleteAlbum(album)
     }
 
     private fun filterTextChangeListener() : TextWatcher {
@@ -156,7 +141,7 @@ class LibraryFragment : Fragment() {
 
     private fun displayAlbums(albums: List<Album>) {
         library_albums.adapter = context?.let {
-            AlbumAdapter(it, albums, this@LibraryFragment)
+            AlbumAdapter(it, albums, viewModel)
         }
         // Restore the scroll position
         if (this@LibraryFragment::libraryAlbumsState.isInitialized) {

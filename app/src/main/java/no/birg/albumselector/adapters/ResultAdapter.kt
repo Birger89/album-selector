@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.result_item.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -15,14 +17,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.screens.search.SearchFragment
+import no.birg.albumselector.screens.search.SearchViewModel
 import org.json.JSONArray
 import org.json.JSONObject
 
 class ResultAdapter(
     private val context: Context,
     private val results: JSONArray,
-    private val searchFragment: SearchFragment
+    private val viewModel: SearchViewModel
 ) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -73,12 +75,12 @@ class ResultAdapter(
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            searchFragment.addAlbum(Album(id, title, artistName, 0))
+            addAlbum(Album(id, title, artistName, 0))
             holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
         }
 
         GlobalScope.launch(Dispatchers.Default) {
-            val inLibrary = searchFragment.checkRecord(id)
+            val inLibrary = viewModel.checkForAlbum(id)
             withContext(Dispatchers.Main) {
                 if (inLibrary) {
                     holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
@@ -89,7 +91,8 @@ class ResultAdapter(
         }
 
         resultView.setOnClickListener {
-            searchFragment.selectAlbum(Album(id, title, artistName, 0 ))
+            viewModel.selectAlbum(Album(id, title, artistName, 0 ))
+            resultView.findNavController().navigate(R.id.action_searchFragment_to_resultDetailsFragment)
         }
 
         return resultView
@@ -98,5 +101,15 @@ class ResultAdapter(
     private class ViewHolder {
         lateinit var titleTextView: TextView
         lateinit var addButton: Button
+    }
+
+    private fun addAlbum(album: Album) {
+        GlobalScope.launch(Dispatchers.Default) {
+            if (!viewModel.addAlbum(album)) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    Toast.makeText(context, "Album already in library", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }

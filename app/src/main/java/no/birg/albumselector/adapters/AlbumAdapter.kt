@@ -7,15 +7,16 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
+import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.library_item.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.screens.library.LibraryFragment
+import no.birg.albumselector.screens.library.LibraryViewModel
 
 class AlbumAdapter(
     context: Context,
     private val albums: List<Album>,
-    private val libraryFragment: LibraryFragment
+    private val viewModel: LibraryViewModel
 ) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -57,9 +58,10 @@ class AlbumAdapter(
         holder.titleTextView.text = album.title
         holder.artistTextView.text = album.artistName
 
-        holder.playButton.setOnClickListener { libraryFragment.playAlbum(album.aid) }
-        holder.removeButton.setOnClickListener { libraryFragment.deleteAlbum(album) }
-        albumView.setOnClickListener { libraryFragment.selectAlbum(album) }
+        /** Listeners **/
+        holder.playButton.setOnClickListener { viewModel.playAlbum(album.aid) }
+        holder.removeButton.setOnClickListener { viewModel.deleteAlbum(album) }
+        albumView.setOnClickListener { selectAlbum(albumView, album) }
 
         return albumView
     }
@@ -69,5 +71,11 @@ class AlbumAdapter(
         lateinit var artistTextView: TextView
         lateinit var playButton: Button
         lateinit var removeButton: Button
+    }
+
+    /** Methods for listeners **/
+    private fun selectAlbum(view: View, album: Album) {
+        viewModel.selectAlbum(album)
+        view.findNavController().navigate(R.id.action_libraryFragment_to_albumFragment)
     }
 }

@@ -2,7 +2,6 @@ package no.birg.albumselector.screens.library
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +22,6 @@ import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
 import org.json.JSONObject
 
@@ -31,8 +29,6 @@ class AlbumFragment : Fragment() {
 
     private lateinit var viewModel: LibraryViewModel
     lateinit var album: Album
-
-    private lateinit var categorySelectorState: Parcelable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -107,16 +103,6 @@ class AlbumFragment : Fragment() {
         }
     }
 
-    fun setCategory(category: Category) {
-        categorySelectorState = category_listview.onSaveInstanceState()!!
-        viewModel.setCategory(category, album)
-    }
-
-    fun unsetCategory(category: Category) {
-        categorySelectorState = category_listview.onSaveInstanceState()!!
-        viewModel.unsetCategory(category, album)
-    }
-
     /** Methods for updating the UI **/
 
     private fun displayAlbum(album: Album) {
@@ -138,13 +124,12 @@ class AlbumFragment : Fragment() {
     }
 
     private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
+        val categorySelectorState = category_listview.onSaveInstanceState()
         category_listview.adapter = context?.let {
-            CategoryAdapter(it, categories, this@AlbumFragment)
+            CategoryAdapter(it, categories, viewModel)
         }
         // Restore scroll position
-        if (this@AlbumFragment::categorySelectorState.isInitialized) {
-            category_listview.onRestoreInstanceState(categorySelectorState)
-        }
+        category_listview.onRestoreInstanceState(categorySelectorState)
     }
 
     /** Utility **/
