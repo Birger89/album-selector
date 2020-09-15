@@ -48,18 +48,14 @@ class CategorySelectorAdapter(
             holder = convertView.tag as ViewHolder
         }
 
-        val category = getItem(position).category.cid
-        holder.categoryCheckBox.text = category
-
-        // Clears the checkListener to avoid unwanted updates from recycling views.
-        holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        val selectedCategories = viewModel.selectedCategories.value
-        if (selectedCategories != null) {
-            holder.categoryCheckBox.isChecked = category in selectedCategories
-        }
-        holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) { viewModel.selectCategory(category) }
-            else { viewModel.deselectCategory(category) }
+        val categoryName = getItem(position).category.cid
+        holder.categoryCheckBox.text = categoryName
+        holder.categoryCheckBox.isChecked = viewModel.isCategorySelected(categoryName)
+        holder.categoryCheckBox.setOnClickListener {
+            when (holder.categoryCheckBox.isChecked) {
+                true -> viewModel.selectCategory(categoryName)
+                false -> viewModel.deselectCategory(categoryName)
+            }
         }
 
         return categoryView

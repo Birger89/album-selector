@@ -17,13 +17,11 @@ class LibraryViewModel constructor(
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
     private val _devices = MutableLiveData<List<Pair<String, String>>>()
-    private val _selectedCategories = MutableLiveData<Set<String>>()
     private val _displayedAlbums = MutableLiveData<List<Album>>()
     private val _selectedAlbum = MutableLiveData<Album>()
     private val _selectedAlbumDetails = MutableLiveData<JSONObject>()
 
     val devices: LiveData<List<Pair<String, String>>> get() = _devices
-    val selectedCategories: LiveData<Set<String>> get() = _selectedCategories
     val displayedAlbums: LiveData<List<Album>> get() = _displayedAlbums
     val selectedAlbum: LiveData<Album> get() = _selectedAlbum
     val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
@@ -31,7 +29,8 @@ class LibraryViewModel constructor(
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
     val albums: LiveData<List<Album>> = albumDao.getAll()
 
-    private var shuffledAlbumList: MutableList<Album> = arrayListOf()
+    private val selectedCategories = MutableLiveData<Set<String>>()
+    private var shuffledAlbumList = mutableListOf<Album>()
     var selectedDevice: String = ""
     var filterText: String = ""
 
@@ -44,7 +43,6 @@ class LibraryViewModel constructor(
         shuffleState.value = false
         _devices.value = listOf()
         _displayedAlbums.value = mutableListOf()
-        _selectedCategories.value = setOf()
         _selectedAlbumDetails.value = JSONObject()
         _selectedAlbum.value = Album("","","",0)
         fetchDevices()
@@ -133,11 +131,17 @@ class LibraryViewModel constructor(
     }
 
     fun selectCategory(categoryName: String) {
-        _selectedCategories.add(categoryName)
+        selectedCategories.add(categoryName)
     }
 
     fun deselectCategory(categoryName: String) {
-        _selectedCategories.remove(categoryName)
+        selectedCategories.remove(categoryName)
+    }
+
+    fun isCategorySelected(categoryName: String) : Boolean {
+        return if (!selectedCategories.value.isNullOrEmpty()) {
+            categoryName in selectedCategories.value!!
+        } else false
     }
 
     fun deleteSelectedCategories() {
@@ -146,7 +150,7 @@ class LibraryViewModel constructor(
                 categoryDao.delete(getCategory(cat).category)
             }
         }
-        _selectedCategories.clear()
+        selectedCategories.clear()
     }
 
     private fun checkForCategory(categoryName: String) : Boolean {
@@ -246,7 +250,7 @@ class LibraryViewModel constructor(
 
     private fun <T> MutableLiveData<Set<T>>.add(item: T) {
         var set = mutableSetOf<T>()
-        if (this.value?.isNotEmpty()!!) {
+        if (!this.value.isNullOrEmpty()) {
             set = this.value as MutableSet
         }
         set.add(item)
