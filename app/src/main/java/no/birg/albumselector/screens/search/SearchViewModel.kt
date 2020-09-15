@@ -1,5 +1,6 @@
 package no.birg.albumselector.screens.search
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,16 +17,21 @@ class SearchViewModel constructor(
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
 
-    val username = MutableLiveData<String>()
-    val searchResults = MutableLiveData<JSONArray>()
-    var selectedResult: Album = Album("","","",0)
-    val selectedAlbumDetails = MutableLiveData<JSONObject>()
+    private val _username = MutableLiveData<String>()
+    private val _searchResults = MutableLiveData<JSONArray>()
+    private var _selectedResult: Album = Album("","","",0)
+    private val _selectedAlbumDetails = MutableLiveData<JSONObject>()
+
+    val username: LiveData<String> get() = _username
+    val searchResults: LiveData<JSONArray> get() = _searchResults
+    val selectedResult: Album get() = _selectedResult
+    val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
 
 
     init {
-        username.value = "-"
-        searchResults.value = JSONArray()
-        selectedAlbumDetails.value = JSONObject()
+        _username.value = "-"
+        _searchResults.value = JSONArray()
+        _selectedAlbumDetails.value = JSONObject()
         fetchUsername()
     }
 
@@ -44,7 +50,7 @@ class SearchViewModel constructor(
     }
 
     fun selectAlbum(album: Album) {
-        selectedResult = album
+        _selectedResult = album
         fetchAlbumDetails(album.aid)
     }
 
@@ -56,19 +62,19 @@ class SearchViewModel constructor(
 
     fun search(query: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            searchResults.postValue(spotifyConnection.search(query))
+            _searchResults.postValue(spotifyConnection.search(query))
         }
     }
 
     private fun fetchUsername() {
         viewModelScope.launch(Dispatchers.Default) {
-            username.postValue(spotifyConnection.fetchUsername())
+            _username.postValue(spotifyConnection.fetchUsername())
         }
     }
 
     private fun fetchAlbumDetails(albumID: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
+            _selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
         }
     }
 

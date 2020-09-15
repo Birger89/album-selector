@@ -16,30 +16,37 @@ class LibraryViewModel constructor(
     private val categoryDao: CategoryDao,
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
+    private val _devices = MutableLiveData<List<Pair<String, String>>>()
+    private val _selectedCategories = MutableLiveData<Set<String>>()
+    private val _displayedAlbums = MutableLiveData<List<Album>>()
+    private val _selectedAlbum = MutableLiveData<Album>()
+    private val _selectedAlbumDetails = MutableLiveData<JSONObject>()
+
+    val devices: LiveData<List<Pair<String, String>>> get() = _devices
+    val selectedCategories: LiveData<Set<String>> get() = _selectedCategories
+    val displayedAlbums: LiveData<List<Album>> get() = _displayedAlbums
+    val selectedAlbum: LiveData<Album> get() = _selectedAlbum
+    val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
+
+    val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
+    val albums: LiveData<List<Album>> = albumDao.getAll()
+
+    private var shuffledAlbumList: MutableList<Album> = arrayListOf()
+    var selectedDevice: String = ""
+    var filterText: String = ""
+
     var queueState = false
     val shuffleState = MutableLiveData<Boolean>()
 
-    val devices = MutableLiveData<List<Pair<String, String>>>()
-    var selectedDevice: String = ""
-
-    val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
-    val selectedCategories = MutableLiveData<Set<String>>()
-    var filterText: String = ""
-
-    val albums: LiveData<List<Album>> = albumDao.getAll()
-    val displayedAlbums = MutableLiveData<List<Album>>()
-    private var shuffledAlbumList: MutableList<Album> = arrayListOf()
-    val selectedAlbum = MutableLiveData<Album>()
-    val selectedAlbumDetails = MutableLiveData<JSONObject>()
 
 
     init {
         shuffleState.value = false
-        devices.value = listOf()
-        displayedAlbums.value = mutableListOf()
-        selectedCategories.value = setOf()
-        selectedAlbumDetails.value = JSONObject()
-        selectedAlbum.value = Album("","","",0)
+        _devices.value = listOf()
+        _displayedAlbums.value = mutableListOf()
+        _selectedCategories.value = setOf()
+        _selectedAlbumDetails.value = JSONObject()
+        _selectedAlbum.value = Album("","","",0)
         fetchDevices()
         fetchShuffleState()
     }
@@ -53,7 +60,7 @@ class LibraryViewModel constructor(
     }
 
     fun selectAlbum(album: Album) {
-        selectedAlbum.postValue(album)
+        _selectedAlbum.postValue(album)
         fetchAlbumDetails(album.aid)
     }
 
@@ -67,9 +74,9 @@ class LibraryViewModel constructor(
 
     private fun getRandomAlbum() : Album? {
         var album: Album? = null
-        if (displayedAlbums.value?.size != 0) {
+        if (_displayedAlbums.value?.size != 0) {
             if (shuffledAlbumList.size == 0) {
-                shuffledAlbumList = displayedAlbums.value?.shuffled() as MutableList<Album>
+                shuffledAlbumList = _displayedAlbums.value?.shuffled() as MutableList<Album>
             }
             album = shuffledAlbumList.removeAt(0)
         }
@@ -97,7 +104,7 @@ class LibraryViewModel constructor(
                 artistAndTitle.contains(filterText, ignoreCase = true)
             }
             shuffledAlbumList = filteredAlbums?.shuffled() as MutableList<Album>
-            displayedAlbums.value = filteredAlbums
+            _displayedAlbums.value = filteredAlbums
         }
     }
 
@@ -126,11 +133,11 @@ class LibraryViewModel constructor(
     }
 
     fun selectCategory(categoryName: String) {
-        selectedCategories.add(categoryName)
+        _selectedCategories.add(categoryName)
     }
 
     fun deselectCategory(categoryName: String) {
-        selectedCategories.remove(categoryName)
+        _selectedCategories.remove(categoryName)
     }
 
     fun deleteSelectedCategories() {
@@ -139,7 +146,7 @@ class LibraryViewModel constructor(
                 categoryDao.delete(getCategory(cat).category)
             }
         }
-        selectedCategories.clear()
+        _selectedCategories.clear()
     }
 
     private fun checkForCategory(categoryName: String) : Boolean {
@@ -159,7 +166,7 @@ class LibraryViewModel constructor(
 
     private fun fetchAlbumDetails(albumID: String) {
         viewModelScope.launch(Dispatchers.Default) {
-            selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
+            _selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
         }
     }
 
@@ -185,7 +192,7 @@ class LibraryViewModel constructor(
                     updateAlbum(album)
 
                     if (selectedAlbum.value?.aid == albumID) {
-                        selectedAlbum.postValue(album)
+                        _selectedAlbum.postValue(album)
                     }
                 }
             }
@@ -200,7 +207,7 @@ class LibraryViewModel constructor(
 
     private fun fetchDevices() {
         viewModelScope.launch(Dispatchers.Default) {
-            devices.postValue(spotifyConnection.fetchDevices())
+            _devices.postValue(spotifyConnection.fetchDevices())
         }
     }
 
