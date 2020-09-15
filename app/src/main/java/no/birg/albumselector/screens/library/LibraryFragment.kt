@@ -58,15 +58,11 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
         /** Observers **/
-        viewModel.albums.observe(viewLifecycleOwner, Observer { viewModel.updateAlbumSelection() })
+        viewModel.devices.observe(viewLifecycleOwner, Observer { displayDevices(it) })
+        viewModel.categories.observe(viewLifecycleOwner, Observer { displayCategories(it) })
         viewModel.displayedAlbums.observe(viewLifecycleOwner, Observer {
             displayAlbums(it.asReversed())
         })
-        viewModel.categories.observe(viewLifecycleOwner, Observer { displayCategories(it) })
-        viewModel.selectedCategories.observe(viewLifecycleOwner, Observer {
-            viewModel.updateAlbumSelection()
-        })
-        viewModel.devices.observe(viewLifecycleOwner, Observer { displayDevices(it) })
 
         /** Event listeners **/
         view.search_button.setOnClickListener{ goToSearch() }
@@ -117,8 +113,7 @@ class LibraryFragment : Fragment() {
     private fun filterTextChangeListener() : TextWatcher {
         return object: TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                viewModel.filterText = filter_text.text.toString()
-                viewModel.updateAlbumSelection()
+                viewModel.filterText.value = filter_text.text.toString()
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }

@@ -1,10 +1,7 @@
 package no.birg.albumselector.screens.library
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.birg.albumselector.database.*
@@ -17,34 +14,40 @@ class LibraryViewModel constructor(
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
     private val _devices = MutableLiveData<List<Pair<String, String>>>()
-    private val _displayedAlbums = MutableLiveData<List<Album>>()
     private val _selectedAlbum = MutableLiveData<Album>()
     private val _selectedAlbumDetails = MutableLiveData<JSONObject>()
 
     val devices: LiveData<List<Pair<String, String>>> get() = _devices
-    val displayedAlbums: LiveData<List<Album>> get() = _displayedAlbums
     val selectedAlbum: LiveData<Album> get() = _selectedAlbum
     val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
 
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
     val albums: LiveData<List<Album>> = albumDao.getAll()
+    val displayedAlbums: LiveData<List<Album>>
 
     private val selectedCategories = MutableLiveData<Set<String>>()
     private var shuffledAlbumList = mutableListOf<Album>()
     var selectedDevice: String = ""
-    var filterText: String = ""
+    var filterText = MutableLiveData<String>()
 
     var queueState = false
     val shuffleState = MutableLiveData<Boolean>()
 
 
-
     init {
-        shuffleState.value = false
         _devices.value = listOf()
-        _displayedAlbums.value = mutableListOf()
-        _selectedAlbumDetails.value = JSONObject()
         _selectedAlbum.value = Album("","","",0)
+        _selectedAlbumDetails.value = JSONObject()
+
+        shuffleState.value = false
+
+        displayedAlbums = MediatorLiveData<List<Album>>().apply {
+            fun update() { value = filterAlbums() }
+            addSource(albums) { update() }
+            addSource(selectedCategories) { update() }
+            addSource(filterText) { update() }
+        }
+
         fetchDevices()
         fetchShuffleState()
     }
@@ -72,9 +75,9 @@ class LibraryViewModel constructor(
 
     private fun getRandomAlbum() : Album? {
         var album: Album? = null
-        if (_displayedAlbums.value?.size != 0) {
+        if (displayedAlbums.value?.size != 0) {
             if (shuffledAlbumList.size == 0) {
-                shuffledAlbumList = _displayedAlbums.value?.shuffled() as MutableList<Album>
+                shuffledAlbumList = displayedAlbums.value?.shuffled() as MutableList<Album>
             }
             album = shuffledAlbumList.removeAt(0)
         }
@@ -89,21 +92,26 @@ class LibraryViewModel constructor(
         return albumDao.checkRecord(albumID)
     }
 
-    fun updateAlbumSelection() {
-        if (albums.value != null) {
-            val filteredAlbums = albums.value?.toMutableList()
-            if (selectedCategories.value?.isNotEmpty()!!) {
-                for (category in selectedCategories.value!!) {
-                    filteredAlbums?.retainAll(getCategory(category).albums)
-                }
-            }
-            filteredAlbums?.retainAll { album ->
-                val artistAndTitle = "${album.artistName} ${album.title}"
-                artistAndTitle.contains(filterText, ignoreCase = true)
-            }
-            shuffledAlbumList = filteredAlbums?.shuffled() as MutableList<Album>
-            _displayedAlbums.value = filteredAlbums
+    private fun filterAlbums() : List<Album> {
+        val filteredAlbums = mutableListOf<Album>()
+        if (!albums.value.isNullOrEmpty()) {
+            filteredAlbums.addAll(albums.value!!)
         }
+        if (!selectedCategories.value.isNullOrEmpty()) {
+            for (category in selectedCategories.value!!) {
+                filteredAlbums.retainAll(getCategory(category).albums)
+            }
+        }
+        if (!filterText.value.isNullOrBlank()) {
+            filteredAlbums.retainAll { album ->
+                val artistAndTitle = "${album.artistName} ${album.title}"
+                artistAndTitle.contains(filterText.value!!, ignoreCase = true)
+            }
+        }
+        if (filteredAlbums != displayedAlbums.value) {
+            shuffledAlbumList = filteredAlbums.shuffled() as MutableList<Album>
+        }
+        return filteredAlbums
     }
 
     /** Methods dealing with categories **/
