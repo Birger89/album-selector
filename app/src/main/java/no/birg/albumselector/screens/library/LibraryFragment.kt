@@ -116,8 +116,9 @@ class LibraryFragment : Fragment() {
     }
 
     private fun selectRandomAlbum() {
-        viewModel.selectRandomAlbum()
-        displayAlbumDetails()
+        if (viewModel.selectRandomAlbum()) {
+            displayAlbumDetails()
+        }
     }
 
     fun playAlbum(albumID: String) {

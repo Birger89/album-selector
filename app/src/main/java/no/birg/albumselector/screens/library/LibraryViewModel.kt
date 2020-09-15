@@ -57,11 +57,12 @@ class LibraryViewModel constructor(
         fetchAlbumDetails(album.aid)
     }
 
-    fun selectRandomAlbum() {
+    fun selectRandomAlbum() : Boolean {
         val album = getRandomAlbum()
-        if (album != null) {
+        return if (album != null) {
             selectAlbum(album)
-        }
+            true
+        } else false
     }
 
     private fun getRandomAlbum() : Album? {
