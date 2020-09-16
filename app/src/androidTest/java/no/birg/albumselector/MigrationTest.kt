@@ -19,7 +19,9 @@ import kotlin.test.assertNotNull
 
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {
-    private val TEST_DB = "migration-test"
+    companion object {
+        private const val TEST_DB = "migration-test"
+    }
 
     @get:Rule
     val helper: MigrationTestHelper = MigrationTestHelper(

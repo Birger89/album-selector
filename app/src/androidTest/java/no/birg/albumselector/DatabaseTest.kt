@@ -10,7 +10,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import java.lang.Exception
 import kotlin.test.assertEquals
 
 @RunWith(AndroidJUnit4::class)
@@ -19,11 +18,14 @@ class DatabaseTest {
     private lateinit var albumDao: AlbumDao
     private lateinit var categoryDao: CategoryDao
 
-    private val TEST_AID = "test_aid"
-    private val TEST_TITLE = "test_title"
-    private val TEST_ARTIST = "test_artist"
-    private val TEST_DURATION = 60000 // One minute
-    private val TEST_CID = "test_cid"
+    companion object {
+        private const val TEST_AID = "test_aid"
+        private const val TEST_TITLE = "test_title"
+        private const val TEST_ARTIST = "test_artist"
+        private const val TEST_DURATION = 60000 // One minute
+        private const val TEST_CID = "test_cid"
+    }
+
 
     private fun getTestAlbum() : Album {
         return Album(TEST_AID, TEST_TITLE, TEST_ARTIST, TEST_DURATION)
