@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_result_details.*
@@ -38,7 +37,7 @@ class ResultDetailsFragment: Fragment() {
         val view = inflater.inflate(R.layout.fragment_result_details, container, false)
 
         /** Observers **/
-        viewModel.selectedAlbumDetails.observe(viewLifecycleOwner, Observer {
+        viewModel.selectedAlbumDetails.observe(viewLifecycleOwner, {
             displayMoreDetails(it)
         })
 

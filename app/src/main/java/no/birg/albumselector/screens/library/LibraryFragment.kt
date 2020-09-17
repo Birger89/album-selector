@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.fragment_library.*
@@ -58,9 +57,9 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
         /** Observers **/
-        viewModel.devices.observe(viewLifecycleOwner, Observer { displayDevices(it) })
-        viewModel.categories.observe(viewLifecycleOwner, Observer { displayCategories(it) })
-        viewModel.displayedAlbums.observe(viewLifecycleOwner, Observer {
+        viewModel.devices.observe(viewLifecycleOwner, { displayDevices(it) })
+        viewModel.categories.observe(viewLifecycleOwner, { displayCategories(it) })
+        viewModel.displayedAlbums.observe(viewLifecycleOwner, {
             displayAlbums(it.asReversed())
         })
 

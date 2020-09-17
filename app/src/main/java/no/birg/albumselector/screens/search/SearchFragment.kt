@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.fragment_search.*
@@ -46,8 +45,8 @@ class SearchFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
 
         /** Observers **/
-        viewModel.username.observe(viewLifecycleOwner, Observer { displayUsername(it) })
-        viewModel.searchResults.observe(viewLifecycleOwner, Observer {
+        viewModel.username.observe(viewLifecycleOwner, { displayUsername(it) })
+        viewModel.searchResults.observe(viewLifecycleOwner, {
             displaySearchResults(it)
         })
 
