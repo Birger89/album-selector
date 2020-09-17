@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Album Selector</string>
-    <string name="spotify_login_button">Log in with Spotify</string>
     <string name="empty_string">-</string>
     <string name="search_button">Search</string>
     <string name="search_field">Waddayawanna search for?</string>
@@ -16,6 +15,4 @@
     <string name="home">Home</string>
     <string name="filter">Filter</string>
     <string name="artist_name">Artist Name</string>
-    <item name="TAG_ID" type="id" />
-    <item name="TAG_URI" type="id" />
 </resources>
