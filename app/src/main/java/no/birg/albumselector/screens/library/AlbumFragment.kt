@@ -91,7 +91,7 @@ class AlbumFragment : Fragment() {
 
     private fun addCategory(categoryName: String) {
         if (categoryName != "") {
-            GlobalScope.launch(Dispatchers.Default) {
+            GlobalScope.launch {
                 if (!viewModel.addCategory(categoryName)) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(activity, "Category already exists",

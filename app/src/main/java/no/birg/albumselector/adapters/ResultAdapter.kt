@@ -79,7 +79,7 @@ class ResultAdapter(
             holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
         }
 
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch {
             val inLibrary = viewModel.checkForAlbum(id)
             withContext(Dispatchers.Main) {
                 if (inLibrary) {
@@ -104,9 +104,9 @@ class ResultAdapter(
     }
 
     private fun addAlbum(album: Album) {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch {
             if (!viewModel.addAlbum(album)) {
-                GlobalScope.launch(Dispatchers.Main) {
+                withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Album already in library", Toast.LENGTH_SHORT).show()
                 }
             }

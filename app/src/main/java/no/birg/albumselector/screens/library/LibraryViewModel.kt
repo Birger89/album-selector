@@ -55,7 +55,7 @@ class LibraryViewModel constructor(
     /** Methods dealing with albums **/
 
     fun deleteAlbum(album: Album) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             albumDao.delete(album)
         }
     }
@@ -84,11 +84,11 @@ class LibraryViewModel constructor(
         return album
     }
 
-    private fun updateAlbum(album: Album) {
+    private suspend fun updateAlbum(album: Album) {
         albumDao.update(album)
     }
 
-    private fun checkForAlbum(albumID: String) : Boolean {
+    private suspend fun checkForAlbum(albumID: String) : Boolean {
         return albumDao.checkRecord(albumID)
     }
 
@@ -116,7 +116,7 @@ class LibraryViewModel constructor(
 
     /** Methods dealing with categories **/
 
-    fun addCategory(categoryName: String) : Boolean {
+    suspend fun addCategory(categoryName: String) : Boolean {
         if (!checkForCategory(categoryName)) {
             categoryDao.insert(Category(categoryName))
             return true
@@ -126,14 +126,14 @@ class LibraryViewModel constructor(
 
     fun setCategory(category: Category, album: Album) {
         val crossRef = CategoryAlbumCrossRef(category.cid, album.aid)
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             categoryDao.insertAlbumCrossRef(crossRef)
         }
     }
 
     fun unsetCategory(category: Category, album: Album) {
         val crossRef = CategoryAlbumCrossRef(category.cid, album.aid)
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
             categoryDao.deleteAlbumCrossRef(crossRef)
         }
     }
@@ -154,14 +154,14 @@ class LibraryViewModel constructor(
 
     fun deleteSelectedCategories() {
         for (cat in selectedCategories.value!!) {
-            viewModelScope.launch(Dispatchers.Default) {
+            viewModelScope.launch {
                 categoryDao.delete(getCategory(cat).category)
             }
         }
         selectedCategories.clear()
     }
 
-    private fun checkForCategory(categoryName: String) : Boolean {
+    private suspend fun checkForCategory(categoryName: String) : Boolean {
         return categoryDao.checkRecord(categoryName)
     }
 
@@ -177,13 +177,13 @@ class LibraryViewModel constructor(
     /** Methods accessing Spotify **/
 
     private fun fetchAlbumDetails(albumID: String) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             _selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
         }
     }
 
     fun refreshAlbum(albumID: String) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             if (checkForAlbum(albumID)) {
                 val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
                 val details = spotifyConnection.fetchAlbumDetails(albumID)
@@ -212,13 +212,13 @@ class LibraryViewModel constructor(
     }
 
     private fun fetchShuffleState() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             shuffleState.postValue(spotifyConnection.fetchShuffleState())
         }
     }
 
     private fun fetchDevices() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             _devices.postValue(spotifyConnection.fetchDevices())
         }
     }
@@ -228,7 +228,7 @@ class LibraryViewModel constructor(
             queueAlbum(albumID)
         } else {
             if (selectedDevice != "") {
-                viewModelScope.launch(Dispatchers.Default) {
+                viewModelScope.launch(Dispatchers.IO) {
                     spotifyConnection.setShuffle(shuffleState.value!!, selectedDevice)
                     spotifyConnection.playAlbum(albumID, selectedDevice)
                 }
@@ -240,7 +240,7 @@ class LibraryViewModel constructor(
 
     private fun queueAlbum(albumID: String) {
         if (selectedDevice != "") {
-            viewModelScope.launch(Dispatchers.Default) {
+            viewModelScope.launch(Dispatchers.IO) {
                 val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
                 if (shuffleState.value!!) {
                     trackIDs.shuffle()

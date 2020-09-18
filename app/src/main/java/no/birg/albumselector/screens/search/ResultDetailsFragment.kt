@@ -45,13 +45,11 @@ class ResultDetailsFragment: Fragment() {
         view.add_button.setOnClickListener { addAlbum(album) }
 
 
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch {
             if (viewModel.checkForAlbum(album.aid)) {
-                withContext(Dispatchers.Main) { context?.let {
-                    view.add_button.setTextColor(
-                        ContextCompat.getColor(it, R.color.spotifyGreen)
-                    )
-                } }
+                context?.let {
+                    view.add_button.setTextColor(ContextCompat.getColor(it, R.color.spotifyGreen))
+                }
             }
         }
         return view
@@ -67,9 +65,9 @@ class ResultDetailsFragment: Fragment() {
     /** Methods for listeners **/
 
     private fun addAlbum(album: Album) {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch {
             if (!viewModel.addAlbum(album)) {
-                GlobalScope.launch(Dispatchers.Main) {
+                withContext(Dispatchers.Main) {
                     Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
                 }
             }

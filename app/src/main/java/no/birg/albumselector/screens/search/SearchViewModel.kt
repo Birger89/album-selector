@@ -37,7 +37,7 @@ class SearchViewModel constructor(
 
     /** Methods dealing with albums **/
 
-    fun addAlbum(album: Album) : Boolean {
+    suspend fun addAlbum(album: Album) : Boolean {
         return if (!checkForAlbum(album.aid)) {
             var newAlbum = album
             if (album.durationMS == 0) {
@@ -54,26 +54,26 @@ class SearchViewModel constructor(
         fetchAlbumDetails(album.aid)
     }
 
-    fun checkForAlbum(albumID: String) : Boolean {
+    suspend fun checkForAlbum(albumID: String) : Boolean {
         return albumDao.checkRecord(albumID)
     }
 
     /** Methods accessing Spotify **/
 
     fun search(query: String) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             _searchResults.postValue(spotifyConnection.search(query))
         }
     }
 
     private fun fetchUsername() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             _username.postValue(spotifyConnection.fetchUsername())
         }
     }
 
     private fun fetchAlbumDetails(albumID: String) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             _selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
         }
     }

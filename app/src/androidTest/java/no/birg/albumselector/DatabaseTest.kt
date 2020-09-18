@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.runBlocking
 import no.birg.albumselector.database.*
 import org.junit.After
 import org.junit.Before
@@ -58,7 +59,7 @@ class DatabaseTest {
 
     @Test
     @Throws(Exception::class)
-    fun addAndDeleteAlbum() {
+    fun addAndDeleteAlbum() = runBlocking {
         val album = getTestAlbum()
         albumDao.insert(album)
 
@@ -73,7 +74,7 @@ class DatabaseTest {
 
     @Test
     @Throws(Exception::class)
-    fun addAndDeleteCategory() {
+    fun addAndDeleteCategory() = runBlocking {
         val category = getTestCategory()
         categoryDao.insert(category)
         assertEquals(category, categoryDao.getAll()[0])
@@ -84,7 +85,7 @@ class DatabaseTest {
 
     @Test
     @Throws(Exception::class)
-    fun addAndDeleteRelation() {
+    fun addAndDeleteRelation() = runBlocking {
         albumDao.insert(getTestAlbum())
         categoryDao.insert(getTestCategory())
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
@@ -104,7 +105,7 @@ class DatabaseTest {
 
     @Test
     @Throws(Exception::class)
-    fun removeAlbumWithRelation() {
+    fun removeAlbumWithRelation() = runBlocking {
         albumDao.insert(getTestAlbum())
         categoryDao.insert(getTestCategory())
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
@@ -118,7 +119,7 @@ class DatabaseTest {
 
     @Test
     @Throws(Exception::class)
-    fun removeCategoryWithRelation() {
+    fun removeCategoryWithRelation() = runBlocking {
         albumDao.insert(getTestAlbum())
         categoryDao.insert(getTestCategory())
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
