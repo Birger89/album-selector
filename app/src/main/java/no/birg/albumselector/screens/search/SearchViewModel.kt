@@ -6,9 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.utility.SingleLiveEvent
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -27,6 +29,8 @@ class SearchViewModel constructor(
     val selectedResult: Album get() = _selectedResult
     val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
 
+    val toastMessage = SingleLiveEvent<Int>()
+
 
     init {
         _username.value = "-"
@@ -37,16 +41,20 @@ class SearchViewModel constructor(
 
     /** Methods dealing with albums **/
 
-    suspend fun addAlbum(album: Album) : Boolean {
-        return if (!checkForAlbum(album.aid)) {
-            var newAlbum = album
-            if (album.durationMS == 0) {
-                newAlbum =
-                    Album(album.aid, album.title, album.artistName, fetchAlbumDurationMS(album.aid))
+    fun addAlbum(album: Album) {
+        viewModelScope.launch {
+            if (!checkForAlbum(album.aid)) {
+                var newAlbum = album
+                if (album.durationMS == 0) {
+                    newAlbum = Album(
+                        album.aid, album.title, album.artistName,
+                        fetchAlbumDurationMS(album.aid)
+                    )
+                }
+                albumDao.insert(newAlbum)
             }
-            albumDao.insert(newAlbum)
-            true
-        } else false
+            else toastMessage.postValue(R.string.album_in_library)
+        }
     }
 
     fun selectAlbum(album: Album) {

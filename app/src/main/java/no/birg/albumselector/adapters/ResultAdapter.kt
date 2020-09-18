@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.result_item.view.*
@@ -104,12 +103,6 @@ class ResultAdapter(
     }
 
     private fun addAlbum(album: Album) {
-        GlobalScope.launch {
-            if (!viewModel.addAlbum(album)) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Album already in library", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        viewModel.addAlbum(album)
     }
 }

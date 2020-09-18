@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -49,6 +50,9 @@ class SearchFragment : Fragment() {
         viewModel.searchResults.observe(viewLifecycleOwner, {
             displaySearchResults(it)
         })
+        viewModel.toastMessage.observe(viewLifecycleOwner, {
+            displayToast(resources.getString(it))
+        })
 
         /** Event listeners **/
         view.library_button.setOnClickListener{ goToLibrary() }
@@ -86,5 +90,9 @@ class SearchFragment : Fragment() {
 
     private fun displayUsername(username: String) {
         name_text_view.text = username
+    }
+
+    private fun displayToast(message: String) {
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
 }

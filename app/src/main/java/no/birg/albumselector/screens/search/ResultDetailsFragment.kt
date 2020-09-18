@@ -12,10 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_result_details.*
 import kotlinx.android.synthetic.main.fragment_result_details.view.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import org.json.JSONObject
@@ -39,6 +37,9 @@ class ResultDetailsFragment: Fragment() {
         /** Observers **/
         viewModel.selectedAlbumDetails.observe(viewLifecycleOwner, {
             displayMoreDetails(it)
+        })
+        viewModel.toastMessage.observe(viewLifecycleOwner, {
+            displayToast(resources.getString(it))
         })
 
         /** Listeners **/
@@ -65,16 +66,10 @@ class ResultDetailsFragment: Fragment() {
     /** Methods for listeners **/
 
     private fun addAlbum(album: Album) {
-        GlobalScope.launch {
-            if (!viewModel.addAlbum(album)) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(activity, "Album already in library", Toast.LENGTH_SHORT).show()
-                }
-            }
+        viewModel.addAlbum(album)
+        context?.let {
+            add_button.setTextColor(ContextCompat.getColor(it, R.color.spotifyGreen))
         }
-        context?.let { add_button.setTextColor(
-            ContextCompat.getColor(it, R.color.spotifyGreen)
-        ) }
     }
 
     /** Methods for updating the UI **/
@@ -94,5 +89,9 @@ class ResultDetailsFragment: Fragment() {
                 Glide.with(context).load(imageUrl).into(album_cover)
             }
         }
+    }
+
+    private fun displayToast(message: String) {
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
 }

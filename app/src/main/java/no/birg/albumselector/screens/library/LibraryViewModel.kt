@@ -1,11 +1,12 @@
 package no.birg.albumselector.screens.library
 
-import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import no.birg.albumselector.R
 import no.birg.albumselector.database.*
 import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.utility.SingleLiveEvent
 import org.json.JSONObject
 
 class LibraryViewModel constructor(
@@ -32,6 +33,7 @@ class LibraryViewModel constructor(
 
     var queueState = false
     val shuffleState = MutableLiveData<Boolean>()
+    val toastMessage = SingleLiveEvent<Int>()
 
 
     init {
@@ -116,12 +118,13 @@ class LibraryViewModel constructor(
 
     /** Methods dealing with categories **/
 
-    suspend fun addCategory(categoryName: String) : Boolean {
-        if (!checkForCategory(categoryName)) {
-            categoryDao.insert(Category(categoryName))
-            return true
+    fun addCategory(categoryName: String) {
+        viewModelScope.launch {
+            if (!checkForCategory(categoryName)) {
+                categoryDao.insert(Category(categoryName))
+            }
+            else toastMessage.postValue(R.string.category_exists)
         }
-        return false
     }
 
     fun setCategory(category: Category, album: Album) {
@@ -232,9 +235,8 @@ class LibraryViewModel constructor(
                     spotifyConnection.setShuffle(shuffleState.value!!, selectedDevice)
                     spotifyConnection.playAlbum(albumID, selectedDevice)
                 }
-            } else {
-                Log.w("LibraryViewModel", "No device selected")
             }
+            else toastMessage.value = R.string.no_device
         }
     }
 
@@ -249,9 +251,8 @@ class LibraryViewModel constructor(
                     spotifyConnection.queueSong(trackID, selectedDevice)
                 }
             }
-        } else {
-            Log.w("LibraryViewModel", "No device selected")
         }
+        else toastMessage.value = R.string.no_device
     }
 
     /** Extension functions **/

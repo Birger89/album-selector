@@ -14,10 +14,6 @@ import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
@@ -57,6 +53,9 @@ class AlbumFragment : Fragment() {
         viewModel.categories.observe(viewLifecycleOwner, {
             displayCategories(it.reversed() as ArrayList<CategoryWithAlbums>)
         })
+        viewModel.toastMessage.observe(viewLifecycleOwner, {
+            displayToast(resources.getString(it))
+        })
 
         /** Event listeners **/
         view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
@@ -91,14 +90,7 @@ class AlbumFragment : Fragment() {
 
     private fun addCategory(categoryName: String) {
         if (categoryName != "") {
-            GlobalScope.launch {
-                if (!viewModel.addCategory(categoryName)) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(activity, "Category already exists",
-                            Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
+            viewModel.addCategory(categoryName)
         }
     }
 
@@ -129,6 +121,10 @@ class AlbumFragment : Fragment() {
         }
         // Restore scroll position
         category_listview.onRestoreInstanceState(categorySelectorState)
+    }
+
+    private fun displayToast(message: String) {
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
 
     /** Utility **/

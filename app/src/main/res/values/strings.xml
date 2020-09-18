@@ -15,4 +15,7 @@
     <string name="home">Home</string>
     <string name="filter">Filter</string>
     <string name="artist_name">Artist Name</string>
+    <string name="album_in_library">Album already in library</string>
+    <string name="category_exists">Category already exists</string>
+    <string name="no_device">No device selected</string>
 </resources>
