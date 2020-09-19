@@ -12,7 +12,6 @@ import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.spotify.SpotifyConnection
 import no.birg.albumselector.utility.SingleLiveEvent
 import org.json.JSONArray
-import org.json.JSONObject
 
 class SearchViewModel constructor(
     private val albumDao: AlbumDao,
@@ -21,13 +20,11 @@ class SearchViewModel constructor(
 
     private val _username = MutableLiveData<String>()
     private val _searchResults = MutableLiveData<JSONArray>()
-    private var _selectedResult: Album = Album("","","",0)
-    private val _selectedAlbumDetails = MutableLiveData<JSONObject>()
+    private var _selectedResult: Album = Album("","","",0, "")
 
     val username: LiveData<String> get() = _username
     val searchResults: LiveData<JSONArray> get() = _searchResults
     val selectedResult: Album get() = _selectedResult
-    val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
 
     val toastMessage = SingleLiveEvent<Int>()
 
@@ -35,7 +32,6 @@ class SearchViewModel constructor(
     init {
         _username.value = "-"
         _searchResults.value = JSONArray()
-        _selectedAlbumDetails.value = JSONObject()
         fetchUsername()
     }
 
@@ -48,7 +44,7 @@ class SearchViewModel constructor(
                 if (album.durationMS == 0) {
                     newAlbum = Album(
                         album.aid, album.title, album.artistName,
-                        fetchAlbumDurationMS(album.aid)
+                        fetchAlbumDurationMS(album.aid), album.imageUrl
                     )
                 }
                 albumDao.insert(newAlbum)
@@ -59,7 +55,6 @@ class SearchViewModel constructor(
 
     fun selectAlbum(album: Album) {
         _selectedResult = album
-        fetchAlbumDetails(album.aid)
     }
 
     suspend fun checkForAlbum(albumID: String) : Boolean {
@@ -77,12 +72,6 @@ class SearchViewModel constructor(
     private fun fetchUsername() {
         viewModelScope.launch(Dispatchers.IO) {
             _username.postValue(spotifyConnection.fetchUsername())
-        }
-    }
-
-    private fun fetchAlbumDetails(albumID: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
         }
     }
 

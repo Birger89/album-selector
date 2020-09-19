@@ -1,7 +1,6 @@
 package no.birg.albumselector.screens.search
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
-import org.json.JSONObject
 
 class ResultDetailsFragment: Fragment() {
 
@@ -35,9 +33,6 @@ class ResultDetailsFragment: Fragment() {
         val view = inflater.inflate(R.layout.fragment_result_details, container, false)
 
         /** Observers **/
-        viewModel.selectedAlbumDetails.observe(viewLifecycleOwner, {
-            displayMoreDetails(it)
-        })
         viewModel.toastMessage.observe(viewLifecycleOwner, {
             displayToast(resources.getString(it))
         })
@@ -77,17 +72,8 @@ class ResultDetailsFragment: Fragment() {
     private fun displayAlbum(album: Album) {
         album_title.text = album.title
         artist_name.text = album.artistName
-    }
-
-    private fun displayMoreDetails(details: JSONObject) {
-        if ( !details.has("images")) {
-            Log.w("ResultDetailsFragment", "Album has no images")
-        } else {
-            val imageUrl = details.getJSONArray("images")
-                .getJSONObject(0).getString("url")
-            if (!imageUrl.isNullOrEmpty()) {
-                Glide.with(context).load(imageUrl).into(album_cover)
-            }
+        if (!album.imageUrl.isNullOrEmpty()) {
+            Glide.with(context).load(album.imageUrl).into(album_cover)
         }
     }
 

@@ -61,6 +61,8 @@ class ResultAdapter(
         val result = getItem(position) as JSONObject
         val title = result.getString("name")
         val id = result.getString("id")
+        val imageUrl = result.getJSONArray("images")
+            .getJSONObject(0).getString("url")
 
         var artistName = "No Artist Info"
         val artists = result.getJSONArray("artists")
@@ -74,7 +76,7 @@ class ResultAdapter(
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            addAlbum(Album(id, title, artistName, 0))
+            addAlbum(Album(id, title, artistName, 0, imageUrl))
             holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
         }
 
@@ -90,7 +92,7 @@ class ResultAdapter(
         }
 
         resultView.setOnClickListener {
-            viewModel.selectAlbum(Album(id, title, artistName, 0 ))
+            viewModel.selectAlbum(Album(id, title, artistName, 0, imageUrl))
             resultView.findNavController().navigate(R.id.action_searchFragment_to_resultDetailsFragment)
         }
 

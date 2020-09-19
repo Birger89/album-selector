@@ -7,7 +7,6 @@ import no.birg.albumselector.R
 import no.birg.albumselector.database.*
 import no.birg.albumselector.spotify.SpotifyConnection
 import no.birg.albumselector.utility.SingleLiveEvent
-import org.json.JSONObject
 
 class LibraryViewModel constructor(
     private val albumDao: AlbumDao,
@@ -16,11 +15,9 @@ class LibraryViewModel constructor(
 ) : ViewModel() {
     private val _devices = MutableLiveData<List<Pair<String, String>>>()
     private val _selectedAlbum = MutableLiveData<Album>()
-    private val _selectedAlbumDetails = MutableLiveData<JSONObject>()
 
     val devices: LiveData<List<Pair<String, String>>> get() = _devices
     val selectedAlbum: LiveData<Album> get() = _selectedAlbum
-    val selectedAlbumDetails: LiveData<JSONObject> get() = _selectedAlbumDetails
 
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
     val albums: LiveData<List<Album>> = albumDao.getAll()
@@ -38,8 +35,7 @@ class LibraryViewModel constructor(
 
     init {
         _devices.value = listOf()
-        _selectedAlbum.value = Album("","","",0)
-        _selectedAlbumDetails.value = JSONObject()
+        _selectedAlbum.value = Album("","","",0, "")
 
         shuffleState.value = false
 
@@ -64,7 +60,6 @@ class LibraryViewModel constructor(
 
     fun selectAlbum(album: Album) {
         _selectedAlbum.postValue(album)
-        fetchAlbumDetails(album.aid)
     }
 
     fun selectRandomAlbum() : Boolean {
@@ -179,23 +174,20 @@ class LibraryViewModel constructor(
 
     /** Methods accessing Spotify **/
 
-    private fun fetchAlbumDetails(albumID: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _selectedAlbumDetails.postValue(spotifyConnection.fetchAlbumDetails(albumID))
-        }
-    }
-
     fun refreshAlbum(albumID: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (checkForAlbum(albumID)) {
+                var title = "No Title"
+                var artistName = "No Artist Info"
+                var imageUrl = "no.url"
+
                 val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
                 val details = spotifyConnection.fetchAlbumDetails(albumID)
 
-                if (details.has("name") && details.has("artists")) {
-                    val albumTitle = details.getString("name")
-
-                    var artistName = "No Artist Info"
-
+                if (details.has("name")) {
+                    title = details.getString("name")
+                }
+                if (details.has("name")){
                     val artists = details.getJSONArray("artists")
                     if (artists.length() == 1) {
                         val artist = artists.getJSONObject(0)
@@ -203,12 +195,16 @@ class LibraryViewModel constructor(
                     } else if (artists.length() > 1) {
                         artistName = "Several Artists"
                     }
-                    val album = Album(albumID, albumTitle, artistName, durationMS)
-                    updateAlbum(album)
+                }
+                if (details.has("images")) {
+                    imageUrl = details.getJSONArray("images")
+                        .getJSONObject(0).getString("url")
 
-                    if (selectedAlbum.value?.aid == albumID) {
-                        _selectedAlbum.postValue(album)
-                    }
+                }
+                val album = Album(albumID, title, artistName, durationMS, imageUrl)
+                updateAlbum(album)
+                if (selectedAlbum.value?.aid == albumID) {
+                    _selectedAlbum.postValue(album)
                 }
             }
         }

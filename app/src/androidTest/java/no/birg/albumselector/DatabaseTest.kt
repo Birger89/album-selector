@@ -30,12 +30,13 @@ class DatabaseTest {
         private const val TEST_TITLE = "test_title"
         private const val TEST_ARTIST = "test_artist"
         private const val TEST_DURATION = 60000 // One minute
+        private const val TEST_IMAGE_URL = "test.url"
         private const val TEST_CID = "test_cid"
     }
 
 
     private fun getTestAlbum() : Album {
-        return Album(TEST_AID, TEST_TITLE, TEST_ARTIST, TEST_DURATION)
+        return Album(TEST_AID, TEST_TITLE, TEST_ARTIST, TEST_DURATION, TEST_IMAGE_URL)
     }
     private fun getTestCategory() : Category {
         return Category(TEST_CID)

@@ -2,7 +2,6 @@ package no.birg.albumselector.screens.library
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +17,6 @@ import no.birg.albumselector.R
 import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.CategoryWithAlbums
-import org.json.JSONObject
 
 class AlbumFragment : Fragment() {
 
@@ -36,7 +34,9 @@ class AlbumFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
 
-        if (album.title == null || album.artistName == null || album.durationMS == 0) {
+        if (album.title == null || album.artistName == null
+            || album.durationMS == 0 || album.imageUrl == null)
+        {
             viewModel.refreshAlbum(album.aid)
         }
 
@@ -47,9 +47,6 @@ class AlbumFragment : Fragment() {
             view.shuffle_switch.isChecked = it
         })
         viewModel.selectedAlbum.observe(viewLifecycleOwner, { displayAlbum(it) })
-        viewModel.selectedAlbumDetails.observe(viewLifecycleOwner, {
-            displayMoreDetails(it)
-        })
         viewModel.categories.observe(viewLifecycleOwner, {
             displayCategories(it.reversed() as ArrayList<CategoryWithAlbums>)
         })
@@ -100,17 +97,8 @@ class AlbumFragment : Fragment() {
         album_title.text = album.title
         artist_name.text = album.artistName
         album_duration.text = toHoursAndMinutes(album.durationMS)
-    }
-
-    private fun displayMoreDetails(details: JSONObject) {
-        if ( !details.has("images")) {
-            Log.w("AlbumFragment", "Album has no images")
-        } else {
-            val imageUrl = details.getJSONArray("images")
-                .getJSONObject(0).getString("url")
-            if (!imageUrl.isNullOrEmpty()) {
-                Glide.with(context).load(imageUrl).into(album_cover)
-            }
+        if (!album.imageUrl.isNullOrEmpty()) {
+            Glide.with(context).load(album.imageUrl).into(album_cover)
         }
     }
 
