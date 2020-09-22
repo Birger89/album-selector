@@ -9,6 +9,8 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -21,6 +23,7 @@ import no.birg.albumselector.adapters.CategorySelectorAdapter
 import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.CategoryWithAlbums
+import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
 
 class LibraryFragment : Fragment() {
 
@@ -50,10 +53,12 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
         /** Observers **/
+        displayedAlbums.observe(viewLifecycleOwner, { displayAlbums(it.asReversed()) })
         viewModel.devices.observe(viewLifecycleOwner, { displayDevices(it) })
         viewModel.categories.observe(viewLifecycleOwner, { displayCategories(it) })
-        viewModel.displayedAlbums.observe(viewLifecycleOwner, {
-            displayAlbums(it.asReversed())
+        viewModel.selectedAlbum.observe(viewLifecycleOwner, { goToAlbumDetails(it) })
+        viewModel.toastMessage.observe(viewLifecycleOwner, {
+            displayToast(resources.getString(it))
         })
 
         /** Event listeners **/
@@ -86,8 +91,11 @@ class LibraryFragment : Fragment() {
         view?.findNavController()?.navigate(R.id.action_libraryFragment_to_searchFragment)
     }
 
-    private fun displayAlbumDetails() {
-        view?.findNavController()?.navigate(R.id.action_libraryFragment_to_albumFragment)
+    private fun goToAlbumDetails(album: Album) {
+        view?.findNavController()?.navigate(
+            R.id.action_libraryFragment_to_albumFragment,
+            bundleOf(Pair("albumId", album.aid))
+        )
     }
 
     /** Methods for listeners **/
@@ -97,9 +105,7 @@ class LibraryFragment : Fragment() {
     }
 
     private fun selectRandomAlbum() {
-        if (viewModel.selectRandomAlbum()) {
-            displayAlbumDetails()
-        }
+        viewModel.selectRandomAlbum()
     }
 
     private fun filterTextChangeListener() : TextWatcher {
@@ -149,5 +155,9 @@ class LibraryFragment : Fragment() {
         if (this@LibraryFragment::deviceSelectorState.isInitialized) {
             devices.onRestoreInstanceState(deviceSelectorState)
         }
+    }
+
+    private fun displayToast(message: String) {
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
 }

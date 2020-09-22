@@ -91,14 +91,14 @@ class DatabaseTest {
         categoryDao.insert(getTestCategory())
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
-        val album = albumDao.getAllWithCategories()[0]
+        val album = albumDao.getAllWithCategories().getOrAwaitValue()[0]
         val categories = categoryDao.getAllWithAlbums().getOrAwaitValue()
         assertEquals(TEST_CID, album.categories[0].cid)
         assertEquals(TEST_AID, categories[0].albums[0].aid)
 
         categoryDao.deleteAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
-        val album2 = albumDao.getAllWithCategories()[0]
+        val album2 = albumDao.getAllWithCategories().getOrAwaitValue()[0]
         val categories2 = categoryDao.getAllWithAlbums().getOrAwaitValue()
         assertEquals(0, categories2[0].albums.size)
         assertEquals(0, album2.categories.size)
@@ -127,7 +127,7 @@ class DatabaseTest {
 
         categoryDao.delete(getTestCategory())
 
-        val albums = albumDao.getAllWithCategories()
+        val albums = albumDao.getAllWithCategories().getOrAwaitValue()
         assertEquals(1, albums.size)
         assertEquals(0, albums[0].categories.size)
     }

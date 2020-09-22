@@ -8,9 +8,12 @@ interface AlbumDao {
     @Query("SELECT * FROM albums")
     fun getAll(): LiveData<List<Album>>
 
+    @Query("SELECT * FROM albums WHERE aid = :aid")
+    fun getByID(aid: String): LiveData<Album>
+
     @Transaction
     @Query("SELECT * FROM albums")
-    suspend fun getAllWithCategories(): List<AlbumWithCategories>
+    fun getAllWithCategories(): LiveData<List<AlbumWithCategories>>
 
     @Query("SELECT COUNT(1) FROM albums WHERE aid = :aid")
     suspend fun checkRecord(aid: String): Boolean

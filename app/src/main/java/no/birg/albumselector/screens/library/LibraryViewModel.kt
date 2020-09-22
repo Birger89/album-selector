@@ -5,6 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.*
+import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
+import no.birg.albumselector.screens.LibraryAlbums.shuffledAlbumList
 import no.birg.albumselector.spotify.SpotifyConnection
 import no.birg.albumselector.utility.SingleLiveEvent
 
@@ -13,32 +15,34 @@ class LibraryViewModel constructor(
     private val categoryDao: CategoryDao,
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
-    private val _devices = MutableLiveData<List<Pair<String, String>>>()
-    private val _selectedAlbum = MutableLiveData<Album>()
 
-    val devices: LiveData<List<Pair<String, String>>> get() = _devices
-    val selectedAlbum: LiveData<Album> get() = _selectedAlbum
+    val albums: LiveData<List<Album>>
+    val selectedAlbum = SingleLiveEvent<Album>()
 
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
-    val albums: LiveData<List<Album>> = albumDao.getAll()
-    val displayedAlbums: LiveData<List<Album>>
-
     private val selectedCategories = MutableLiveData<Set<String>>()
-    private var shuffledAlbumList = mutableListOf<Album>()
+
+    private val _devices = MutableLiveData<List<Pair<String, String>>>()
+    val devices: LiveData<List<Pair<String, String>>> get() = _devices
     var selectedDevice: String = ""
+
+    private var queueState = false
+    private val shuffleState = MutableLiveData<Boolean>()
     var filterText = MutableLiveData<String>()
 
-    var queueState = false
-    val shuffleState = MutableLiveData<Boolean>()
     val toastMessage = SingleLiveEvent<Int>()
 
 
     init {
         _devices.value = listOf()
-        _selectedAlbum.value = Album("","","",0, "")
 
         shuffleState.value = false
 
+        albums = Transformations.map(albumDao.getAllWithCategories()) { list ->
+            list.map { a ->
+                a.album
+            }
+        }
         displayedAlbums = MediatorLiveData<List<Album>>().apply {
             fun update() { value = filterAlbums() }
             addSource(albums) { update() }
@@ -59,7 +63,7 @@ class LibraryViewModel constructor(
     }
 
     fun selectAlbum(album: Album) {
-        _selectedAlbum.postValue(album)
+        selectedAlbum.postValue(album)
     }
 
     fun selectRandomAlbum() : Boolean {
@@ -79,14 +83,6 @@ class LibraryViewModel constructor(
             album = shuffledAlbumList.removeAt(0)
         }
         return album
-    }
-
-    private suspend fun updateAlbum(album: Album) {
-        albumDao.update(album)
-    }
-
-    private suspend fun checkForAlbum(albumID: String) : Boolean {
-        return albumDao.checkRecord(albumID)
     }
 
     private fun filterAlbums() : List<Album> {
@@ -113,29 +109,6 @@ class LibraryViewModel constructor(
 
     /** Methods dealing with categories **/
 
-    fun addCategory(categoryName: String) {
-        viewModelScope.launch {
-            if (!checkForCategory(categoryName)) {
-                categoryDao.insert(Category(categoryName))
-            }
-            else toastMessage.postValue(R.string.category_exists)
-        }
-    }
-
-    fun setCategory(category: Category, album: Album) {
-        val crossRef = CategoryAlbumCrossRef(category.cid, album.aid)
-        viewModelScope.launch {
-            categoryDao.insertAlbumCrossRef(crossRef)
-        }
-    }
-
-    fun unsetCategory(category: Category, album: Album) {
-        val crossRef = CategoryAlbumCrossRef(category.cid, album.aid)
-        viewModelScope.launch {
-            categoryDao.deleteAlbumCrossRef(crossRef)
-        }
-    }
-
     fun selectCategory(categoryName: String) {
         selectedCategories.add(categoryName)
     }
@@ -159,10 +132,6 @@ class LibraryViewModel constructor(
         selectedCategories.clear()
     }
 
-    private suspend fun checkForCategory(categoryName: String) : Boolean {
-        return categoryDao.checkRecord(categoryName)
-    }
-
     private fun getCategory(categoryName: String) : CategoryWithAlbums {
         for (category in categories.value!!) {
             if (category.category.cid == categoryName) {
@@ -173,42 +142,6 @@ class LibraryViewModel constructor(
     }
 
     /** Methods accessing Spotify **/
-
-    fun refreshAlbum(albumID: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (checkForAlbum(albumID)) {
-                var title = "No Title"
-                var artistName = "No Artist Info"
-                var imageUrl = "no.url"
-
-                val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
-                val details = spotifyConnection.fetchAlbumDetails(albumID)
-
-                if (details.has("name")) {
-                    title = details.getString("name")
-                }
-                if (details.has("name")){
-                    val artists = details.getJSONArray("artists")
-                    if (artists.length() == 1) {
-                        val artist = artists.getJSONObject(0)
-                        artistName = artist.getString("name")
-                    } else if (artists.length() > 1) {
-                        artistName = "Several Artists"
-                    }
-                }
-                if (details.has("images")) {
-                    imageUrl = details.getJSONArray("images")
-                        .getJSONObject(0).getString("url")
-
-                }
-                val album = Album(albumID, title, artistName, durationMS, imageUrl)
-                updateAlbum(album)
-                if (selectedAlbum.value?.aid == albumID) {
-                    _selectedAlbum.postValue(album)
-                }
-            }
-        }
-    }
 
     private fun fetchShuffleState() {
         viewModelScope.launch(Dispatchers.IO) {

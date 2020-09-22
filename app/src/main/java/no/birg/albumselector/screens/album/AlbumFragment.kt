@@ -1,4 +1,4 @@
-package no.birg.albumselector.screens.library
+package no.birg.albumselector.screens.album
 
 import android.os.Build
 import android.os.Bundle
@@ -7,12 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
+import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
@@ -20,7 +22,7 @@ import no.birg.albumselector.database.CategoryWithAlbums
 
 class AlbumFragment : Fragment() {
 
-    private lateinit var viewModel: LibraryViewModel
+    private lateinit var viewModel: AlbumViewModel
     lateinit var album: Album
 
     override fun onCreateView(
@@ -29,16 +31,15 @@ class AlbumFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        viewModel = activity?.let { ViewModelProvider(it).get(LibraryViewModel::class.java) }!!
-        album = viewModel.selectedAlbum.value!!
+        val albumId = arguments?.getString("albumId")!!
+        val albumDao = (activity as MainActivity).albumDao
+        val categoryDao = (activity as MainActivity).categoryDao
+        val spotifyConnection = (activity as MainActivity).spotifyConnection
+
+        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, spotifyConnection)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(AlbumViewModel::class.java)
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
-
-        if (album.title == null || album.artistName == null
-            || album.durationMS == 0 || album.imageUrl == null)
-        {
-            viewModel.refreshAlbum(album.aid)
-        }
 
         view.queue_switch.isChecked = viewModel.queueState
 
@@ -46,17 +47,18 @@ class AlbumFragment : Fragment() {
         viewModel.shuffleState.observe(viewLifecycleOwner, {
             view.shuffle_switch.isChecked = it
         })
-        viewModel.selectedAlbum.observe(viewLifecycleOwner, { displayAlbum(it) })
+        viewModel.album.observe(viewLifecycleOwner, { onAlbumObserved(it) })
         viewModel.categories.observe(viewLifecycleOwner, {
             displayCategories(it.reversed() as ArrayList<CategoryWithAlbums>)
         })
         viewModel.toastMessage.observe(viewLifecycleOwner, {
             displayToast(resources.getString(it))
         })
+        viewModel.nextAlbum.observe(viewLifecycleOwner, { goToAlbum(it) })
 
         /** Event listeners **/
         view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
-        view.next_random_button.setOnClickListener { selectRandomAlbum() }
+        view.next_random_button.setOnClickListener { viewModel.selectRandomAlbum() }
         view.album_title.setOnClickListener { toggleSingleLine(it.album_title) }
         view.artist_name.setOnClickListener { toggleSingleLine(it.artist_name) }
         view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
@@ -72,12 +74,25 @@ class AlbumFragment : Fragment() {
         return view
     }
 
-    /** Methods for listeners **/
+    /** Observer methods **/
 
-    private fun selectRandomAlbum() {
-        viewModel.selectRandomAlbum()
-        view?.findNavController()?.navigate(R.id.action_albumFragment_self)
+    private fun onAlbumObserved(album: Album) {
+        displayAlbum(album)
+        if (album.title == null || album.artistName == null
+            || album.durationMS == 0 || album.imageUrl == null
+        ) {
+            viewModel.refreshAlbum(album.aid)
+        }
     }
+
+    private fun goToAlbum(album: Album) {
+        view?.findNavController()?.navigate(
+            R.id.action_albumFragment_self,
+            bundleOf(Pair("albumId", album.aid))
+        )
+    }
+
+    /** Methods for listeners **/
 
     private fun toggleSingleLine(textView: TextView) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

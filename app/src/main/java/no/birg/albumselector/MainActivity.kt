@@ -43,7 +43,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.home_button -> { findNavController(R.id.nav_host_fragment_container).navigateUp() }
+        R.id.home_button -> {
+            findNavController(R.id.nav_host_fragment_container)
+                .popBackStack(R.id.libraryFragment, false)
+        }
         else -> { super.onOptionsItemSelected(item) }
     }
 }

@@ -9,12 +9,12 @@ import android.widget.CheckBox
 import kotlinx.android.synthetic.main.category_item.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
-import no.birg.albumselector.screens.library.LibraryViewModel
+import no.birg.albumselector.screens.album.AlbumViewModel
 
 class CategoryAdapter(
     context: Context,
     private val categories: List<CategoryWithAlbums>,
-    private val viewModel: LibraryViewModel
+    private val viewModel: AlbumViewModel
 ) : BaseAdapter() {
 
     private val inflater: LayoutInflater
@@ -53,7 +53,7 @@ class CategoryAdapter(
 
         // Clears the checkListener to avoid unwanted updates from recycling views.
         holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        val album = viewModel.selectedAlbum.value!!
+        val album = viewModel.album.value!!
         holder.categoryCheckBox.isChecked = album in category.albums
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
             when (isChecked) {

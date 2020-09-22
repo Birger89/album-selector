@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.TextView
-import androidx.navigation.findNavController
 import kotlinx.android.synthetic.main.library_item.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
@@ -61,7 +60,7 @@ class AlbumAdapter(
         /** Listeners **/
         holder.playButton.setOnClickListener { viewModel.playAlbum(album.aid) }
         holder.removeButton.setOnClickListener { viewModel.deleteAlbum(album) }
-        albumView.setOnClickListener { selectAlbum(albumView, album) }
+        albumView.setOnClickListener { viewModel.selectAlbum(album) }
 
         return albumView
     }
@@ -71,11 +70,5 @@ class AlbumAdapter(
         lateinit var artistTextView: TextView
         lateinit var playButton: Button
         lateinit var removeButton: Button
-    }
-
-    /** Methods for listeners **/
-    private fun selectAlbum(view: View, album: Album) {
-        viewModel.selectAlbum(album)
-        view.findNavController().navigate(R.id.action_libraryFragment_to_albumFragment)
     }
 }

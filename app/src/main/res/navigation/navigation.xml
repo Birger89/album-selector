@@ -30,13 +30,16 @@
     </fragment>
     <fragment
         android:id="@+id/albumFragment"
-        android:name="no.birg.albumselector.screens.library.AlbumFragment"
+        android:name="no.birg.albumselector.screens.album.AlbumFragment"
         android:label="AlbumFragment"
         tools:layout="@layout/fragment_album" >
         <action
             android:id="@+id/action_albumFragment_self"
             app:destination="@id/albumFragment"
-            app:popUpTo="@id/libraryFragment" />
+            app:popUpTo="@id/albumFragment" />
+        <argument
+            android:name="albumId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/resultDetailsFragment"
