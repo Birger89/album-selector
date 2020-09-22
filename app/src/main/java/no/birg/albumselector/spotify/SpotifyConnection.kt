@@ -10,11 +10,13 @@ import java.net.URLEncoder
 import java.nio.charset.Charset
 import javax.net.ssl.HttpsURLConnection
 
-private const val API_URL = "https://api.spotify.com/v1"
-private val OK = JSONObject("{ \"success\": true }")
-private val FAIL = JSONObject("{ \"success\": false }")
-
 class SpotifyConnection(private val activity: Activity) {
+
+    companion object {
+        private const val API_URL = "https://api.spotify.com/v1"
+        private val OK = JSONObject("{ \"success\": true }")
+        private val FAIL = JSONObject("{ \"success\": false }")
+    }
 
     init {
         fetchAccessToken()
