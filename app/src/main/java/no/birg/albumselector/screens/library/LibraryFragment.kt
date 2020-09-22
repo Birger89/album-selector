@@ -20,18 +20,11 @@ import no.birg.albumselector.adapters.AlbumAdapter
 import no.birg.albumselector.adapters.CategorySelectorAdapter
 import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.database.AlbumDao
-import no.birg.albumselector.database.CategoryDao
 import no.birg.albumselector.database.CategoryWithAlbums
-import no.birg.albumselector.spotify.SpotifyConnection
 
 class LibraryFragment : Fragment() {
 
     lateinit var viewModel: LibraryViewModel
-
-    private lateinit var albumDao: AlbumDao
-    private lateinit var categoryDao: CategoryDao
-    private lateinit var spotifyConnection: SpotifyConnection
 
     private lateinit var libraryAlbumsState: Parcelable
     private lateinit var deviceSelectorState: Parcelable
@@ -39,10 +32,6 @@ class LibraryFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
-        albumDao = (activity as MainActivity).albumDao
-        categoryDao = (activity as MainActivity).categoryDao
-        spotifyConnection = (activity as MainActivity).spotifyConnection
     }
 
     override fun onCreateView(
@@ -50,6 +39,10 @@ class LibraryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
+        val albumDao = (activity as MainActivity).albumDao
+        val categoryDao = (activity as MainActivity).categoryDao
+        val spotifyConnection = (activity as MainActivity).spotifyConnection
 
         val viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyConnection)
         viewModel = activity?.let { ViewModelProvider(it, viewModelFactory).get(LibraryViewModel::class.java) }!!

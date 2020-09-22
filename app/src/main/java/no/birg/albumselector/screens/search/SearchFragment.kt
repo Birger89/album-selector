@@ -14,24 +14,11 @@ import kotlinx.android.synthetic.main.fragment_search.view.*
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
 import no.birg.albumselector.adapters.ResultAdapter
-import no.birg.albumselector.database.AlbumDao
-import no.birg.albumselector.spotify.SpotifyConnection
 import org.json.JSONArray
 
 class SearchFragment : Fragment() {
 
-    private lateinit var viewModelFactory: SearchViewModelFactory
     private lateinit var viewModel: SearchViewModel
-
-    private lateinit var albumDao: AlbumDao
-    private lateinit var spotifyConnection: SpotifyConnection
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        albumDao = (activity as MainActivity).albumDao
-        spotifyConnection = (activity as MainActivity).spotifyConnection
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,7 +26,10 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        viewModelFactory = SearchViewModelFactory(albumDao, spotifyConnection)
+        val albumDao = (activity as MainActivity).albumDao
+        val spotifyConnection = (activity as MainActivity).spotifyConnection
+
+        val viewModelFactory = SearchViewModelFactory(albumDao, spotifyConnection)
         viewModel = activity?.let {
             ViewModelProvider(it, viewModelFactory).get(SearchViewModel::class.java) }!!
 
