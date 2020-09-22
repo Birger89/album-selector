@@ -98,7 +98,7 @@ class AlbumFragment : Fragment() {
         artist_name.text = album.artistName
         album_duration.text = toHoursAndMinutes(album.durationMS)
         if (!album.imageUrl.isNullOrEmpty()) {
-            Glide.with(context).load(album.imageUrl).into(album_cover)
+            context?.let { Glide.with(it).load(album.imageUrl).into(album_cover) }
         }
     }
 

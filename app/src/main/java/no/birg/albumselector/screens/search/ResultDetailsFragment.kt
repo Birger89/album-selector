@@ -73,7 +73,7 @@ class ResultDetailsFragment: Fragment() {
         album_title.text = album.title
         artist_name.text = album.artistName
         if (!album.imageUrl.isNullOrEmpty()) {
-            Glide.with(context).load(album.imageUrl).into(album_cover)
+            context?.let { Glide.with(it).load(album.imageUrl).into(album_cover) }
         }
     }
 

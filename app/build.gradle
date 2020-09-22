@@ -77,7 +77,7 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$room_version"
 
     // For loading images
-    def glide_version = "4.4.0"
+    def glide_version = "4.10.0"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
     implementation "com.github.bumptech.glide:glide:$glide_version"
 
