@@ -53,12 +53,11 @@ class CategoryAdapter(
 
         // Clears the checkListener to avoid unwanted updates from recycling views.
         holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        val album = viewModel.album.value!!
-        holder.categoryCheckBox.isChecked = album in category.albums
+        holder.categoryCheckBox.isChecked = viewModel.album.value in category.albums
         holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
             when (isChecked) {
-                true -> viewModel.setCategory(category.category, album)
-                false -> viewModel.unsetCategory(category.category, album)
+                true -> viewModel.setCategory(category.category)
+                false -> viewModel.unsetCategory(category.category)
             }
         }
         return categoryView

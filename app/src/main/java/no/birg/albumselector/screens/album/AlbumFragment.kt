@@ -23,7 +23,6 @@ import no.birg.albumselector.screens.album.adapters.CategoryAdapter
 class AlbumFragment : Fragment() {
 
     private lateinit var viewModel: AlbumViewModel
-    lateinit var album: Album
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +56,7 @@ class AlbumFragment : Fragment() {
         viewModel.nextAlbum.observe(viewLifecycleOwner, { goToAlbum(it) })
 
         /** Event listeners **/
-        view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
+        view.play_button.setOnClickListener { viewModel.playAlbum() }
         view.next_random_button.setOnClickListener { viewModel.selectRandomAlbum() }
         view.remove_button.setOnClickListener { viewModel.deleteAlbum() }
         view.album_title.setOnClickListener { toggleSingleLine(it.album_title) }

@@ -111,15 +111,15 @@ class AlbumViewModel constructor(
         }
     }
 
-    fun setCategory(category: Category, album: Album) {
-        val crossRef = CategoryAlbumCrossRef(category.cid, album.aid)
+    fun setCategory(category: Category) {
+        val crossRef = CategoryAlbumCrossRef(category.cid, album.value?.aid!!)
         viewModelScope.launch {
             categoryDao.insertAlbumCrossRef(crossRef)
         }
     }
 
-    fun unsetCategory(category: Category, album: Album) {
-        val crossRef = CategoryAlbumCrossRef(category.cid, album.aid)
+    fun unsetCategory(category: Category) {
+        val crossRef = CategoryAlbumCrossRef(category.cid, album.value?.aid!!)
         viewModelScope.launch {
             categoryDao.deleteAlbumCrossRef(crossRef)
         }
@@ -131,14 +131,14 @@ class AlbumViewModel constructor(
 
     /** Methods accessing Spotify **/
 
-    fun playAlbum(albumID: String) {
+    fun playAlbum() {
         if (queueState) {
-            queueAlbum(albumID)
+            queueAlbum(album.value?.aid!!)
         } else {
             if (selectedDevice != "") {
                 viewModelScope.launch(Dispatchers.IO) {
                     spotifyConnection.setShuffle(shuffleState.value!!, selectedDevice)
-                    spotifyConnection.playAlbum(albumID, selectedDevice)
+                    spotifyConnection.playAlbum(album.value?.aid!!, selectedDevice)
                 }
             } else toastMessage.value = R.string.no_device
         }
