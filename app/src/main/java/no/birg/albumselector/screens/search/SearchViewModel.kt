@@ -38,7 +38,7 @@ class SearchViewModel constructor(
     /** Methods dealing with albums **/
 
     fun addAlbum(album: Album) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             if (!checkForAlbum(album.aid)) {
                 var newAlbum = album
                 if (album.durationMS == 0) {
