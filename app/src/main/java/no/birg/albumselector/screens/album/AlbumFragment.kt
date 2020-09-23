@@ -1,5 +1,6 @@
 package no.birg.albumselector.screens.album
 
+import android.app.AlertDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -58,7 +59,7 @@ class AlbumFragment : Fragment() {
         /** Event listeners **/
         view.play_button.setOnClickListener { viewModel.playAlbum() }
         view.next_random_button.setOnClickListener { viewModel.selectRandomAlbum() }
-        view.remove_button.setOnClickListener { viewModel.deleteAlbum() }
+        view.remove_button.setOnClickListener { removeAlbum() }
         view.album_title.setOnClickListener { toggleSingleLine(it.album_title) }
         view.artist_name.setOnClickListener { toggleSingleLine(it.artist_name) }
         view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
@@ -102,6 +103,16 @@ class AlbumFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             textView.isSingleLine = !textView.isSingleLine
         }
+    }
+
+    private fun removeAlbum() {
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(R.string.verify_remove_album)
+            .setPositiveButton(R.string.remove) { _, _ ->
+                viewModel.deleteAlbum()
+            }
+            .setNegativeButton(R.string.cancel, null)
+        builder.show()
     }
 
     private fun addCategory(categoryName: String) {

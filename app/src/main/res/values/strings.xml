@@ -6,7 +6,7 @@
     <string name="play_button">Play</string>
     <string name="play_random">Rando</string>
     <string name="add_button">Add</string>
-    <string name="remove_button">Remove</string>
+    <string name="remove">Remove</string>
     <string name="shuffle">Shuffle</string>
     <string name="queue">Queue</string>
     <string name="library">Library</string>
@@ -18,4 +18,6 @@
     <string name="album_in_library">Album already in library</string>
     <string name="category_exists">Category already exists</string>
     <string name="no_device">No device selected</string>
+    <string name="verify_remove_album">Remove album from library?</string>
+    <string name="cancel">Cancel</string>
 </resources>
