@@ -1,4 +1,4 @@
-package no.birg.albumselector.adapters
+package no.birg.albumselector.screens.library.adapters
 
 import android.annotation.SuppressLint
 import android.content.Context

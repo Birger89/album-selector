@@ -18,12 +18,12 @@ import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
-import no.birg.albumselector.adapters.AlbumAdapter
-import no.birg.albumselector.adapters.CategorySelectorAdapter
-import no.birg.albumselector.adapters.DeviceAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
+import no.birg.albumselector.screens.library.adapters.AlbumAdapter
+import no.birg.albumselector.screens.library.adapters.CategorySelectorAdapter
+import no.birg.albumselector.screens.library.adapters.DeviceAdapter
 
 class LibraryFragment : Fragment() {
 

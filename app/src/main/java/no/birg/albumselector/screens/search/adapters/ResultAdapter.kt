@@ -1,4 +1,4 @@
-package no.birg.albumselector.adapters
+package no.birg.albumselector.screens.search.adapters
 
 import android.content.Context
 import android.view.LayoutInflater

@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
-import no.birg.albumselector.adapters.ResultAdapter
+import no.birg.albumselector.screens.search.adapters.ResultAdapter
 import org.json.JSONArray
 
 class SearchFragment : Fragment() {

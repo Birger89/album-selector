@@ -16,9 +16,9 @@ import kotlinx.android.synthetic.main.fragment_album.*
 import kotlinx.android.synthetic.main.fragment_album.view.*
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
-import no.birg.albumselector.adapters.CategoryAdapter
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.CategoryWithAlbums
+import no.birg.albumselector.screens.album.adapters.CategoryAdapter
 
 class AlbumFragment : Fragment() {
 
