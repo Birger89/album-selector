@@ -11,7 +11,7 @@ import no.birg.albumselector.spotify.SpotifyConnection
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class LibraryViewModel constructor(
-    private val albumDao: AlbumDao,
+    albumDao: AlbumDao,
     private val categoryDao: CategoryDao,
     private val spotifyConnection: SpotifyConnection
 ) : ViewModel() {
@@ -55,12 +55,6 @@ class LibraryViewModel constructor(
     }
 
     /** Methods dealing with albums **/
-
-    fun deleteAlbum(album: Album) {
-        viewModelScope.launch {
-            albumDao.delete(album)
-        }
-    }
 
     fun selectAlbum(album: Album) {
         selectedAlbum.postValue(album)

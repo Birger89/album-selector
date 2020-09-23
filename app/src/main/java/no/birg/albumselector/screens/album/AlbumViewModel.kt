@@ -35,6 +35,12 @@ class AlbumViewModel constructor(
 
     /** Methods dealing with albums **/
 
+    fun deleteAlbum() {
+        viewModelScope.launch {
+            album.value?.let { albumDao.delete(it) }
+        }
+    }
+
     fun refreshAlbum(albumID: String) {
         viewModelScope.launch(Dispatchers.IO) {
             if (checkForAlbum(albumID)) {

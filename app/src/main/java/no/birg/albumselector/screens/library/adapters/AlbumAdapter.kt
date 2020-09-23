@@ -44,7 +44,6 @@ class AlbumAdapter(
             holder.artistTextView = albumView.artist_name as TextView
             holder.titleTextView = albumView.album_title as TextView
             holder.playButton = albumView.play_button as Button
-            holder.removeButton = albumView.remove_button as Button
 
             albumView.tag = holder
         } else {
@@ -59,7 +58,6 @@ class AlbumAdapter(
 
         /** Listeners **/
         holder.playButton.setOnClickListener { viewModel.playAlbum(album.aid) }
-        holder.removeButton.setOnClickListener { viewModel.deleteAlbum(album) }
         albumView.setOnClickListener { viewModel.selectAlbum(album) }
 
         return albumView
@@ -69,6 +67,5 @@ class AlbumAdapter(
         lateinit var titleTextView: TextView
         lateinit var artistTextView: TextView
         lateinit var playButton: Button
-        lateinit var removeButton: Button
     }
 }

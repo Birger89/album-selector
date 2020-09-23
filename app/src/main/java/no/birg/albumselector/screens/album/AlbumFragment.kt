@@ -59,6 +59,7 @@ class AlbumFragment : Fragment() {
         /** Event listeners **/
         view.play_button.setOnClickListener { viewModel.playAlbum(album.aid) }
         view.next_random_button.setOnClickListener { viewModel.selectRandomAlbum() }
+        view.remove_button.setOnClickListener { viewModel.deleteAlbum() }
         view.album_title.setOnClickListener { toggleSingleLine(it.album_title) }
         view.artist_name.setOnClickListener { toggleSingleLine(it.artist_name) }
         view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
@@ -76,12 +77,16 @@ class AlbumFragment : Fragment() {
 
     /** Observer methods **/
 
-    private fun onAlbumObserved(album: Album) {
-        displayAlbum(album)
-        if (album.title == null || album.artistName == null
-            || album.durationMS == 0 || album.imageUrl == null
-        ) {
-            viewModel.refreshAlbum(album.aid)
+    private fun onAlbumObserved(album: Album?) {
+        if (album != null) {
+            displayAlbum(album)
+            if (album.title == null || album.artistName == null
+                || album.durationMS == 0 || album.imageUrl == null
+            ) {
+                viewModel.refreshAlbum(album.aid)
+            }
+        } else {
+            view?.findNavController()?.navigateUp()
         }
     }
 
