@@ -5,8 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.*
-import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
-import no.birg.albumselector.screens.LibraryAlbums.shuffledAlbumList
+import no.birg.albumselector.screens.LibraryAlbums.getRandomAlbum
 import no.birg.albumselector.spotify.SpotifyClient
 import no.birg.albumselector.utility.SingleLiveEvent
 
@@ -92,23 +91,11 @@ class AlbumViewModel constructor(
         return albumDao.checkRecord(albumID)
     }
 
-    fun selectRandomAlbum(): Boolean {
+    fun selectRandomAlbum() {
         val album = getRandomAlbum()
-        return if (album != null) {
+        if (album != null) {
             nextAlbum.postValue(album)
-            true
-        } else false
-    }
-
-    private fun getRandomAlbum(): Album? {
-        var album: Album? = null
-        if (displayedAlbums.value?.size != 0) {
-            if (shuffledAlbumList.size == 0) {
-                shuffledAlbumList = displayedAlbums.value?.shuffled() as MutableList<Album>
-            }
-            album = shuffledAlbumList.removeAt(0)
         }
-        return album
     }
 
     /** Methods dealing with categories **/
