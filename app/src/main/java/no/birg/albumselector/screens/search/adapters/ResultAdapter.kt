@@ -17,12 +17,10 @@ import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.screens.search.SearchViewModel
-import org.json.JSONArray
-import org.json.JSONObject
 
 class ResultAdapter(
     private val context: Context,
-    private val results: JSONArray,
+    private val results: List<Album>,
     private val viewModel: SearchViewModel
 ) : BaseAdapter() {
 
@@ -30,10 +28,10 @@ class ResultAdapter(
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
     override fun getCount(): Int {
-        return results.length()
+        return results.size
     }
 
-    override fun getItem(position: Int): Any {
+    override fun getItem(position: Int): Album {
         return results[position]
     }
 
@@ -58,25 +56,14 @@ class ResultAdapter(
             holder = convertView.tag as ViewHolder
         }
 
-        val result = getItem(position) as JSONObject
-        val title = result.getString("name")
-        val id = result.getString("id")
-        val imageUrl = result.getJSONArray("images")
-            .getJSONObject(0).getString("url")
-
-        var artistName = "No Artist Info"
-        val artists = result.getJSONArray("artists")
-        if (artists.length() == 1) {
-            val artist = artists.getJSONObject(0)
-            artistName = artist.getString("name")
-        } else if (artists.length() > 1) {
-            artistName = "Several Artists"
-        }
+        val result = getItem(position)
+        val id = result.aid
+        val title = result.title
 
         holder.titleTextView.text = title
 
         holder.addButton.setOnClickListener {
-            addAlbum(Album(id, title, artistName, 0, imageUrl))
+            addAlbum(result)
             holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
         }
 
@@ -92,7 +79,7 @@ class ResultAdapter(
         }
 
         resultView.setOnClickListener {
-            viewModel.selectAlbum(Album(id, title, artistName, 0, imageUrl))
+            viewModel.selectAlbum(result)
             resultView.findNavController().navigate(R.id.action_searchFragment_to_resultDetailsFragment)
         }
 

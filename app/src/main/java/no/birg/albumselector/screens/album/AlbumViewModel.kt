@@ -50,39 +50,6 @@ class AlbumViewModel constructor(
         }
     }
 
-    fun refreshAlbum(albumID: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (checkForAlbum(albumID)) {
-                var title = "No Title"
-                var artistName = "No Artist Info"
-                var imageUrl = "no.url"
-
-                val durationMS = spotifyClient.fetchAlbumDurationMS(albumID)
-                val details = spotifyClient.fetchAlbumDetails(albumID)
-
-                if (details.has("name")) {
-                    title = details.getString("name")
-                }
-                if (details.has("name")) {
-                    val artists = details.getJSONArray("artists")
-                    if (artists.length() == 1) {
-                        val artist = artists.getJSONObject(0)
-                        artistName = artist.getString("name")
-                    } else if (artists.length() > 1) {
-                        artistName = "Several Artists"
-                    }
-                }
-                if (details.has("images")) {
-                    imageUrl = details.getJSONArray("images")
-                        .getJSONObject(0).getString("url")
-
-                }
-                val album = Album(albumID, title, artistName, durationMS, imageUrl)
-                updateAlbum(album)
-            }
-        }
-    }
-
     private suspend fun updateAlbum(album: Album) {
         albumDao.update(album)
     }
@@ -131,6 +98,14 @@ class AlbumViewModel constructor(
     fun playAlbum() {
         viewModelScope.launch(Dispatchers.IO) {
             spotifyClient.playAlbum(album.value?.aid!!)
+        }
+    }
+
+    fun refreshAlbum(albumID: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (checkForAlbum(albumID)) {
+                updateAlbum(spotifyClient.fetchAlbumDetails(albumID, true))
+            }
         }
     }
 

@@ -13,8 +13,8 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
+import no.birg.albumselector.database.Album
 import no.birg.albumselector.screens.search.adapters.ResultAdapter
-import org.json.JSONArray
 
 class SearchFragment : Fragment() {
 
@@ -71,7 +71,7 @@ class SearchFragment : Fragment() {
 
     /** Methods for updating the UI **/
 
-    private fun displaySearchResults(results: JSONArray) {
+    private fun displaySearchResults(results: List<Album>) {
         val adapter = context?.let {
             ResultAdapter(it, results, viewModel)
         }

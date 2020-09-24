@@ -6,8 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
+import no.birg.albumselector.database.Album
 import no.birg.albumselector.utility.SingleLiveEvent
-import org.json.JSONArray
 import org.json.JSONObject
 
 class SpotifyClient(activity: Activity) {
@@ -25,8 +25,8 @@ class SpotifyClient(activity: Activity) {
 
     val shuffleState = MutableLiveData<Boolean>()
 
-    private val _searchResults = MutableLiveData<JSONArray>()
-    val searchResults: LiveData<JSONArray> get() = _searchResults
+    private val _searchResults = MutableLiveData<List<Album>>()
+    val searchResults: LiveData<List<Album>> get() = _searchResults
 
     val toastMessage = SingleLiveEvent<Int>()
 
@@ -55,12 +55,51 @@ class SpotifyClient(activity: Activity) {
         return spotifyConnection.fetchAlbumDurationMS(albumId)
     }
 
-    fun fetchAlbumDetails(albumId: String): JSONObject {
-        return spotifyConnection.fetchAlbumDetails(albumId)
+    fun fetchAlbumDetails(albumId: String, fetchDuration: Boolean = false): Album {
+        return parseAlbum(spotifyConnection.fetchAlbumDetails(albumId), fetchDuration)
     }
 
     fun search(query: String) {
-        _searchResults.postValue(spotifyConnection.search(query))
+        val results = spotifyConnection.search(query)
+        val albums = mutableListOf<Album>()
+
+        for (i in 0 until results.length()) {
+            albums.add(parseAlbum(results.getJSONObject(i)))
+        }
+        _searchResults.postValue(albums)
+    }
+
+    private fun parseAlbum(json: JSONObject, fetchDuration: Boolean = false): Album {
+        var id = "No ID"
+        var title = "No Title"
+        var artistName = "No Artist Info"
+        var durationMS = 0
+        var imageUrl = "no.url"
+
+        if (json.has("id")) {
+            id = json.getString("id")
+        }
+        if (json.has("name")) {
+            title = json.getString("name")
+        }
+        if (json.has("name")) {
+            val artists = json.getJSONArray("artists")
+            if (artists.length() == 1) {
+                val artist = artists.getJSONObject(0)
+                artistName = artist.getString("name")
+            } else if (artists.length() > 1) {
+                artistName = "Several Artists"
+            }
+        }
+        if (json.has("images")) {
+            imageUrl = json.getJSONArray("images")
+                .getJSONObject(0).getString("url")
+
+        }
+        if (fetchDuration) {
+            durationMS = fetchAlbumDurationMS(id)
+        }
+        return Album(id, title, artistName, durationMS, imageUrl)
     }
 
     /** Methods for the Player **/
