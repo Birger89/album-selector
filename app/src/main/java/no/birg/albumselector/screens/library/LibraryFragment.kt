@@ -45,9 +45,9 @@ class LibraryFragment : Fragment() {
 
         val albumDao = (activity as MainActivity).albumDao
         val categoryDao = (activity as MainActivity).categoryDao
-        val spotifyConnection = (activity as MainActivity).spotifyConnection
+        val spotifyClient = (activity as MainActivity).spotifyClient
 
-        val viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyConnection)
+        val viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyClient)
         viewModel = activity?.let { ViewModelProvider(it, viewModelFactory).get(LibraryViewModel::class.java) }!!
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
@@ -122,8 +122,9 @@ class LibraryFragment : Fragment() {
         return object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
                 if (parent != null) {
-                    viewModel.selectedDevice =
+                    viewModel.selectDevice(
                         (parent.getItemAtPosition(pos) as Pair<*, *>).first.toString()
+                    )
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}

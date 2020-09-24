@@ -34,9 +34,9 @@ class AlbumFragment : Fragment() {
         val albumId = arguments?.getString("albumId")!!
         val albumDao = (activity as MainActivity).albumDao
         val categoryDao = (activity as MainActivity).categoryDao
-        val spotifyConnection = (activity as MainActivity).spotifyConnection
+        val spotifyClient = (activity as MainActivity).spotifyClient
 
-        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, spotifyConnection)
+        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, spotifyClient)
         viewModel = ViewModelProvider(this, viewModelFactory).get(AlbumViewModel::class.java)
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
@@ -63,10 +63,10 @@ class AlbumFragment : Fragment() {
         view.album_title.setOnClickListener { toggleSingleLine(it.album_title) }
         view.artist_name.setOnClickListener { toggleSingleLine(it.artist_name) }
         view.queue_switch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.queueState = isChecked
+            viewModel.setQueueState(isChecked)
         }
         view.shuffle_switch.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.shuffleState.value = isChecked
+            viewModel.setShuffleState(isChecked)
         }
         view.add_category_button.setOnClickListener {
             addCategory(view.category_name.text.toString())

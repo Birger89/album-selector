@@ -1,37 +1,47 @@
 package no.birg.albumselector.screens.album
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.*
 import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
 import no.birg.albumselector.screens.LibraryAlbums.shuffledAlbumList
-import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.spotify.SpotifyClient
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class AlbumViewModel constructor(
     albumId: String,
     private val albumDao: AlbumDao,
     private val categoryDao: CategoryDao,
-    private val spotifyConnection: SpotifyConnection
+    private val spotifyClient: SpotifyClient
 ) : ViewModel() {
 
     val album = albumDao.getByID(albumId)
 
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
 
-    private var selectedDevice: String = ""
+    val queueState = spotifyClient.queueState
+    val shuffleState = spotifyClient.shuffleState
 
-    var queueState = false
-    val shuffleState = MutableLiveData<Boolean>()
-    val toastMessage = SingleLiveEvent<Int>()
+    var toastMessage = MutableLiveData<Int>()
+    private val _toastMessage = SingleLiveEvent<Int>()
+    private val spotifyToastMessage = spotifyClient.toastMessage
 
     val nextAlbum = SingleLiveEvent<Album>()
 
+
+    init {
+        toastMessage = MediatorLiveData<Int>().apply {
+            fun postMessage(message: Int) { value = message}
+            addSource(_toastMessage) {
+                _toastMessage.value?.let { it1 -> postMessage(it1) }
+            }
+            addSource(spotifyToastMessage) {
+                spotifyToastMessage.value?.let { it1 -> postMessage(it1) }
+            }
+        }
+    }
 
     /** Methods dealing with albums **/
 
@@ -48,8 +58,8 @@ class AlbumViewModel constructor(
                 var artistName = "No Artist Info"
                 var imageUrl = "no.url"
 
-                val durationMS = spotifyConnection.fetchAlbumDurationMS(albumID)
-                val details = spotifyConnection.fetchAlbumDetails(albumID)
+                val durationMS = spotifyClient.fetchAlbumDurationMS(albumID)
+                val details = spotifyClient.fetchAlbumDetails(albumID)
 
                 if (details.has("name")) {
                     title = details.getString("name")
@@ -107,7 +117,7 @@ class AlbumViewModel constructor(
         viewModelScope.launch {
             if (!checkForCategory(categoryName)) {
                 categoryDao.insert(Category(categoryName))
-            } else toastMessage.postValue(R.string.category_exists)
+            } else _toastMessage.postValue(R.string.category_exists)
         }
     }
 
@@ -132,29 +142,16 @@ class AlbumViewModel constructor(
     /** Methods accessing Spotify **/
 
     fun playAlbum() {
-        if (queueState) {
-            queueAlbum(album.value?.aid!!)
-        } else {
-            if (selectedDevice != "") {
-                viewModelScope.launch(Dispatchers.IO) {
-                    spotifyConnection.setShuffle(shuffleState.value!!, selectedDevice)
-                    spotifyConnection.playAlbum(album.value?.aid!!, selectedDevice)
-                }
-            } else toastMessage.value = R.string.no_device
+        viewModelScope.launch(Dispatchers.IO) {
+            spotifyClient.playAlbum(album.value?.aid!!)
         }
     }
 
-    private fun queueAlbum(albumID: String) {
-        if (selectedDevice != "") {
-            viewModelScope.launch(Dispatchers.IO) {
-                val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
-                if (shuffleState.value!!) {
-                    trackIDs.shuffle()
-                }
-                for (trackID in trackIDs) {
-                    spotifyConnection.queueSong(trackID, selectedDevice)
-                }
-            }
-        } else toastMessage.value = R.string.no_device
+    fun setShuffleState(state: Boolean) {
+        spotifyClient.shuffleState.value = state
+    }
+
+    fun setQueueState(state: Boolean) {
+        spotifyClient.queueState = state
     }
 }

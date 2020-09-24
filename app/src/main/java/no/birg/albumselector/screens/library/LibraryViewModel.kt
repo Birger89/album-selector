@@ -3,17 +3,16 @@ package no.birg.albumselector.screens.library
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import no.birg.albumselector.R
 import no.birg.albumselector.database.*
 import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
 import no.birg.albumselector.screens.LibraryAlbums.shuffledAlbumList
-import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.spotify.SpotifyClient
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class LibraryViewModel constructor(
     albumDao: AlbumDao,
     private val categoryDao: CategoryDao,
-    private val spotifyConnection: SpotifyConnection
+    private val spotifyClient: SpotifyClient
 ) : ViewModel() {
 
     val albums: LiveData<List<Album>>
@@ -22,22 +21,12 @@ class LibraryViewModel constructor(
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
     private val selectedCategories = MutableLiveData<Set<String>>()
 
-    private val _devices = MutableLiveData<List<Pair<String, String>>>()
-    val devices: LiveData<List<Pair<String, String>>> get() = _devices
-    var selectedDevice: String = ""
-
-    private var queueState = false
-    private val shuffleState = MutableLiveData<Boolean>()
+    val devices = spotifyClient.devices
     var filterText = MutableLiveData<String>()
-
-    val toastMessage = SingleLiveEvent<Int>()
+    val toastMessage = spotifyClient.toastMessage
 
 
     init {
-        _devices.value = listOf()
-
-        shuffleState.value = false
-
         albums = Transformations.map(albumDao.getAllWithCategories()) { list ->
             list.map { a ->
                 a.album
@@ -139,43 +128,24 @@ class LibraryViewModel constructor(
 
     private fun fetchShuffleState() {
         viewModelScope.launch(Dispatchers.IO) {
-            shuffleState.postValue(spotifyConnection.fetchShuffleState())
+            spotifyClient.fetchShuffleState()
         }
     }
 
     private fun fetchDevices() {
         viewModelScope.launch(Dispatchers.IO) {
-            _devices.postValue(spotifyConnection.fetchDevices())
+            spotifyClient.fetchDevices()
         }
+    }
+
+    fun selectDevice(device: String) {
+        spotifyClient.selectDevice(device)
     }
 
     fun playAlbum(albumID: String) {
-        if (queueState) {
-            queueAlbum(albumID)
-        } else {
-            if (selectedDevice != "") {
-                viewModelScope.launch(Dispatchers.IO) {
-                    spotifyConnection.setShuffle(shuffleState.value!!, selectedDevice)
-                    spotifyConnection.playAlbum(albumID, selectedDevice)
-                }
-            }
-            else toastMessage.value = R.string.no_device
+        viewModelScope.launch(Dispatchers.IO) {
+            spotifyClient.playAlbum(albumID)
         }
-    }
-
-    private fun queueAlbum(albumID: String) {
-        if (selectedDevice != "") {
-            viewModelScope.launch(Dispatchers.IO) {
-                val trackIDs = spotifyConnection.fetchAlbumTracks(albumID)
-                if (shuffleState.value!!) {
-                    trackIDs.shuffle()
-                }
-                for (trackID in trackIDs) {
-                    spotifyConnection.queueSong(trackID, selectedDevice)
-                }
-            }
-        }
-        else toastMessage.value = R.string.no_device
     }
 
     /** Extension functions **/

@@ -9,13 +9,13 @@ import androidx.navigation.findNavController
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
-import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.spotify.SpotifyClient
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var albumDao: AlbumDao
     lateinit var categoryDao: CategoryDao
-    lateinit var spotifyConnection: SpotifyConnection
+    lateinit var spotifyClient: SpotifyClient
 
     private var startUp = true
 
@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         albumDao = AppDatabase.getInstance(this).albumDao()
         categoryDao = AppDatabase.getInstance(this).categoryDao()
-        spotifyConnection = SpotifyConnection(this)
+        spotifyClient = SpotifyClient(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
