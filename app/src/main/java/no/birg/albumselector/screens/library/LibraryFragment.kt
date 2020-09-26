@@ -52,10 +52,7 @@ class LibraryFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
         /** Adapters **/
-        view.library_albums.adapter = AlbumAdapter(
-            { viewModel.selectAlbum(it) },
-            { viewModel.playAlbum(it.aid) }
-        )
+        view.library_albums.adapter = AlbumAdapter { viewModel.selectAlbum(it) }
 
         /** Observers **/
         displayedAlbums.observe(viewLifecycleOwner, { displayAlbums(it.asReversed()) })

@@ -122,12 +122,6 @@ class LibraryViewModel constructor(
         spotifyClient.selectDevice(device)
     }
 
-    fun playAlbum(albumID: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            spotifyClient.playAlbum(albumID)
-        }
-    }
-
     /** Extension functions **/
 
     private fun <T> MutableLiveData<Set<T>>.add(item: T) {
