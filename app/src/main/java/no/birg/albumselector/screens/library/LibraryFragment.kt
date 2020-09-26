@@ -68,10 +68,10 @@ class LibraryFragment : Fragment() {
 
         /** Event listeners **/
         view.search_button.setOnClickListener{ goToSearch() }
-        view.display_random_button.setOnClickListener{ selectRandomAlbum() }
+        view.display_random_button.setOnClickListener{ viewModel.selectRandomAlbum() }
         view.filter_text.addTextChangedListener(filterTextChangeListener())
         view.devices.onItemSelectedListener = deviceSelectedListener()
-        view.delete_selected_categories.setOnClickListener { deleteSelectedCategories() }
+        view.delete_selected_categories.setOnClickListener { viewModel.deleteSelectedCategories() }
 
         return view
     }
@@ -103,14 +103,6 @@ class LibraryFragment : Fragment() {
     }
 
     /** Methods for listeners **/
-
-    private fun deleteSelectedCategories() {
-        viewModel.deleteSelectedCategories()
-    }
-
-    private fun selectRandomAlbum() {
-        viewModel.selectRandomAlbum()
-    }
 
     private fun filterTextChangeListener() : TextWatcher {
         return object: TextWatcher {
