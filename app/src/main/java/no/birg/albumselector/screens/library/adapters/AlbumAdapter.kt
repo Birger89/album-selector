@@ -1,71 +1,55 @@
 package no.birg.albumselector.screens.library.adapters
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.Button
-import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.library_item.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.screens.library.LibraryViewModel
+import no.birg.albumselector.utility.AlbumDiffCallback
 
 class AlbumAdapter(
-    context: Context,
-    private val albums: List<Album>,
-    private val viewModel: LibraryViewModel
-) : BaseAdapter() {
-
-    private val inflater: LayoutInflater
-        = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    override fun getCount(): Int {
-        return albums.size
-    }
-
-    override fun getItem(position: Int): Album {
-        return albums[position]
-    }
+    private val clickCallback: (Album) -> Unit,
+    private val playButtonCallback: (Album) -> Unit
+) : ListAdapter<Album, AlbumAdapter.ViewHolder>(AlbumDiffCallback()) {
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val albumView: View
-        val holder: ViewHolder
-
-        if (convertView == null) {
-            albumView = inflater.inflate(R.layout.library_item, parent, false)
-
-            holder = ViewHolder()
-            holder.artistTextView = albumView.artist_name as TextView
-            holder.titleTextView = albumView.album_title as TextView
-            holder.playButton = albumView.play_button as Button
-
-            albumView.tag = holder
-        } else {
-            albumView = convertView
-            holder = convertView.tag as ViewHolder
-        }
-
-        val album = getItem(position)
-
-        holder.titleTextView.text = album.title
-        holder.artistTextView.text = album.artistName
-
-        /** Listeners **/
-        holder.playButton.setOnClickListener { viewModel.playAlbum(album.aid) }
-        albumView.setOnClickListener { viewModel.selectAlbum(album) }
-
-        return albumView
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position), clickCallback, playButtonCallback)
     }
 
-    private class ViewHolder {
-        lateinit var titleTextView: TextView
-        lateinit var artistTextView: TextView
-        lateinit var playButton: Button
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder.from(parent)
+    }
+
+    class ViewHolder private constructor(val view: ConstraintLayout) :
+        RecyclerView.ViewHolder(view) {
+
+        fun bind(
+            album: Album,
+            clickCallback: (Album) -> Unit,
+            playButtonCallback: (Album) -> Unit
+        ) {
+            view.album_title.text = album.title
+            view.artist_name.text = album.artistName
+
+            /** Listeners **/
+            view.setOnClickListener { clickCallback(album) }
+            view.play_button.setOnClickListener { playButtonCallback(album) }
+        }
+
+        companion object {
+            fun from(parent: ViewGroup): ViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val view = layoutInflater.inflate(R.layout.library_item, parent, false)
+
+                return ViewHolder(view as ConstraintLayout)
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.fragment_album.view.*
 import no.birg.albumselector.MainActivity
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
+import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.screens.album.adapters.CategoryAdapter
 
@@ -42,6 +43,12 @@ class AlbumFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_album, container, false)
 
         view.queue_switch.isChecked = viewModel.queueState
+
+        /** Adapters **/
+        view.category_list.adapter = CategoryAdapter(
+            { viewModel.album.value in it.albums },
+            { toggleCategory(it.first, it.second) }
+        )
 
         /** Observers **/
         viewModel.shuffleState.observe(viewLifecycleOwner, {
@@ -121,6 +128,13 @@ class AlbumFragment : Fragment() {
         }
     }
 
+    private fun toggleCategory(category: Category, isChecked: Boolean) {
+        when (isChecked) {
+            true -> viewModel.setCategory(category)
+            false -> viewModel.unsetCategory(category)
+        }
+    }
+
     /** Methods for updating the UI **/
 
     private fun displayAlbum(album: Album) {
@@ -133,12 +147,7 @@ class AlbumFragment : Fragment() {
     }
 
     private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
-        val categorySelectorState = category_listview.onSaveInstanceState()
-        category_listview.adapter = context?.let {
-            CategoryAdapter(it, categories, viewModel)
-        }
-        // Restore scroll position
-        category_listview.onRestoreInstanceState(categorySelectorState)
+        (category_list.adapter as CategoryAdapter).submitList(categories)
     }
 
     private fun displayToast(message: String) {

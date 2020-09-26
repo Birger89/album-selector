@@ -29,7 +29,6 @@ class LibraryFragment : Fragment() {
 
     lateinit var viewModel: LibraryViewModel
 
-    private lateinit var libraryAlbumsState: Parcelable
     private lateinit var deviceSelectorState: Parcelable
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +51,12 @@ class LibraryFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
+        /** Adapters **/
+        view.library_albums.adapter = AlbumAdapter(
+            { viewModel.selectAlbum(it) },
+            { viewModel.playAlbum(it.aid) }
+        )
+
         /** Observers **/
         displayedAlbums.observe(viewLifecycleOwner, { displayAlbums(it.asReversed()) })
         viewModel.devices.observe(viewLifecycleOwner, { displayDevices(it) })
@@ -72,7 +77,6 @@ class LibraryFragment : Fragment() {
     }
 
     override fun onPause() {
-        libraryAlbumsState = library_albums.onSaveInstanceState()!!
         deviceSelectorState = devices.onSaveInstanceState()!!
         super.onPause()
     }
@@ -134,13 +138,7 @@ class LibraryFragment : Fragment() {
     /** Methods for updating the UI **/
 
     private fun displayAlbums(albums: List<Album>) {
-        library_albums.adapter = context?.let {
-            AlbumAdapter(it, albums, viewModel)
-        }
-        // Restore the scroll position
-        if (this@LibraryFragment::libraryAlbumsState.isInitialized) {
-            library_albums.onRestoreInstanceState(libraryAlbumsState)
-        }
+        (library_albums.adapter as AlbumAdapter).submitList(albums)
     }
 
     private fun displayCategories(categories: List<CategoryWithAlbums>) {

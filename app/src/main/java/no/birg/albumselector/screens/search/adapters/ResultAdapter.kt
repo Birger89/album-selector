@@ -1,14 +1,12 @@
 package no.birg.albumselector.screens.search.adapters
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.Button
-import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.navigation.findNavController
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.result_item.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -16,82 +14,69 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
-import no.birg.albumselector.screens.search.SearchViewModel
+import no.birg.albumselector.utility.AlbumDiffCallback
 
 class ResultAdapter(
-    private val context: Context,
-    private val results: List<Album>,
-    private val viewModel: SearchViewModel
-) : BaseAdapter() {
-
-    private val inflater: LayoutInflater
-        = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    override fun getCount(): Int {
-        return results.size
-    }
-
-    override fun getItem(position: Int): Album {
-        return results[position]
-    }
+    private val clickCallback: (Album) -> Unit,
+    private val addButtonCallback: (Album) -> Unit,
+    private val checkForAlbumCallback: suspend (Album) -> Boolean
+) : ListAdapter<Album, ResultAdapter.ViewHolder>(AlbumDiffCallback()) {
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val resultView: View
-        val holder: ViewHolder
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position), clickCallback, addButtonCallback, checkForAlbumCallback)
+    }
 
-        if (convertView == null) {
-            resultView = inflater.inflate(R.layout.result_item, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder.from(parent)
+    }
 
-            holder = ViewHolder()
-            holder.titleTextView = resultView.album_title as TextView
-            holder.addButton = resultView.add_button as Button
+    class ViewHolder private constructor(val view: ConstraintLayout) :
+        RecyclerView.ViewHolder(view) {
 
-            resultView.tag = holder
-        } else {
-            resultView = convertView
-            holder = convertView.tag as ViewHolder
-        }
+        private val addButton: Button = view.add_button
 
-        val result = getItem(position)
-        val id = result.aid
-        val title = result.title
+        fun bind(
+            result: Album,
+            clickCallback: (Album) -> Unit,
+            addButtonCallback: (Album) -> Unit,
+            checkForAlbumCallback: suspend (Album) -> Boolean
+        ) {
+            view.album_title.text = result.title
 
-        holder.titleTextView.text = title
+            view.setOnClickListener { clickCallback(result) }
+            addButton.setOnClickListener {
+                addButtonCallback(result)
+                addButton.setTextColor(ContextCompat.getColor(view.context, R.color.spotifyGreen))
+            }
 
-        holder.addButton.setOnClickListener {
-            addAlbum(result)
-            holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
-        }
-
-        GlobalScope.launch {
-            val inLibrary = viewModel.checkForAlbum(id)
-            withContext(Dispatchers.Main) {
-                if (inLibrary) {
-                    holder.addButton.setTextColor(ContextCompat.getColor(context, R.color.spotifyGreen))
-                } else {
-                    holder.addButton.setTextColor(ContextCompat.getColor(context, android.R.color.white))
+            // Green text on addButton if album in library
+            GlobalScope.launch {
+                val inLibrary = checkForAlbumCallback(result)
+                withContext(Dispatchers.Main) {
+                    if (inLibrary) {
+                        addButton.setTextColor(
+                            ContextCompat.getColor(view.context, R.color.spotifyGreen)
+                        )
+                    } else {
+                        addButton.setTextColor(
+                            ContextCompat.getColor(view.context, android.R.color.white)
+                        )
+                    }
                 }
             }
         }
 
-        resultView.setOnClickListener {
-            viewModel.selectAlbum(result)
-            resultView.findNavController().navigate(R.id.action_searchFragment_to_resultDetailsFragment)
+        companion object {
+            fun from(parent: ViewGroup): ViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val view = layoutInflater.inflate(R.layout.result_item, parent, false)
+
+                return ViewHolder(view as ConstraintLayout)
+            }
         }
-
-        return resultView
-    }
-
-    private class ViewHolder {
-        lateinit var titleTextView: TextView
-        lateinit var addButton: Button
-    }
-
-    private fun addAlbum(album: Album) {
-        viewModel.addAlbum(album)
     }
 }

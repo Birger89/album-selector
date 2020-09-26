@@ -35,6 +35,13 @@ class SearchFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_search, container, false)
 
+        /** Adapters **/
+        view.search_results.adapter = ResultAdapter(
+            { goToResultDetails(it) },
+            { viewModel.addAlbum(it) },
+            { viewModel.checkForAlbum(it.aid) }
+        )
+
         /** Observers **/
         viewModel.username.observe(viewLifecycleOwner, { displayUsername(it) })
         viewModel.searchResults.observe(viewLifecycleOwner, {
@@ -58,6 +65,11 @@ class SearchFragment : Fragment() {
         view?.findNavController()?.popBackStack()
     }
 
+    private fun goToResultDetails(result: Album) {
+        viewModel.selectAlbum(result)
+        view?.findNavController()?.navigate(R.id.action_searchFragment_to_resultDetailsFragment)
+    }
+
     /** Methods for listeners **/
 
     private fun search() {
@@ -72,10 +84,7 @@ class SearchFragment : Fragment() {
     /** Methods for updating the UI **/
 
     private fun displaySearchResults(results: List<Album>) {
-        val adapter = context?.let {
-            ResultAdapter(it, results, viewModel)
-        }
-        search_results.adapter = adapter
+        (search_results.adapter as ResultAdapter).submitList(results)
     }
 
     private fun displayUsername(username: String) {

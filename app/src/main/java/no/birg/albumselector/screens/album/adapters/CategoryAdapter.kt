@@ -1,68 +1,59 @@
 package no.birg.albumselector.screens.album.adapters
 
-import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.CheckBox
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.category_item.view.*
 import no.birg.albumselector.R
+import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
-import no.birg.albumselector.screens.album.AlbumViewModel
+import no.birg.albumselector.utility.CategoryDiffCallback
 
 class CategoryAdapter(
-    context: Context,
-    private val categories: List<CategoryWithAlbums>,
-    private val viewModel: AlbumViewModel
-) : BaseAdapter() {
-
-    private val inflater: LayoutInflater
-            = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    override fun getCount(): Int {
-        return categories.size
-    }
-
-    override fun getItem(position: Int): CategoryWithAlbums {
-        return categories[position]
-    }
+    private val isCheckedCallback: (CategoryWithAlbums) -> Boolean,
+    private val checkBoxCallback: (Pair<Category, Boolean>) -> Unit
+) : ListAdapter<CategoryWithAlbums, CategoryAdapter.ViewHolder>(CategoryDiffCallback()) {
 
     override fun getItemId(position: Int): Long {
         return position.toLong()
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val categoryView: View
-        val holder: ViewHolder
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position), isCheckedCallback, checkBoxCallback)
+    }
 
-        if (convertView == null) {
-            categoryView = inflater.inflate(R.layout.category_item, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder.from(parent)
+    }
 
-            holder = ViewHolder()
-            holder.categoryCheckBox = categoryView.category as CheckBox
+    class ViewHolder private constructor(val view: ConstraintLayout) :
+        RecyclerView.ViewHolder(view) {
 
-            categoryView.tag = holder
-        } else {
-            categoryView = convertView
-            holder = convertView.tag as ViewHolder
-        }
+        private var categoryCheckBox: CheckBox = view.category
 
-        val category = getItem(position)
-        holder.categoryCheckBox.text = category.category.cid
+        fun bind(
+            category: CategoryWithAlbums,
+            isCheckedCallback: (CategoryWithAlbums) -> Boolean,
+            checkBoxCallback: (Pair<Category, Boolean>) -> Unit
+        ) {
+            categoryCheckBox.text = category.category.cid
 
-        // Clears the checkListener to avoid unwanted updates from recycling views.
-        holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        holder.categoryCheckBox.isChecked = viewModel.album.value in category.albums
-        holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            when (isChecked) {
-                true -> viewModel.setCategory(category.category)
-                false -> viewModel.unsetCategory(category.category)
+            categoryCheckBox.isChecked = isCheckedCallback(category)
+            categoryCheckBox.setOnClickListener {
+                checkBoxCallback(Pair(category.category, categoryCheckBox.isChecked))
             }
         }
-        return categoryView
-    }
-    private class ViewHolder {
-        lateinit var categoryCheckBox: CheckBox
+
+        companion object {
+            fun from(parent: ViewGroup): ViewHolder {
+                val layoutInflater = LayoutInflater.from(parent.context)
+                val view = layoutInflater.inflate(R.layout.category_item, parent, false)
+
+                return ViewHolder(view as ConstraintLayout)
+            }
+        }
     }
 }
