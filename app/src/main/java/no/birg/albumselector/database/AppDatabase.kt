@@ -7,31 +7,25 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Album::class, Category::class, CategoryAlbumCrossRef::class], version = 3)
+@Database(entities = [Album::class, Category::class, CategoryAlbumCrossRef::class], version = 4)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun albumDao(): AlbumDao
     abstract fun categoryDao(): CategoryDao
 
 
     companion object {
-        @Volatile private var instance: AppDatabase? = null
+        @Volatile
+        private var instance: AppDatabase? = null
 
         fun getInstance(context: Context): AppDatabase {
-            return instance
-                ?: synchronized(this) {
-                instance
-                    ?: buildDatabase(
-                        context
-                    )
-                        .also { instance = it }
+            return instance ?: synchronized(this) {
+                instance ?: buildDatabase(context).also { instance = it }
             }
         }
 
         private fun buildDatabase(context: Context): AppDatabase {
-            return Room.databaseBuilder(context, AppDatabase::class.java,
-                Constants.DATABASE_NAME
-            )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            return Room.databaseBuilder(context, AppDatabase::class.java, Constants.DATABASE_NAME)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
         }
     }
@@ -59,5 +53,11 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
 
         database.execSQL("ALTER TABLE albums ADD COLUMN artist_name TEXT")
         database.execSQL("ALTER TABLE albums ADD COLUMN duration_ms INTEGER DEFAULT 0 NOT NULL")
+    }
+}
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE albums ADD COLUMN image_url TEXT")
     }
 }

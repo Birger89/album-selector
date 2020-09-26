@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.MIGRATION_1_2
 import no.birg.albumselector.database.MIGRATION_2_3
+import no.birg.albumselector.database.MIGRATION_3_4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,7 +20,9 @@ import kotlin.test.assertNotNull
 
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {
-    private val TEST_DB = "migration-test"
+    companion object {
+        private const val TEST_DB = "migration-test"
+    }
 
     @get:Rule
     val helper: MigrationTestHelper = MigrationTestHelper(
@@ -96,5 +99,48 @@ class MigrationTest {
 
         val durationMS = cursor.getInt(3)
         assertEquals(0, durationMS)
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate3to4() {
+        var db = helper.createDatabase(TEST_DB, 3)
+
+        val beforeID = "testID"
+        val beforeTitle = "Test Album"
+        val beforeArtist = "Test Artist"
+        val beforeDuration = 100
+
+        val album = ContentValues()
+        album.put("aid", beforeID)
+        album.put("title", beforeTitle)
+        album.put("artist_name", beforeArtist)
+        album.put("duration_ms", beforeDuration)
+        val aid = db.insert("albums", SQLiteDatabase.CONFLICT_REPLACE, album)
+        db.close()
+
+        db = helper.runMigrationsAndValidate(TEST_DB, 4, true,
+            MIGRATION_3_4
+        )
+
+        val cursor = db.query("SELECT * FROM albums WHERE rowid = ?", arrayOf(aid))
+
+        assertNotNull(cursor)
+        assertEquals(true, cursor.moveToFirst())
+
+        val afterID = cursor.getString(0)
+        assertEquals(beforeID, afterID)
+
+        val afterTitle = cursor.getString(1)
+        assertEquals(beforeTitle, afterTitle)
+
+        val afterArtist = cursor.getString(2)
+        assertEquals(beforeArtist, afterArtist)
+
+        val afterDuration = cursor.getInt(3)
+        assertEquals(beforeDuration, afterDuration)
+
+        val imageUri = cursor.getString(4)
+        assertEquals(null, imageUri)
     }
 }

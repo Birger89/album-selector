@@ -1,13 +1,12 @@
 <resources>
     <string name="app_name">Album Selector</string>
-    <string name="spotify_login_button">Log in with Spotify</string>
     <string name="empty_string">-</string>
     <string name="search_button">Search</string>
     <string name="search_field">Waddayawanna search for?</string>
     <string name="play_button">Play</string>
     <string name="play_random">Rando</string>
     <string name="add_button">Add</string>
-    <string name="remove_button">Remove</string>
+    <string name="remove">Remove</string>
     <string name="shuffle">Shuffle</string>
     <string name="queue">Queue</string>
     <string name="library">Library</string>
@@ -16,6 +15,9 @@
     <string name="home">Home</string>
     <string name="filter">Filter</string>
     <string name="artist_name">Artist Name</string>
-    <item name="TAG_ID" type="id" />
-    <item name="TAG_URI" type="id" />
+    <string name="album_in_library">Album already in library</string>
+    <string name="category_exists">Category already exists</string>
+    <string name="no_device">No device selected</string>
+    <string name="verify_remove_album">Remove album from library?</string>
+    <string name="cancel">Cancel</string>
 </resources>

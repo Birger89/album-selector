@@ -1,21 +1,21 @@
 package no.birg.albumselector
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.fragment.app.FragmentManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.findNavController
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
-import no.birg.albumselector.spotify.SpotifyConnection
+import no.birg.albumselector.spotify.SpotifyClient
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var albumDao: AlbumDao
     lateinit var categoryDao: CategoryDao
-    lateinit var spotifyConnection: SpotifyConnection
+    lateinit var spotifyClient: SpotifyClient
 
     private var startUp = true
 
@@ -24,9 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         albumDao = AppDatabase.getInstance(this).albumDao()
         categoryDao = AppDatabase.getInstance(this).categoryDao()
-        spotifyConnection = SpotifyConnection(this)
-
-        spotifyConnection.fetchAccessToken()
+        spotifyClient = SpotifyClient(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -35,11 +33,6 @@ class MainActivity : AppCompatActivity() {
         if (startUp) {
             setContentView(R.layout.activity_main)
             setSupportActionBar(findViewById(R.id.toolbar))
-
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.add(R.id.main_frame, LibraryFragment())
-            transaction.commit()
-
             startUp = false
         }
     }
@@ -51,11 +44,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.home_button -> {
-            supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            true
+            findNavController(R.id.nav_host_fragment_container)
+                .popBackStack(R.id.libraryFragment, false)
         }
-        else -> {
-            super.onOptionsItemSelected(item)
-        }
+        else -> { super.onOptionsItemSelected(item) }
     }
 }

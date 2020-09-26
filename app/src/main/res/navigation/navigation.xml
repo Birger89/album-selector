@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/libraryFragment">
+
+    <fragment
+        android:id="@+id/libraryFragment"
+        android:name="no.birg.albumselector.screens.library.LibraryFragment"
+        android:label="LibraryFragment"
+        tools:layout="@layout/fragment_library" >
+        <action
+            android:id="@+id/action_libraryFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:popUpTo="@id/libraryFragment" />
+        <action
+            android:id="@+id/action_libraryFragment_to_albumFragment"
+            app:destination="@id/albumFragment"
+            app:popUpTo="@id/libraryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="no.birg.albumselector.screens.search.SearchFragment"
+        android:label="SearchFragment"
+        tools:layout="@layout/fragment_search" >
+        <action
+            android:id="@+id/action_searchFragment_to_resultDetailsFragment"
+            app:destination="@id/resultDetailsFragment"
+            app:popUpTo="@id/searchFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/albumFragment"
+        android:name="no.birg.albumselector.screens.album.AlbumFragment"
+        android:label="AlbumFragment"
+        tools:layout="@layout/fragment_album" >
+        <action
+            android:id="@+id/action_albumFragment_self"
+            app:destination="@id/albumFragment"
+            app:popUpTo="@id/albumFragment" />
+        <argument
+            android:name="albumId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/resultDetailsFragment"
+        android:name="no.birg.albumselector.screens.search.ResultDetailsFragment"
+        android:label="ResultDetailsFragment"
+        tools:layout="@layout/fragment_result_details"/>
+</navigation>

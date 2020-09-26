@@ -36,7 +36,7 @@
     <ImageView
         android:id="@+id/album_cover"
         android:layout_width="0dp"
-        android:layout_height="300dp"
+        android:layout_height="250dp"
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="24dp"
@@ -59,8 +59,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/next_random_button" />
 
-    <ListView
-        android:id="@+id/category_listview"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/category_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -69,10 +69,12 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/play_button"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@+id/shuffle_switch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_category_button" />
+        app:layout_constraintTop_toBottomOf="@+id/add_category_button"
+        tools:listitem="@layout/category_item" />
 
     <TextView
         android:id="@+id/category_header"
@@ -119,25 +121,27 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/shuffle_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/shuffle"
-        app:layout_constraintBottom_toTopOf="@+id/queue_switch"
-        app:layout_constraintEnd_toStartOf="@+id/play_button"
-        app:layout_constraintTop_toBottomOf="@+id/category_listview" />
+        app:layout_constraintBottom_toTopOf="@+id/next_random_button"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/queue_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
         android:text="@string/queue"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/shuffle_switch"
-        app:layout_constraintTop_toBottomOf="@+id/shuffle_switch" />
+        app:layout_constraintBottom_toTopOf="@+id/play_button"
+        app:layout_constraintEnd_toStartOf="@+id/shuffle_switch" />
 
     <TextView
         android:id="@+id/album_duration"
@@ -147,5 +151,16 @@
         app:layout_constraintBaseline_toBaselineOf="@+id/artist_name"
         app:layout_constraintEnd_toEndOf="@+id/album_title"
         tools:text="1 hr 10 min" />
+
+    <Button
+        android:id="@+id/remove_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/remove"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

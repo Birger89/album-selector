@@ -1,4 +1,4 @@
-package no.birg.albumselector.adapters
+package no.birg.albumselector.screens.library.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,16 +7,18 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.CheckBox
 import kotlinx.android.synthetic.main.category_item.view.*
-import no.birg.albumselector.LibraryFragment
 import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
+import no.birg.albumselector.screens.library.LibraryViewModel
 
-class CategorySelectorAdapter(context: Context, private val categories: List<CategoryWithAlbums>, fragment: LibraryFragment) : BaseAdapter() {
+class CategorySelectorAdapter(
+    context: Context,
+    private val categories: List<CategoryWithAlbums>,
+    private val viewModel: LibraryViewModel
+) : BaseAdapter() {
 
     private val inflater: LayoutInflater
         = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    private val mFragment = fragment
 
     override fun getCount(): Int {
         return categories.count()
@@ -46,21 +48,13 @@ class CategorySelectorAdapter(context: Context, private val categories: List<Cat
             holder = convertView.tag as ViewHolder
         }
 
-        val category = getItem(position)
-        holder.categoryCheckBox.text = category.category.cid
-
-        // Clears the checkListener to avoid unwanted updates from recycling views.
-        holder.categoryCheckBox.setOnCheckedChangeListener { _, _ -> }
-        holder.categoryCheckBox.isChecked = category in mFragment.selectedCategories
-        holder.categoryCheckBox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                mFragment.selectedCategories.add(category)
-                mFragment.updateAlbumSelection()
-                mFragment.displayAlbums()
-            } else {
-                mFragment.selectedCategories.remove(category)
-                mFragment.updateAlbumSelection()
-                mFragment.displayAlbums()
+        val categoryName = getItem(position).category.cid
+        holder.categoryCheckBox.text = categoryName
+        holder.categoryCheckBox.isChecked = viewModel.isCategorySelected(categoryName)
+        holder.categoryCheckBox.setOnClickListener {
+            when (holder.categoryCheckBox.isChecked) {
+                true -> viewModel.selectCategory(categoryName)
+                false -> viewModel.deselectCategory(categoryName)
             }
         }
 

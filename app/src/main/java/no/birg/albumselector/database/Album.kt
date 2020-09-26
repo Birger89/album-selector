@@ -7,7 +7,8 @@ data class Album(
     @PrimaryKey val aid: String,
     val title: String?,
     @ColumnInfo(name = "artist_name") val artistName: String?,
-    @ColumnInfo(name = "duration_ms", defaultValue = "0") val durationMS: Int
+    @ColumnInfo(name = "duration_ms", defaultValue = "0") val durationMS: Int,
+    @ColumnInfo(name = "image_url") val imageUrl: String?
 )
 
 data class AlbumWithCategories(
