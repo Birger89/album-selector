@@ -19,5 +19,7 @@
     <string name="category_exists">Category already exists</string>
     <string name="no_device">No device selected</string>
     <string name="verify_remove_album">Remove album from library?</string>
+    <string name="verify_delete_category">Delete category from all albums?</string>
+    <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
 </resources>

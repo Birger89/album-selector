@@ -16,15 +16,4 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Category" />
 
-    <Button
-        android:id="@+id/delete_category_button"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@drawable/ic_baseline_clear_24"
-        app:layout_constraintBottom_toBottomOf="@+id/category_checkbox"
-        app:layout_constraintEnd_toEndOf="@+id/category_checkbox"
-        app:layout_constraintTop_toTopOf="@+id/category_checkbox" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

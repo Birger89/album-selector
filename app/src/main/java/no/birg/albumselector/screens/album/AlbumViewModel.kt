@@ -75,6 +75,12 @@ class AlbumViewModel constructor(
         }
     }
 
+    fun deleteCategory(category: Category) {
+        viewModelScope.launch {
+            categoryDao.delete(category)
+        }
+    }
+
     fun setCategory(category: Category) {
         val crossRef = CategoryAlbumCrossRef(category.cid, album.value?.aid!!)
         viewModelScope.launch {

@@ -47,7 +47,8 @@ class AlbumFragment : Fragment() {
         /** Adapters **/
         view.category_list.adapter = CategoryAdapter(
             { viewModel.album.value in it.albums },
-            { toggleCategory(it.first, it.second) }
+            { toggleCategory(it.first, it.second) },
+            { deleteCategory(it) }
         )
 
         /** Observers **/
@@ -126,6 +127,16 @@ class AlbumFragment : Fragment() {
         if (categoryName != "") {
             viewModel.addCategory(categoryName)
         }
+    }
+
+    private fun deleteCategory(category: Category) {
+        val builder = AlertDialog.Builder(context)
+        builder.setMessage(R.string.verify_delete_category)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                viewModel.deleteCategory(category)
+            }
+            .setNegativeButton(R.string.cancel, null)
+        builder.show()
     }
 
     private fun toggleCategory(category: Category, isChecked: Boolean) {

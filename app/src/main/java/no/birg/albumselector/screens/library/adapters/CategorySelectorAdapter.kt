@@ -37,10 +37,10 @@ class CategorySelectorAdapter(
         val holder: ViewHolder
 
         if (convertView == null) {
-            categoryView = inflater.inflate(R.layout.category_item, parent, false)
+            categoryView = inflater.inflate(R.layout.category_selector_item, parent, false)
 
             holder = ViewHolder()
-            holder.categoryCheckBox = categoryView.category as CheckBox
+            holder.categoryCheckBox = categoryView.category_checkbox as CheckBox
 
             categoryView.tag = holder
         } else {
