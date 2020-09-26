@@ -12,7 +12,7 @@ import no.birg.albumselector.utility.SingleLiveEvent
 
 class LibraryViewModel constructor(
     albumDao: AlbumDao,
-    private val categoryDao: CategoryDao,
+    categoryDao: CategoryDao,
     private val spotifyClient: SpotifyClient
 ) : ViewModel() {
 
@@ -95,15 +95,6 @@ class LibraryViewModel constructor(
         } else false
     }
 
-    fun deleteSelectedCategories() {
-        for (cat in selectedCategories.value!!) {
-            viewModelScope.launch {
-                categoryDao.delete(getCategory(cat).category)
-            }
-        }
-        selectedCategories.clear()
-    }
-
     private fun getCategory(categoryName: String) : CategoryWithAlbums {
         for (category in categories.value!!) {
             if (category.category.cid == categoryName) {
@@ -152,9 +143,5 @@ class LibraryViewModel constructor(
         val set = this.value as MutableSet
         set.remove(item)
         this.value = set
-    }
-
-    private fun <T> MutableLiveData<Set<T>>.clear() {
-        this.value = mutableSetOf()
     }
 }

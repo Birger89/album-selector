@@ -71,7 +71,6 @@ class LibraryFragment : Fragment() {
         view.display_random_button.setOnClickListener{ viewModel.selectRandomAlbum() }
         view.filter_text.addTextChangedListener(filterTextChangeListener())
         view.devices.onItemSelectedListener = deviceSelectedListener()
-        view.delete_selected_categories.setOnClickListener { viewModel.deleteSelectedCategories() }
 
         return view
     }
