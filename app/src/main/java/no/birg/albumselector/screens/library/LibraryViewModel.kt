@@ -11,7 +11,7 @@ import no.birg.albumselector.spotify.SpotifyClient
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class LibraryViewModel constructor(
-    albumDao: AlbumDao,
+    private val albumDao: AlbumDao,
     categoryDao: CategoryDao,
     private val spotifyClient: SpotifyClient
 ) : ViewModel() {
@@ -55,6 +55,14 @@ class LibraryViewModel constructor(
         if (album != null) {
             selectAlbum(album)
         }
+    }
+
+    private suspend fun updateAlbum(album: Album) {
+        albumDao.update(album)
+    }
+
+    private suspend fun checkForAlbum(albumID: String): Boolean {
+        return albumDao.checkRecord(albumID)
     }
 
     private fun filterAlbums() : List<Album> {
@@ -120,6 +128,14 @@ class LibraryViewModel constructor(
 
     fun selectDevice(device: String) {
         spotifyClient.selectDevice(device)
+    }
+
+    fun refreshAlbum(albumID: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (checkForAlbum(albumID)) {
+                updateAlbum(spotifyClient.fetchAlbumDetails(albumID, true))
+            }
+        }
     }
 
     /** Extension functions **/
