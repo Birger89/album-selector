@@ -22,12 +22,13 @@
         android:layout_height="0dp"
         android:layout_marginTop="80dp"
         android:layout_marginBottom="16dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/search_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/library_item" />
+        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        tools:listitem="@layout/library_grid_item"
+        tools:spanCount="4" />
 
     <Button
         android:id="@+id/display_random_button"
@@ -70,11 +71,21 @@
         android:layout_marginRight="16dp"
         android:ems="10"
         android:hint="@string/filter"
+        android:importantForAutofill="no"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toTopOf="@+id/library_albums"
         app:layout_constraintEnd_toStartOf="@+id/devices"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:importantForAutofill="no" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/toggle_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/toggle_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -26,6 +26,8 @@ class LibraryViewModel constructor(
     var filterText = MutableLiveData<String>()
     val toastMessage = spotifyClient.toastMessage
 
+    val isListLayout = SingleLiveEvent<Boolean>()
+
 
     init {
         albums = Transformations.map(albumDao.getAllWithCategories()) { list ->

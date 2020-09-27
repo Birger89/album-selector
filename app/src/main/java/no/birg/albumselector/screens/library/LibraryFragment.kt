@@ -14,6 +14,9 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.fragment_library.*
 import kotlinx.android.synthetic.main.fragment_library.view.*
 import no.birg.albumselector.MainActivity
@@ -51,7 +54,8 @@ class LibraryFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)
 
-        /** Adapters **/
+        /** RecyclerViews **/
+        setLayoutStyle(viewModel.isListLayout.value  ?: false, view.library_albums)
         view.library_albums.adapter = AlbumAdapter(
             { viewModel.selectAlbum(it) },
             { viewModel.refreshAlbum(it.aid) }
@@ -62,12 +66,16 @@ class LibraryFragment : Fragment() {
         viewModel.devices.observe(viewLifecycleOwner, { displayDevices(it) })
         viewModel.categories.observe(viewLifecycleOwner, { displayCategories(it) })
         viewModel.selectedAlbum.observe(viewLifecycleOwner, { goToAlbumDetails(it) })
+        viewModel.isListLayout.observe(viewLifecycleOwner, {
+            onLayoutToggled(it, view.library_albums)
+        })
         viewModel.toastMessage.observe(viewLifecycleOwner, {
             displayToast(resources.getString(it))
         })
 
         /** Event listeners **/
         view.search_button.setOnClickListener{ goToSearch() }
+        view.toggle_layout.setOnClickListener{ toggleLayout() }
         view.display_random_button.setOnClickListener{ viewModel.selectRandomAlbum() }
         view.filter_text.addTextChangedListener(filterTextChangeListener())
         view.devices.onItemSelectedListener = deviceSelectedListener()
@@ -88,6 +96,14 @@ class LibraryFragment : Fragment() {
     }
 
 
+    /** Methods for observers **/
+
+    private fun onLayoutToggled(listLayout: Boolean, view: RecyclerView) {
+        setLayoutStyle(listLayout, view)
+        (view.adapter as AlbumAdapter).isListLayout = listLayout
+        view.recycledViewPool.clear()
+    }
+
     /** Navigation methods **/
 
     private fun goToSearch() {
@@ -102,6 +118,13 @@ class LibraryFragment : Fragment() {
     }
 
     /** Methods for listeners **/
+
+    private fun toggleLayout() {
+        viewModel.isListLayout.value = when (viewModel.isListLayout.value) {
+            true -> false
+            else -> true
+        }
+    }
 
     private fun filterTextChangeListener() : TextWatcher {
         return object: TextWatcher {
@@ -127,6 +150,13 @@ class LibraryFragment : Fragment() {
     }
 
     /** Methods for updating the UI **/
+
+    private fun setLayoutStyle(listLayout: Boolean, view: RecyclerView) {
+        view.layoutManager = when (listLayout) {
+            true -> LinearLayoutManager(activity)
+            false -> GridLayoutManager(activity, 4)
+        }
+    }
 
     private fun displayAlbums(albums: List<Album>) {
         (library_albums.adapter as AlbumAdapter).submitList(albums)
