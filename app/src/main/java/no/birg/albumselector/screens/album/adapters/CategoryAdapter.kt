@@ -6,7 +6,7 @@ import android.widget.CheckBox
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.category_item.view.*
+import kotlinx.android.synthetic.main.item_category.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Category
 import no.birg.albumselector.database.CategoryWithAlbums
@@ -55,7 +55,7 @@ class CategoryAdapter(
         companion object {
             fun from(parent: ViewGroup): ViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
-                val view = layoutInflater.inflate(R.layout.category_item, parent, false)
+                val view = layoutInflater.inflate(R.layout.item_category, parent, false)
 
                 return ViewHolder(view as ConstraintLayout)
             }

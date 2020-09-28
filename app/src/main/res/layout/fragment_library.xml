@@ -27,7 +27,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:listitem="@layout/library_grid_item"
+        tools:listitem="@layout/item_library_grid"
         tools:spanCount="4" />
 
     <Button

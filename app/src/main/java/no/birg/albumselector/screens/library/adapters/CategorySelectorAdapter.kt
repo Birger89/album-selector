@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.CheckBox
-import kotlinx.android.synthetic.main.category_item.view.*
+import kotlinx.android.synthetic.main.item_category.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.CategoryWithAlbums
 import no.birg.albumselector.screens.library.LibraryViewModel
@@ -37,7 +37,7 @@ class CategorySelectorAdapter(
         val holder: ViewHolder
 
         if (convertView == null) {
-            categoryView = inflater.inflate(R.layout.category_selector_item, parent, false)
+            categoryView = inflater.inflate(R.layout.item_category_selector, parent, false)
 
             holder = ViewHolder()
             holder.categoryCheckBox = categoryView.category_checkbox as CheckBox

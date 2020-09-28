@@ -6,7 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.library_grid_item.view.*
+import kotlinx.android.synthetic.main.item_library_grid.view.*
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.utility.AlbumDiffCallback
@@ -62,8 +62,8 @@ class AlbumAdapter(
             fun from(parent: ViewGroup, isListLayout: Boolean): ViewHolder {
                 val layoutInflater = LayoutInflater.from(parent.context)
                 val layout = when (isListLayout) {
-                    true -> R.layout.library_list_item
-                    false -> R.layout.library_grid_item
+                    true -> R.layout.item_library_list
+                    false -> R.layout.item_library_grid
                 }
                 val view = layoutInflater.inflate(layout, parent, false)
 
