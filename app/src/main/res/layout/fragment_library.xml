@@ -17,7 +17,8 @@
         app:layout_constraintBottom_toTopOf="@+id/category_spinner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/item_device" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/library_albums"
@@ -67,7 +68,8 @@
         app:layout_constraintBottom_toTopOf="@+id/library_albums"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/devices" />
+        app:layout_constraintTop_toBottomOf="@+id/devices"
+        tools:listitem="@layout/item_category_selector" />
 
     <EditText
         android:id="@+id/filter_text"
