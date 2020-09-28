@@ -7,14 +7,18 @@
 
     <Spinner
         android:id="@+id/devices"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginRight="24dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:spinnerMode="dropdown"
         app:layout_constraintBottom_toTopOf="@+id/category_spinner"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/item_device" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/library_albums"
@@ -22,12 +26,13 @@
         android:layout_height="0dp"
         android:layout_marginTop="80dp"
         android:layout_marginBottom="16dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/search_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/library_item" />
+        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        tools:listitem="@layout/item_library_grid"
+        tools:spanCount="4" />
 
     <Button
         android:id="@+id/display_random_button"
@@ -53,21 +58,18 @@
 
     <Spinner
         android:id="@+id/category_spinner"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:spinnerMode="dropdown"
         app:layout_constraintBottom_toTopOf="@+id/library_albums"
-        app:layout_constraintEnd_toEndOf="@+id/devices"
-        app:layout_constraintTop_toBottomOf="@+id/devices" />
-
-    <Button
-        android:id="@+id/delete_selected_categories"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DelCat"
-        app:layout_constraintBaseline_toBaselineOf="@+id/search_button"
-        app:layout_constraintEnd_toStartOf="@+id/display_random_button"
-        app:layout_constraintStart_toEndOf="@+id/search_button" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/devices"
+        tools:listitem="@layout/item_category_selector" />
 
     <EditText
         android:id="@+id/filter_text"
@@ -75,15 +77,32 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:ems="10"
         android:hint="@string/filter"
+        android:importantForAutofill="no"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toTopOf="@+id/library_albums"
-        app:layout_constraintEnd_toStartOf="@+id/devices"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:importantForAutofill="no" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/toggle_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/toggle_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

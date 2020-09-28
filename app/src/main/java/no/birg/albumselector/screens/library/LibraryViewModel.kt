@@ -11,8 +11,8 @@ import no.birg.albumselector.spotify.SpotifyClient
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class LibraryViewModel constructor(
-    albumDao: AlbumDao,
-    private val categoryDao: CategoryDao,
+    private val albumDao: AlbumDao,
+    categoryDao: CategoryDao,
     private val spotifyClient: SpotifyClient
 ) : ViewModel() {
 
@@ -25,6 +25,8 @@ class LibraryViewModel constructor(
     val devices = spotifyClient.devices
     var filterText = MutableLiveData<String>()
     val toastMessage = spotifyClient.toastMessage
+
+    val isListLayout = SingleLiveEvent<Boolean>()
 
 
     init {
@@ -55,6 +57,14 @@ class LibraryViewModel constructor(
         if (album != null) {
             selectAlbum(album)
         }
+    }
+
+    private suspend fun updateAlbum(album: Album) {
+        albumDao.update(album)
+    }
+
+    private suspend fun checkForAlbum(albumID: String): Boolean {
+        return albumDao.checkRecord(albumID)
     }
 
     private fun filterAlbums() : List<Album> {
@@ -95,15 +105,6 @@ class LibraryViewModel constructor(
         } else false
     }
 
-    fun deleteSelectedCategories() {
-        for (cat in selectedCategories.value!!) {
-            viewModelScope.launch {
-                categoryDao.delete(getCategory(cat).category)
-            }
-        }
-        selectedCategories.clear()
-    }
-
     private fun getCategory(categoryName: String) : CategoryWithAlbums {
         for (category in categories.value!!) {
             if (category.category.cid == categoryName) {
@@ -131,9 +132,11 @@ class LibraryViewModel constructor(
         spotifyClient.selectDevice(device)
     }
 
-    fun playAlbum(albumID: String) {
+    fun refreshAlbum(albumID: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            spotifyClient.playAlbum(albumID)
+            if (checkForAlbum(albumID)) {
+                updateAlbum(spotifyClient.fetchAlbumDetails(albumID, true))
+            }
         }
     }
 
@@ -152,9 +155,5 @@ class LibraryViewModel constructor(
         val set = this.value as MutableSet
         set.remove(item)
         this.value = set
-    }
-
-    private fun <T> MutableLiveData<Set<T>>.clear() {
-        this.value = mutableSetOf()
     }
 }
