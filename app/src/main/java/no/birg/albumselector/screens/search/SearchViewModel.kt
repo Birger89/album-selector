@@ -2,17 +2,18 @@ package no.birg.albumselector.screens.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.utility.CoroutineContextProvider
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class SearchViewModel constructor(
     private val albumDao: AlbumDao,
-    private val spotifyClient: SpotifyClient
+    private val spotifyClient: SpotifyClient,
+    private val contextProvider: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel() {
 
     val username = spotifyClient.username
@@ -31,7 +32,7 @@ class SearchViewModel constructor(
     /** Methods dealing with albums **/
 
     fun addAlbum(album: Album) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(contextProvider.IO) {
             if (!checkForAlbum(album.aid)) {
                 var newAlbum = album
                 if (album.durationMS == 0) {
@@ -57,13 +58,13 @@ class SearchViewModel constructor(
     /** Methods accessing Spotify **/
 
     fun search(query: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(contextProvider.IO) {
             spotifyClient.search(query)
         }
     }
 
     private fun fetchUsername() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(contextProvider.IO) {
             spotifyClient.fetchUsername()
         }
     }
