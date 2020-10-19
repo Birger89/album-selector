@@ -32,15 +32,11 @@ class DatabaseTest {
         private const val TEST_DURATION = 60000 // One minute
         private const val TEST_IMAGE_URL = "test.url"
         private const val TEST_CID = "test_cid"
+
+        private val TEST_ALBUM = Album(TEST_AID, TEST_TITLE, TEST_ARTIST, TEST_DURATION, TEST_IMAGE_URL)
+        private val TEST_CATEGORY = Category(TEST_CID)
     }
 
-
-    private fun getTestAlbum() : Album {
-        return Album(TEST_AID, TEST_TITLE, TEST_ARTIST, TEST_DURATION, TEST_IMAGE_URL)
-    }
-    private fun getTestCategory() : Category {
-        return Category(TEST_CID)
-    }
 
 
     @Before
@@ -61,13 +57,12 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun addAndDeleteAlbum() = runBlocking {
-        val album = getTestAlbum()
-        albumDao.insert(album)
+        albumDao.insert(TEST_ALBUM)
 
         val album2 = albumDao.getAll().getOrAwaitValue()[0]
-        assertEquals(album, album2)
+        assertEquals(TEST_ALBUM, album2)
 
-        albumDao.delete(album)
+        albumDao.delete(TEST_ALBUM)
 
         val albums = albumDao.getAll().getOrAwaitValue()
         assertEquals(0, albums.size)
@@ -76,19 +71,18 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun addAndDeleteCategory() = runBlocking {
-        val category = getTestCategory()
-        categoryDao.insert(category)
-        assertEquals(category, categoryDao.getAll()[0])
+        categoryDao.insert(TEST_CATEGORY)
+        assertEquals(TEST_CATEGORY, categoryDao.getAll()[0])
 
-        categoryDao.delete(category)
+        categoryDao.delete(TEST_CATEGORY)
         assertEquals(0, categoryDao.getAll().size)
     }
 
     @Test
     @Throws(Exception::class)
     fun addAndDeleteRelation() = runBlocking {
-        albumDao.insert(getTestAlbum())
-        categoryDao.insert(getTestCategory())
+        albumDao.insert(TEST_ALBUM)
+        categoryDao.insert(TEST_CATEGORY)
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
         val album = albumDao.getAllWithCategories().getOrAwaitValue()[0]
@@ -107,11 +101,11 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun removeAlbumWithRelation() = runBlocking {
-        albumDao.insert(getTestAlbum())
-        categoryDao.insert(getTestCategory())
+        albumDao.insert(TEST_ALBUM)
+        categoryDao.insert(TEST_CATEGORY)
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
-        albumDao.delete(getTestAlbum())
+        albumDao.delete(TEST_ALBUM)
 
         val categories = categoryDao.getAllWithAlbums().getOrAwaitValue()
         assertEquals(1, categories.size)
@@ -121,11 +115,11 @@ class DatabaseTest {
     @Test
     @Throws(Exception::class)
     fun removeCategoryWithRelation() = runBlocking {
-        albumDao.insert(getTestAlbum())
-        categoryDao.insert(getTestCategory())
+        albumDao.insert(TEST_ALBUM)
+        categoryDao.insert(TEST_CATEGORY)
         categoryDao.insertAlbumCrossRef(CategoryAlbumCrossRef(TEST_CID, TEST_AID))
 
-        categoryDao.delete(getTestCategory())
+        categoryDao.delete(TEST_CATEGORY)
 
         val albums = albumDao.getAllWithCategories().getOrAwaitValue()
         assertEquals(1, albums.size)
