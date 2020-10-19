@@ -1,19 +1,20 @@
 package no.birg.albumselector.screens.album
 
 import androidx.lifecycle.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.*
 import no.birg.albumselector.screens.LibraryAlbums.getRandomAlbum
 import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.utility.CoroutineContextProvider
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class AlbumViewModel constructor(
     albumId: String,
     private val albumDao: AlbumDao,
     private val categoryDao: CategoryDao,
-    private val spotifyClient: SpotifyClient
+    private val spotifyClient: SpotifyClient,
+    private val contextProvider: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel() {
 
     val album = albumDao.getByID(albumId)
@@ -23,7 +24,7 @@ class AlbumViewModel constructor(
     val queueState = spotifyClient.queueState
     val shuffleState = spotifyClient.shuffleState
 
-    var toastMessage = MutableLiveData<Int>()
+    val toastMessage: MutableLiveData<Int>
     private val _toastMessage = SingleLiveEvent<Int>()
     private val spotifyToastMessage = spotifyClient.toastMessage
 
@@ -45,7 +46,7 @@ class AlbumViewModel constructor(
     /** Methods dealing with albums **/
 
     fun deleteAlbum() {
-        viewModelScope.launch {
+        viewModelScope.launch(contextProvider.IO) {
             album.value?.let { albumDao.delete(it) }
         }
     }
@@ -59,10 +60,7 @@ class AlbumViewModel constructor(
     }
 
     fun selectRandomAlbum() {
-        val album = getRandomAlbum()
-        if (album != null) {
-            nextAlbum.postValue(album)
-        }
+        nextAlbum.postValue(getRandomAlbum())
     }
 
     /** Methods dealing with categories **/
@@ -102,13 +100,13 @@ class AlbumViewModel constructor(
     /** Methods accessing Spotify **/
 
     fun playAlbum() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(contextProvider.IO) {
             spotifyClient.playAlbum(album.value?.aid!!)
         }
     }
 
     fun refreshAlbum(albumID: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(contextProvider.IO) {
             if (checkForAlbum(albumID)) {
                 updateAlbum(spotifyClient.fetchAlbumDetails(albumID, true))
             }
