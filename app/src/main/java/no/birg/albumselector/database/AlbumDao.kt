@@ -25,8 +25,16 @@ interface AlbumDao {
     @Insert
     suspend fun insert(album: Album)
 
+    suspend fun delete(album: Album) {
+        privateDeleteAlbum(album)
+        privateDeleteCrossRefByAID(album.aid)
+    }
+
     @Delete
-    suspend fun delete(album: Album)
+    suspend fun privateDeleteAlbum(album: Album)
+
+    @Query("DELETE FROM categoryAlbumCrossRefs WHERE aid = :aid")
+    suspend fun privateDeleteCrossRefByAID(aid: String)
 
     @Update
     suspend fun update(album: Album)

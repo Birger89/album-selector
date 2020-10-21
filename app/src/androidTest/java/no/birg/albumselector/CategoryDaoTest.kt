@@ -188,4 +188,15 @@ class CategoryDaoTest {
 
         assertFalse(album.categories.contains(TEST_CATEGORY))
     }
+
+    @Test
+    fun deleteCategory_HasRelation_RelationShouldNotExist() = runBlocking {
+        categoryDao.insert(TEST_CATEGORY)
+        albumDao.insert(TEST_ALBUM)
+        categoryDao.insertAlbumCrossRef(TEST_CROSS_REF)
+
+        categoryDao.delete(TEST_CATEGORY)
+
+        assertFalse(categoryDao.checkAlbumCrossRef(TEST_CID, TEST_AID))
+    }
 }

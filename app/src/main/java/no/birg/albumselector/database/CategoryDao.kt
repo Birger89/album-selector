@@ -25,8 +25,16 @@ interface CategoryDao {
     @Insert
     suspend fun insertAlbumCrossRef(crossRef: CategoryAlbumCrossRef)
 
+    suspend fun delete(category: Category) {
+        privateDeleteCategory(category)
+        privateDeleteCrossRefByCID(category.cid)
+    }
+
     @Delete
-    suspend fun delete(category: Category)
+    suspend fun privateDeleteCategory(category: Category)
+
+    @Query("DELETE FROM categoryAlbumCrossRefs WHERE cid = :cid")
+    suspend fun privateDeleteCrossRefByCID(cid: String)
 
     @Delete
     suspend fun deleteAlbumCrossRef(crossRef: CategoryAlbumCrossRef)
