@@ -15,6 +15,10 @@ interface AlbumDao {
     @Query("SELECT * FROM albums")
     fun getAllWithCategories(): LiveData<List<AlbumWithCategories>>
 
+    @Transaction
+    @Query("SELECT * FROM albums WHERE aid = :aid")
+    fun getWithCategories(aid: String): LiveData<AlbumWithCategories>
+
     @Query("SELECT COUNT(1) FROM albums WHERE aid = :aid")
     suspend fun checkRecord(aid: String): Boolean
 
