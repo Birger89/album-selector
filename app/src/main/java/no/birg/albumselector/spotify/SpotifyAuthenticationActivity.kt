@@ -27,6 +27,7 @@ class SpotifyAuthenticationActivity : Activity() {
             if (response.accessToken != null) {
                 SpotifyToken.setToken(response.accessToken)
                 SpotifyToken.fetchingToken = false
+                Log.d("SpotifyConnection", "Token fetched")
             } else {
                 Log.e("SpotifyConnection", "something went wrong with authentication")
             }
