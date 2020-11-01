@@ -5,7 +5,7 @@ import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.*
 import no.birg.albumselector.screens.LibraryAlbums.getRandomAlbum
-import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 import no.birg.albumselector.utility.CoroutineContextProvider
 import no.birg.albumselector.utility.SingleLiveEvent
 
@@ -13,7 +13,7 @@ class AlbumViewModel constructor(
     albumId: String,
     private val albumDao: AlbumDao,
     private val categoryDao: CategoryDao,
-    private val spotifyClient: SpotifyClient,
+    private val streamingClient: StreamingClient,
     private val contextProvider: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel() {
 
@@ -21,12 +21,12 @@ class AlbumViewModel constructor(
 
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
 
-    val queueState = spotifyClient.queueState
-    val shuffleState = spotifyClient.shuffleState
+    val queueState = streamingClient.queueState
+    val shuffleState = streamingClient.shuffleState
 
     val toastMessage: MutableLiveData<Int>
     private val _toastMessage = SingleLiveEvent<Int>()
-    private val spotifyToastMessage = spotifyClient.toastMessage
+    private val streamingToastMessage = streamingClient.toastMessage
 
     val nextAlbum = SingleLiveEvent<Album>()
 
@@ -37,8 +37,8 @@ class AlbumViewModel constructor(
             addSource(_toastMessage) {
                 _toastMessage.value?.let { it1 -> postMessage(it1) }
             }
-            addSource(spotifyToastMessage) {
-                spotifyToastMessage.value?.let { it1 -> postMessage(it1) }
+            addSource(streamingToastMessage) {
+                streamingToastMessage.value?.let { it1 -> postMessage(it1) }
             }
         }
     }
@@ -101,23 +101,23 @@ class AlbumViewModel constructor(
 
     fun playAlbum() {
         viewModelScope.launch(contextProvider.IO) {
-            spotifyClient.playAlbum(album.value?.aid!!)
+            streamingClient.playAlbum(album.value?.aid!!)
         }
     }
 
     fun refreshAlbum(albumID: String) {
         viewModelScope.launch(contextProvider.IO) {
             if (checkForAlbum(albumID)) {
-                updateAlbum(spotifyClient.fetchAlbumDetails(albumID, true))
+                updateAlbum(streamingClient.fetchAlbumDetails(albumID, true))
             }
         }
     }
 
     fun setShuffleState(state: Boolean) {
-        spotifyClient.shuffleState.value = state
+        streamingClient.shuffleState.value = state
     }
 
     fun setQueueState(state: Boolean) {
-        spotifyClient.queueState = state
+        streamingClient.queueState = state
     }
 }

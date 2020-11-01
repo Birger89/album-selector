@@ -35,9 +35,9 @@ class AlbumFragment : Fragment() {
         val albumId = arguments?.getString("albumId")!!
         val albumDao = (activity as MainActivity).albumDao
         val categoryDao = (activity as MainActivity).categoryDao
-        val spotifyClient = (activity as MainActivity).spotifyClient
+        val streamingClient = (activity as MainActivity).streamingClient
 
-        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, spotifyClient)
+        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, streamingClient)
         viewModel = ViewModelProvider(this, viewModelFactory).get(AlbumViewModel::class.java)
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)

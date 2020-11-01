@@ -10,19 +10,20 @@ import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
 import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 
 class MainActivity : AppCompatActivity() {
 
     lateinit var albumDao: AlbumDao
     lateinit var categoryDao: CategoryDao
-    lateinit var spotifyClient: SpotifyClient
+    lateinit var streamingClient: StreamingClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         albumDao = AppDatabase.getInstance(this).albumDao()
         categoryDao = AppDatabase.getInstance(this).categoryDao()
-        spotifyClient = SpotifyClient(this)
+        streamingClient = SpotifyClient(this)
 
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))

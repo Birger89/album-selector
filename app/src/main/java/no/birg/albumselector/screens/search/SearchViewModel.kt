@@ -6,18 +6,18 @@ import kotlinx.coroutines.launch
 import no.birg.albumselector.R
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
-import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 import no.birg.albumselector.utility.CoroutineContextProvider
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class SearchViewModel constructor(
     private val albumDao: AlbumDao,
-    private val spotifyClient: SpotifyClient,
+    private val streamingClient: StreamingClient,
     private val contextProvider: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel() {
 
-    val username = spotifyClient.username
-    val searchResults = spotifyClient.searchResults
+    val username = streamingClient.username
+    val searchResults = streamingClient.searchResults
 
     var selectedResult: Album = Album("","","",0, "")
         private set
@@ -59,17 +59,17 @@ class SearchViewModel constructor(
 
     fun search(query: String) {
         viewModelScope.launch(contextProvider.IO) {
-            spotifyClient.search(query)
+            streamingClient.search(query)
         }
     }
 
     private fun fetchUsername() {
         viewModelScope.launch(contextProvider.IO) {
-            spotifyClient.fetchUsername()
+            streamingClient.fetchUsername()
         }
     }
 
     private fun fetchAlbumDurationMS(albumID: String) : Int {
-        return spotifyClient.fetchAlbumDurationMS(albumID)
+        return streamingClient.fetchAlbumDurationMS(albumID)
     }
 }

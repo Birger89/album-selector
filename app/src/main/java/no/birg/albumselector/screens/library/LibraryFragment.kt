@@ -47,9 +47,9 @@ class LibraryFragment : Fragment() {
 
         val albumDao = (activity as MainActivity).albumDao
         val categoryDao = (activity as MainActivity).categoryDao
-        val spotifyClient = (activity as MainActivity).spotifyClient
+        val streamingClient = (activity as MainActivity).streamingClient
 
-        val viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, spotifyClient)
+        val viewModelFactory = LibraryViewModelFactory(albumDao, categoryDao, streamingClient)
         viewModel = activity?.let { ViewModelProvider(it, viewModelFactory).get(LibraryViewModel::class.java) }!!
 
         val view = inflater.inflate(R.layout.fragment_library, container, false)

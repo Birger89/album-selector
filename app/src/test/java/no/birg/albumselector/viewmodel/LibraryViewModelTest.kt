@@ -13,7 +13,7 @@ import no.birg.albumselector.database.*
 import no.birg.albumselector.getOrAwaitValue
 import no.birg.albumselector.screens.LibraryAlbums
 import no.birg.albumselector.screens.library.LibraryViewModel
-import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -52,7 +52,7 @@ class LibraryViewModelTest {
 
     private val mockAlbumDao: AlbumDao = mock()
     private val mockCategoryDao: CategoryDao = mock()
-    private val mockSpotifyClient: SpotifyClient = mock()
+    private val mockStreamingClient: StreamingClient = mock()
     private val viewModel: LibraryViewModel
 
     private val libraryAlbums = MutableLiveData<List<AlbumWithCategories>>()
@@ -64,7 +64,7 @@ class LibraryViewModelTest {
         whenever(mockCategoryDao.getAllWithAlbums()).thenReturn(categories)
 
         viewModel = LibraryViewModel(
-            mockAlbumDao, mockCategoryDao, mockSpotifyClient, TestContextProvider()
+            mockAlbumDao, mockCategoryDao, mockStreamingClient, TestContextProvider()
         )
     }
 
@@ -154,7 +154,7 @@ class LibraryViewModelTest {
     fun selectDevice_WhenCalled_SpotifyClientCalled() {
         viewModel.selectDevice(DEVICE)
 
-        verify(mockSpotifyClient).selectDevice(DEVICE)
+        verify(mockStreamingClient).selectDevice(DEVICE)
     }
 
     @Test
@@ -162,7 +162,7 @@ class LibraryViewModelTest {
     fun refreshAlbum_AlbumInLibrary_AlbumDaoCalledWithDetails() {
         testCoroutineRule.runBlockingTest {
             whenever(mockAlbumDao.checkRecord(AID)).thenReturn(true)
-            whenever(mockSpotifyClient.fetchAlbumDetails(AID, true))
+            whenever(mockStreamingClient.fetchAlbumDetails(AID, true))
                 .thenReturn(ALBUM)
 
             viewModel.refreshAlbum(AID)
@@ -179,7 +179,7 @@ class LibraryViewModelTest {
 
             viewModel.refreshAlbum(AID)
 
-            verify(mockSpotifyClient).fetchAlbumDetails(AID, true)
+            verify(mockStreamingClient).fetchAlbumDetails(AID, true)
         }
     }
 
@@ -203,7 +203,7 @@ class LibraryViewModelTest {
 
             viewModel.refreshAlbum(AID)
 
-            verify(mockSpotifyClient, never()).fetchAlbumDetails(AID)
+            verify(mockStreamingClient, never()).fetchAlbumDetails(AID)
         }
     }
 }

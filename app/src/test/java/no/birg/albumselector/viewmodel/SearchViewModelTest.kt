@@ -12,7 +12,7 @@ import no.birg.albumselector.TestCoroutineRule
 import no.birg.albumselector.database.Album
 import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.screens.search.SearchViewModel
-import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -42,8 +42,8 @@ class SearchViewModelTest {
     }
 
     private val mockAlbumDao: AlbumDao = mock()
-    private val mockSpotifyClient: SpotifyClient = mock()
-    private val viewModel = SearchViewModel(mockAlbumDao, mockSpotifyClient, TestContextProvider())
+    private val mockStreamingClient: StreamingClient = mock()
+    private val viewModel = SearchViewModel(mockAlbumDao, mockStreamingClient, TestContextProvider())
 
 
     @Test
@@ -75,7 +75,7 @@ class SearchViewModelTest {
     fun addAlbum_AlbumHasNoDuration_InsertAlbumCalledWithDuration() {
         testCoroutineRule.runBlockingTest {
             whenever(mockAlbumDao.checkRecord(AID)).thenReturn(false)
-            whenever(mockSpotifyClient.fetchAlbumDurationMS(AID)).thenReturn(DURATION)
+            whenever(mockStreamingClient.fetchAlbumDurationMS(AID)).thenReturn(DURATION)
 
             viewModel.addAlbum(ALBUM_WITHOUT_DURATION)
 
@@ -144,7 +144,7 @@ class SearchViewModelTest {
         testCoroutineRule.runBlockingTest {
             viewModel.search(QUERY)
 
-            verify(mockSpotifyClient).search(QUERY)
+            verify(mockStreamingClient).search(QUERY)
         }
     }
 }

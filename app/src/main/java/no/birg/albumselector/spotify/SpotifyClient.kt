@@ -10,25 +10,25 @@ import no.birg.albumselector.database.Album
 import no.birg.albumselector.utility.SingleLiveEvent
 import org.json.JSONObject
 
-class SpotifyClient(activity: Activity) {
+class SpotifyClient(activity: Activity) : StreamingClient {
 
     private val spotifyConnection = SpotifyConnection(activity)
 
     private val _username = MutableLiveData<String>()
-    val username: LiveData<String> get() = _username
+    override val username: LiveData<String> get() = _username
 
     private val _devices = MutableLiveData<List<Pair<String, String>>>()
-    val devices: LiveData<List<Pair<String, String>>> get() = _devices
+    override val devices: LiveData<List<Pair<String, String>>> get() = _devices
     private var selectedDevice: String = ""
 
-    var queueState = false
+    override var queueState = false
 
-    val shuffleState = MutableLiveData<Boolean>()
+    override val shuffleState = MutableLiveData<Boolean>()
 
     private val _searchResults = MutableLiveData<List<Album>>()
-    val searchResults: LiveData<List<Album>> get() = _searchResults
+    override val searchResults: LiveData<List<Album>> get() = _searchResults
 
-    val toastMessage = SingleLiveEvent<Int>()
+    override val toastMessage = SingleLiveEvent<Int>()
 
 
     init {
@@ -39,27 +39,27 @@ class SpotifyClient(activity: Activity) {
 
     /** Methods to fetch information **/
 
-    fun fetchUsername() {
+    override fun fetchUsername() {
         _username.postValue(spotifyConnection.fetchUsername())
     }
 
-    fun fetchShuffleState() {
+    override fun fetchShuffleState() {
         shuffleState.postValue(spotifyConnection.fetchShuffleState())
     }
 
-    fun fetchDevices() {
+    override fun fetchDevices() {
         _devices.postValue(spotifyConnection.fetchDevices())
     }
 
-    fun fetchAlbumDurationMS(albumId: String): Int {
+    override fun fetchAlbumDurationMS(albumId: String): Int {
         return spotifyConnection.fetchAlbumDurationMS(albumId)
     }
 
-    fun fetchAlbumDetails(albumId: String, fetchDuration: Boolean = false): Album {
+    override fun fetchAlbumDetails(albumId: String, fetchDuration: Boolean): Album {
         return parseAlbum(spotifyConnection.fetchAlbumDetails(albumId), fetchDuration)
     }
 
-    fun search(query: String) {
+    override fun search(query: String) {
         val results = spotifyConnection.search(query)
         val albums = mutableListOf<Album>()
 
@@ -104,11 +104,11 @@ class SpotifyClient(activity: Activity) {
 
     /** Methods for the Player **/
 
-    fun selectDevice(device: String) {
+    override fun selectDevice(device: String) {
         selectedDevice = device
     }
 
-    suspend fun playAlbum(albumId: String) {
+    override suspend fun playAlbum(albumId: String) {
         if (queueState) {
             queueAlbum(albumId)
         } else {

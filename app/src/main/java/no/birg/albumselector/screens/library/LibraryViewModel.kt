@@ -6,14 +6,14 @@ import no.birg.albumselector.database.*
 import no.birg.albumselector.screens.LibraryAlbums.displayedAlbums
 import no.birg.albumselector.screens.LibraryAlbums.getRandomAlbum
 import no.birg.albumselector.screens.LibraryAlbums.shuffledAlbumList
-import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 import no.birg.albumselector.utility.CoroutineContextProvider
 import no.birg.albumselector.utility.SingleLiveEvent
 
 class LibraryViewModel constructor(
     private val albumDao: AlbumDao,
     categoryDao: CategoryDao,
-    private val spotifyClient: SpotifyClient,
+    private val streamingClient: StreamingClient,
     private val contextProvider: CoroutineContextProvider = CoroutineContextProvider()
 ) : ViewModel() {
 
@@ -23,9 +23,9 @@ class LibraryViewModel constructor(
     val categories: LiveData<List<CategoryWithAlbums>> = categoryDao.getAllWithAlbums()
     private val selectedCategories = MutableLiveData<Set<String>>()
 
-    val devices = spotifyClient.devices
+    val devices = streamingClient.devices
     var filterText = MutableLiveData<String>()
-    val toastMessage = spotifyClient.toastMessage
+    val toastMessage = streamingClient.toastMessage
 
     val isListLayout = SingleLiveEvent<Boolean>()
 
@@ -122,24 +122,24 @@ class LibraryViewModel constructor(
 
     private fun fetchShuffleState() {
         viewModelScope.launch(contextProvider.IO) {
-            spotifyClient.fetchShuffleState()
+            streamingClient.fetchShuffleState()
         }
     }
 
     private fun fetchDevices() {
         viewModelScope.launch(contextProvider.IO) {
-            spotifyClient.fetchDevices()
+            streamingClient.fetchDevices()
         }
     }
 
     fun selectDevice(device: String) {
-        spotifyClient.selectDevice(device)
+        streamingClient.selectDevice(device)
     }
 
     fun refreshAlbum(albumID: String) {
         viewModelScope.launch(contextProvider.IO) {
             if (checkForAlbum(albumID)) {
-                updateAlbum(spotifyClient.fetchAlbumDetails(albumID, true))
+                updateAlbum(streamingClient.fetchAlbumDetails(albumID, true))
             }
         }
     }

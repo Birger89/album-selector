@@ -27,9 +27,9 @@ class SearchFragment : Fragment() {
     ): View? {
 
         val albumDao = (activity as MainActivity).albumDao
-        val spotifyClient = (activity as MainActivity).spotifyClient
+        val streamingClient = (activity as MainActivity).streamingClient
 
-        val viewModelFactory = SearchViewModelFactory(albumDao, spotifyClient)
+        val viewModelFactory = SearchViewModelFactory(albumDao, streamingClient)
         viewModel = activity?.let {
             ViewModelProvider(it, viewModelFactory).get(SearchViewModel::class.java) }!!
 
