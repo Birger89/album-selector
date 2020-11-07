@@ -35,9 +35,9 @@ class AlbumFragment : Fragment() {
         val albumId = arguments?.getString("albumId")!!
         val albumDao = (activity as MainActivity).albumDao
         val categoryDao = (activity as MainActivity).categoryDao
-        val spotifyClient = (activity as MainActivity).spotifyClient
+        val streamingClient = (activity as MainActivity).streamingClient
 
-        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, spotifyClient)
+        val viewModelFactory = AlbumViewModelFactory(albumId, albumDao, categoryDao, streamingClient)
         viewModel = ViewModelProvider(this, viewModelFactory).get(AlbumViewModel::class.java)
 
         val view = inflater.inflate(R.layout.fragment_album, container, false)
@@ -57,7 +57,7 @@ class AlbumFragment : Fragment() {
         })
         viewModel.album.observe(viewLifecycleOwner, { onAlbumObserved(it) })
         viewModel.categories.observe(viewLifecycleOwner, {
-            displayCategories(it.reversed() as ArrayList<CategoryWithAlbums>)
+            displayCategories(it.reversed())
         })
         viewModel.toastMessage.observe(viewLifecycleOwner, {
             displayToast(resources.getString(it))
@@ -157,7 +157,7 @@ class AlbumFragment : Fragment() {
         }
     }
 
-    private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
+    private fun displayCategories(categories: List<CategoryWithAlbums>) {
         (category_list.adapter as CategoryAdapter).submitList(categories)
     }
 

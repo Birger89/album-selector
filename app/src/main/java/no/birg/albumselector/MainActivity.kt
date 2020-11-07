@@ -1,6 +1,7 @@
 package no.birg.albumselector
 
-import android.content.Intent
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,31 +11,26 @@ import no.birg.albumselector.database.AlbumDao
 import no.birg.albumselector.database.AppDatabase
 import no.birg.albumselector.database.CategoryDao
 import no.birg.albumselector.spotify.SpotifyClient
+import no.birg.albumselector.spotify.StreamingClient
 
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
 
     lateinit var albumDao: AlbumDao
+        private set
     lateinit var categoryDao: CategoryDao
-    lateinit var spotifyClient: SpotifyClient
-
-    private var startUp = true
+        private set
+    lateinit var streamingClient: StreamingClient
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        albumDao = AppDatabase.getInstance(this).albumDao()
-        categoryDao = AppDatabase.getInstance(this).categoryDao()
-        spotifyClient = SpotifyClient(this)
-    }
+        albumDao = getAlbumDao(this)
+        categoryDao = getCategoryDao(this)
+        streamingClient = getStreamingClient(this)
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (startUp) {
-            setContentView(R.layout.activity_main)
-            setSupportActionBar(findViewById(R.id.toolbar))
-            startUp = false
-        }
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(findViewById(R.id.toolbar))
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -48,5 +44,19 @@ class MainActivity : AppCompatActivity() {
                 .popBackStack(R.id.libraryFragment, false)
         }
         else -> { super.onOptionsItemSelected(item) }
+    }
+
+    /** Methods needed for testing **/
+
+    open fun getStreamingClient(activity: Activity): StreamingClient {
+        return SpotifyClient(activity)
+    }
+
+    open fun getAlbumDao(context: Context): AlbumDao {
+        return AppDatabase.getInstance(context).albumDao()
+    }
+
+    open fun getCategoryDao(context: Context): CategoryDao {
+        return AppDatabase.getInstance(context).categoryDao()
     }
 }

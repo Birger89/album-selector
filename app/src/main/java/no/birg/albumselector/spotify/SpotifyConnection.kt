@@ -18,15 +18,14 @@ class SpotifyConnection(private val activity: Activity) {
         private val FAIL = JSONObject("{ \"success\": false }")
     }
 
-    init {
-        fetchAccessToken()
-    }
-
 
     private fun fetchAccessToken() {
-        SpotifyToken.fetchingToken = true
-        val intent = Intent(activity, SpotifyAuthenticationActivity::class.java)
-        activity.startActivityForResult(intent, 1)
+        if (!SpotifyToken.fetchingToken) {
+            SpotifyToken.fetchingToken = true
+            val intent = Intent(activity, SpotifyAuthenticationActivity::class.java)
+            activity.startActivityForResult(intent, 1)
+        }
+        while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
     }
 
 
@@ -183,6 +182,9 @@ class SpotifyConnection(private val activity: Activity) {
         params: List<String> = listOf()
     ) : HttpsURLConnection {
 
+        if (SpotifyToken.getToken() == "") {
+            fetchAccessToken()
+        }
         var u = url
         for (i in params.indices) {
             Log.d("SpotifyConnection", "Parameter added: ${params[i]}")
@@ -206,7 +208,6 @@ class SpotifyConnection(private val activity: Activity) {
                 204 -> OK
                 401 -> {
                     fetchAccessToken()
-                    while (SpotifyToken.fetchingToken) { Thread.sleep(50) }
                     createConnection(url.toString(), requestMethod).response
                 }
                 else -> {
