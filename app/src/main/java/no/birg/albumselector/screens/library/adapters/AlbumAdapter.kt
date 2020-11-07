@@ -13,10 +13,9 @@ import no.birg.albumselector.utility.AlbumDiffCallback
 
 class AlbumAdapter(
     private val clickCallback: (Album) -> Unit,
-    private val refreshAlbumCallback: (Album) -> Unit
+    private val refreshAlbumCallback: (Album) -> Unit,
+    var isListLayout: Boolean
 ) : ListAdapter<Album, AlbumAdapter.ViewHolder>(AlbumDiffCallback()) {
-
-    var isListLayout = false
 
     override fun getItemId(position: Int): Long {
         return position.toLong()

@@ -58,7 +58,8 @@ class LibraryFragment : Fragment() {
         setLayoutStyle(viewModel.isListLayout.value  ?: false, view.library_albums)
         view.library_albums.adapter = AlbumAdapter(
             { viewModel.selectAlbum(it) },
-            { viewModel.refreshAlbum(it.aid) }
+            { viewModel.refreshAlbum(it.aid) },
+            viewModel.isListLayout.value ?: false
         )
 
         /** Observers **/
