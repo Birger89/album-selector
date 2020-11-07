@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.database
 
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
@@ -7,7 +7,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
-import no.birg.albumselector.database.*
+import no.birg.albumselector.getOrAwaitValue
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test

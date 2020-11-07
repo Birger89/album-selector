@@ -57,7 +57,7 @@ class AlbumFragment : Fragment() {
         })
         viewModel.album.observe(viewLifecycleOwner, { onAlbumObserved(it) })
         viewModel.categories.observe(viewLifecycleOwner, {
-            displayCategories(it.reversed() as ArrayList<CategoryWithAlbums>)
+            displayCategories(it.reversed())
         })
         viewModel.toastMessage.observe(viewLifecycleOwner, {
             displayToast(resources.getString(it))
@@ -157,7 +157,7 @@ class AlbumFragment : Fragment() {
         }
     }
 
-    private fun displayCategories(categories: ArrayList<CategoryWithAlbums>) {
+    private fun displayCategories(categories: List<CategoryWithAlbums>) {
         (category_list.adapter as CategoryAdapter).submitList(categories)
     }
 

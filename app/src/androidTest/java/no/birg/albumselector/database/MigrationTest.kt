@@ -1,4 +1,4 @@
-package no.birg.albumselector
+package no.birg.albumselector.database
 
 import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
@@ -6,10 +6,6 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import no.birg.albumselector.database.AppDatabase
-import no.birg.albumselector.database.MIGRATION_1_2
-import no.birg.albumselector.database.MIGRATION_2_3
-import no.birg.albumselector.database.MIGRATION_3_4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +43,8 @@ class MigrationTest {
         val aid = db.insert("album", SQLiteDatabase.CONFLICT_REPLACE, album)
         db.close()
 
-        db = helper.runMigrationsAndValidate(TEST_DB, 2, true,
+        db = helper.runMigrationsAndValidate(
+            TEST_DB, 2, true,
             MIGRATION_1_2
         )
 
@@ -79,7 +76,8 @@ class MigrationTest {
         val aid = db.insert("albums", SQLiteDatabase.CONFLICT_REPLACE, album)
         db.close()
 
-        db = helper.runMigrationsAndValidate(TEST_DB, 3, true,
+        db = helper.runMigrationsAndValidate(
+            TEST_DB, 3, true,
             MIGRATION_2_3
         )
 
@@ -119,7 +117,8 @@ class MigrationTest {
         val aid = db.insert("albums", SQLiteDatabase.CONFLICT_REPLACE, album)
         db.close()
 
-        db = helper.runMigrationsAndValidate(TEST_DB, 4, true,
+        db = helper.runMigrationsAndValidate(
+            TEST_DB, 4, true,
             MIGRATION_3_4
         )
 
