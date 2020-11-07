@@ -39,7 +39,7 @@ class MigrationTest {
         val album = ContentValues()
         album.put("aid", albumID)
         album.put("album_title", albumTitle)
-        album.put("album_uri", albumURI)
+        album.put("spotify_uri", albumURI)
         val aid = db.insert("album", SQLiteDatabase.CONFLICT_REPLACE, album)
         db.close()
 
