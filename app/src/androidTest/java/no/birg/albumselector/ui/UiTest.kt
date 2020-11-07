@@ -1,5 +1,6 @@
 package no.birg.albumselector.ui
 
+import android.provider.Settings.Global.*
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -7,8 +8,10 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import no.birg.albumselector.R
 import no.birg.albumselector.TestMainActivity
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +23,26 @@ class UiTest {
     @get:Rule
     var activityRule: ActivityScenarioRule<TestMainActivity>
             = ActivityScenarioRule(TestMainActivity::class.java)
+
+
+    init {
+        setAnimations(false)
+    }
+
+    @After
+    fun after() {
+        setAnimations(true)
+    }
+
+    private fun setAnimations(enabled: Boolean) {
+        val value = if (enabled) "1.0" else "0.0"
+
+        InstrumentationRegistry.getInstrumentation().uiAutomation.run {
+            this.executeShellCommand("settings put global $WINDOW_ANIMATION_SCALE $value")
+            this.executeShellCommand("settings put global $TRANSITION_ANIMATION_SCALE $value")
+            this.executeShellCommand("settings put global $ANIMATOR_DURATION_SCALE $value")
+        }
+    }
 
 
     @Test
